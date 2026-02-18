@@ -1,19 +1,29 @@
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { useLoaderData, Link, useParams } from 'react-router';
 import { getMarkdownContent } from '~/utils/files.server';
-import { Marked } from 'marked';
-import { markedHighlight } from 'marked-highlight';
-import hljs from 'highlight.js';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import vscDarkPlus from 'react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus';
+import { type ReactNode, type ComponentPropsWithoutRef } from 'react';
 
-const marked = new Marked(
-  markedHighlight({
-    langPrefix: 'hljs language-',
-    highlight(code, lang) {
-      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-      return hljs.highlight(code, { language }).value;
-    }
-  })
-);
+interface CodeProps extends ComponentPropsWithoutRef<'code'> {
+  children?: ReactNode;
+  className?: string;
+}
+
+const components = {
+  code({ children, className }: CodeProps) {
+    const match = /language-(\w+)/.exec(className || '');
+    return match ? (
+      <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div">
+        {String(children).replace(/\n$/, '')}
+      </SyntaxHighlighter>
+    ) : (
+      <code className={className}>{children}</code>
+    );
+  },
+};
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
   { title: data?.path ? `${data.path} - Markdown Viewer` : 'File Not Found' },
@@ -34,7 +44,6 @@ export default function MarkdownPage() {
   const { content } = useLoaderData<typeof loader>();
   const params = useParams();
   const title = params['*']?.split('/').pop() || 'Untitled';
-  const htmlContent = marked.parse(content) as string;
 
   return (
     <>
@@ -48,8 +57,12 @@ export default function MarkdownPage() {
       </header>
 
       <main className="card bg-base-100 shadow-xl">
-        <div className="card-body prose max-w-none">
-          <article dangerouslySetInnerHTML={{ __html: htmlContent }} />
+        <div className="card-body prose prose-slate max-w-none prose-pre:p-0 prose-pre:bg-transparent">
+          <article>
+            <Markdown remarkPlugins={[remarkGfm]} components={components}>
+              {content}
+            </Markdown>
+          </article>
         </div>
       </main>
     </>

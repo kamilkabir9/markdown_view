@@ -9,9 +9,7 @@ import type { LinksFunction } from 'react-router';
 
 import './styles/tailwind.css';
 
-export const links: LinksFunction = () => [
-  { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/github.min.css' },
-];
+export const links: LinksFunction = () => [];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
