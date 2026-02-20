@@ -3,27 +3,6 @@ import { useLoaderData, Link, useParams } from 'react-router';
 import { getMarkdownContent } from '~/utils/files.server';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import vscDarkPlus from 'react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus';
-import { type ReactNode, type ComponentPropsWithoutRef } from 'react';
-
-interface CodeProps extends ComponentPropsWithoutRef<'code'> {
-  children?: ReactNode;
-  className?: string;
-}
-
-const components = {
-  code({ children, className }: CodeProps) {
-    const match = /language-(\w+)/.exec(className || '');
-    return match ? (
-      <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div">
-        {String(children).replace(/\n$/, '')}
-      </SyntaxHighlighter>
-    ) : (
-      <code className={className}>{children}</code>
-    );
-  },
-};
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
   { title: data?.path ? `${data.path} - Markdown Viewer` : 'File Not Found' },
@@ -57,9 +36,9 @@ export default function MarkdownPage() {
       </header>
 
       <main className="card bg-base-100 shadow-xl">
-        <div className="card-body prose prose-slate max-w-none prose-pre:p-0 prose-pre:bg-transparent">
+        <div className="card-body prose prose-slate max-w-none">
           <article>
-            <Markdown remarkPlugins={[remarkGfm]} components={components}>
+            <Markdown remarkPlugins={[remarkGfm]}>
               {content}
             </Markdown>
           </article>
