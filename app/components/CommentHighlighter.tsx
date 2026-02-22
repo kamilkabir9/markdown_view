@@ -53,6 +53,7 @@ export function CommentHighlighter({
 
           annotations.forEach((annotation) => {
             try {
+              if (!annotation.anchor) return;
               const range = textQuote.toRange(container, annotation.anchor);
               if (!range) return;
 

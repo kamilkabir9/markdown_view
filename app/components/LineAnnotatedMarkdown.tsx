@@ -24,6 +24,7 @@ export function LineAnnotatedMarkdown({
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null);
   const [pendingAnchor, setPendingAnchor] = useState<{ exact: string; prefix: string; suffix: string } | null>(null);
   const [commentText, setCommentText] = useState('');
+  const [isGlobalComment, setIsGlobalComment] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -67,9 +68,10 @@ export function LineAnnotatedMarkdown({
     }
   }, []);
 
-  const openDialog = useCallback(() => {
+  const openDialog = useCallback((global = false) => {
     setPopoverPos(null);
     setCommentText('');
+    setIsGlobalComment(global);
     dialogRef.current?.showModal();
   }, []);
 
@@ -77,14 +79,19 @@ export function LineAnnotatedMarkdown({
     dialogRef.current?.close();
     setPendingAnchor(null);
     setCommentText('');
+    setIsGlobalComment(false);
     window.getSelection()?.removeAllRanges();
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (!pendingAnchor || !commentText.trim()) return;
-    addAnnotation(pendingAnchor, commentText.trim());
+    if (!commentText.trim()) return;
+    if (isGlobalComment) {
+      addAnnotation(null, commentText.trim(), true);
+    } else if (pendingAnchor) {
+      addAnnotation(pendingAnchor, commentText.trim());
+    }
     closeDialog();
-  }, [pendingAnchor, commentText, addAnnotation, closeDialog]);
+  }, [pendingAnchor, commentText, addAnnotation, closeDialog, isGlobalComment]);
 
   const handleAnnotationClick = useCallback((_annotation: Annotation) => {}, []);
 
@@ -107,9 +114,24 @@ export function LineAnnotatedMarkdown({
         onRemove={removeAnnotation}
       />
 
-      <div ref={containerRef} className="flex-1 min-w-0" onMouseUp={handleMouseUp}>
-        <div className={`${proseClass} ${themeClass}`}>
-          <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex items-center justify-end mb-4">
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => openDialog(true)}
+            title="Add global comment"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span className="ml-1">Add Comment</span>
+          </button>
+        </div>
+
+        <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>
+          <div className={`${proseClass} ${themeClass} overflow-x-auto`}>
+            <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
+          </div>
         </div>
 
         <CommentHighlighter
@@ -161,13 +183,23 @@ export function LineAnnotatedMarkdown({
           }}
           onClose={closeDialog}
         >
-          {pendingAnchor && (
+          {(pendingAnchor || isGlobalComment) && (
             <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-lg font-semibold mb-4">Add Comment</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {isGlobalComment ? 'Add Global Comment' : 'Add Comment'}
+              </h3>
 
-              <div className="bg-base-200 rounded p-3 mb-4 font-mono text-sm max-h-32 overflow-auto">
-                <span className="whitespace-pre-wrap">{pendingAnchor.exact}</span>
-              </div>
+              {!isGlobalComment && pendingAnchor && (
+                <div className="bg-base-200 rounded p-3 mb-4 font-mono text-sm max-h-32 overflow-auto">
+                  <span className="whitespace-pre-wrap">{pendingAnchor.exact}</span>
+                </div>
+              )}
+
+              {isGlobalComment && (
+                <div className="bg-base-200 rounded p-3 mb-4 text-sm">
+                  <span className="text-base-content/60">This comment applies to the entire document</span>
+                </div>
+              )}
 
               <textarea
                 className="textarea textarea-bordered w-full h-24 resize-none"

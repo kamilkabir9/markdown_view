@@ -8,14 +8,15 @@ export interface Anchor {
 
 export interface Annotation {
   id: string;
-  anchor: Anchor;
+  anchor: Anchor | null;
   text: string;
   createdAt: Date;
+  isGlobal?: boolean;
 }
 
 interface AnnotationStoreContextType {
   annotations: Annotation[];
-  addAnnotation: (anchor: Anchor, text: string) => void;
+  addAnnotation: (anchor: Anchor | null, text: string, isGlobal?: boolean) => void;
   removeAnnotation: (id: string) => void;
 }
 
@@ -24,12 +25,13 @@ const AnnotationStoreContext = createContext<AnnotationStoreContextType | null>(
 export function AnnotationStoreProvider({ children }: { children: ReactNode }) {
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
 
-  const addAnnotation = useCallback((anchor: Anchor, text: string) => {
+  const addAnnotation = useCallback((anchor: Anchor | null, text: string, isGlobal = false) => {
     const newAnnotation: Annotation = {
       id: crypto.randomUUID(),
       anchor,
       text,
       createdAt: new Date(),
+      isGlobal,
     };
     setAnnotations((prev) => [...prev, newAnnotation]);
   }, []);

@@ -50,6 +50,10 @@ export function CommentSidebar({ annotations, rawContent, onRemove }: CommentSid
   }, [rawContent]);
 
   const handleCopyOne = useCallback((annotation: Annotation) => {
+    if (annotation.isGlobal || !annotation.anchor) {
+      navigator.clipboard.writeText(`// Global Comment: ${annotation.text}`);
+      return;
+    }
     const context = findMarkdownContext(annotation.anchor.exact);
     const copyText = `${context}\n\n// Comment: ${annotation.text}`;
     navigator.clipboard.writeText(copyText);
@@ -57,6 +61,9 @@ export function CommentSidebar({ annotations, rawContent, onRemove }: CommentSid
 
   const handleCopyAll = useCallback(() => {
     const allComments = annotations.map((annotation) => {
+      if (annotation.isGlobal || !annotation.anchor) {
+        return `// Global Comment: ${annotation.text}`;
+      }
       const context = findMarkdownContext(annotation.anchor.exact);
       return `${context}\n\n// Comment: ${annotation.text}`;
     }).join('\n\n---\n\n');
@@ -87,10 +94,16 @@ export function CommentSidebar({ annotations, rawContent, onRemove }: CommentSid
           {annotations.map((annotation) => (
             <div key={annotation.id} className="card card-compact bg-base-200 shadow-sm">
               <div className="card-body">
-                <p className="text-xs text-base-content/60 line-clamp-2 font-mono">
-                  "{annotation.anchor.exact.slice(0, 50)}
-                  {annotation.anchor.exact.length > 50 ? '...' : ''}"
-                </p>
+                {annotation.isGlobal ? (
+                  <p className="text-xs text-base-content/60 font-semibold">
+                    Global Comment
+                  </p>
+                ) : (
+                  <p className="text-xs text-base-content/60 line-clamp-2 font-mono">
+                    "{annotation.anchor?.exact.slice(0, 50)}
+                    {(annotation.anchor?.exact.length || 0) > 50 ? '...' : ''}"
+                  </p>
+                )}
                 <p className="text-sm">{annotation.text}</p>
                 <div className="card-actions justify-end mt-1">
                   <button
