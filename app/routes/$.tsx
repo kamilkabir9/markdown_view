@@ -1,10 +1,11 @@
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
-import { useLoaderData, Link, useParams } from 'react-router';
+import { useLoaderData, Link, useParams, useRouteError, isRouteErrorResponse } from 'react-router';
 import { getMarkdownContent } from '~/utils/files.server';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { useTheme } from '~/contexts/ThemeContext';
+import { AnnotationStoreProvider } from '~/contexts/AnnotationStore';
 import { ThemeSwitcher } from '~/components/ThemeSwitcher';
+import { LineAnnotatedMarkdown } from '~/components/LineAnnotatedMarkdown';
+import { AnnotationErrorBoundary } from '~/components/AnnotationErrorBoundary';
 import '~/styles/themes.css';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -32,7 +33,7 @@ export default function MarkdownPage() {
   const proseClass = theme === 'default' ? 'prose prose-slate max-w-none' : '';
 
   return (
-    <>
+    <AnnotationStoreProvider>
       <header className="mb-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">{title}</h1>
@@ -46,25 +47,49 @@ export default function MarkdownPage() {
       </header>
 
       <main className="card bg-base-100 shadow-xl">
-        <div className={`card-body ${proseClass} ${themeClass}`}>
+        <div className="card-body">
           <article>
-            <Markdown remarkPlugins={[remarkGfm]}>
-              {content}
-            </Markdown>
+            <AnnotationErrorBoundary>
+              <LineAnnotatedMarkdown
+                content={content}
+                proseClass={proseClass}
+                themeClass={themeClass}
+              />
+            </AnnotationErrorBoundary>
           </article>
         </div>
       </main>
-    </>
+    </AnnotationStoreProvider>
   );
 }
 
 export function ErrorBoundary() {
+  const error = useRouteError();
+  
+  if (isRouteErrorResponse(error) && error.status === 404) {
+    return (
+      <div className="text-center py-12">
+        <div className="alert alert-error">
+          <div>
+            <h2 className="text-xl font-bold">404 - File Not Found</h2>
+            <p>The requested markdown file could not be found.</p>
+          </div>
+        </div>
+        <Link to="/" className="btn btn-primary mt-6">
+          ← Back to file list
+        </Link>
+      </div>
+    );
+  }
+
+  console.error('Route error:', error);
+  
   return (
     <div className="text-center py-12">
       <div className="alert alert-error">
         <div>
-          <h2 className="text-xl font-bold">404 - File Not Found</h2>
-          <p>The requested markdown file could not be found.</p>
+          <h2 className="text-xl font-bold">Something went wrong</h2>
+          <p>An unexpected error occurred. Please try refreshing the page.</p>
         </div>
       </div>
       <Link to="/" className="btn btn-primary mt-6">

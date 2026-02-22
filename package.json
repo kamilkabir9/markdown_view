@@ -9,13 +9,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.27.18",
+    "@react-aria/dialog": "^3.5.33",
     "@react-router/node": "^7.0.0",
     "@react-router/serve": "^7.0.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.0",
     "daisyui": "^5.5.18",
+    "dom-anchor-text-quote": "^4.0.2",
     "isbot": "^5.0.0",
     "react": "^19.0.0",
+    "react-aria": "^3.46.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "react-router": "^7.0.0",

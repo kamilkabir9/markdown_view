@@ -36,6 +36,16 @@ Default port is **3000**.
 4. The homepage lists all available markdown files
 5. Click any file to view it rendered as HTML
 
+## Adding Comments to Markdown
+
+1. Select any text region in the rendered markdown
+2. A context menu will appear with option to add a comment
+3. Enter your comment in the dialog
+4. Comments are displayed as highlights on the corresponding lines
+5. Click the copy icon on any comment to copy it to clipboard with the original markdown lines
+
+The copied format includes the selected markdown lines followed by the comment, similar to how Cursor IDE or Plannotator.ai handles annotations.
+
 ## Features
 
 - **SSR (Server-Side Rendering)** - Fast initial page loads, good SEO
@@ -44,6 +54,7 @@ Default port is **3000**.
 - Syntax highlighting for code blocks
 - Responsive design with DaisyUI components
 - Clean URLs (e.g., `/docs/readme` serves `docs/readme.md`)
+- **Line Comments** - Select any region in the markdown to add comments. Comments can be copied to clipboard with their corresponding markdown lines (similar to Cursor IDE / Plannotator style)
 
 ## Architecture
 
