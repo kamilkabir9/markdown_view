@@ -24,7 +24,9 @@ export function ThemeProvider({ children }: { children: ReactNode }): ReactEleme
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+    const isDark = theme === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', isDark);
     try {
       localStorage.setItem('markdown-theme', theme);
     } catch {}

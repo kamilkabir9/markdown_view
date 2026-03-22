@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@import "@heroui/styles";
 @plugin "@tailwindcss/typography";
 @import "highlight.js/styles/github.min.css";
-

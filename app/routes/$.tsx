@@ -6,6 +6,7 @@ import { AnnotationStoreProvider } from '~/contexts/AnnotationStore';
 import { ThemeSwitcher } from '~/components/ThemeSwitcher';
 import { LineAnnotatedMarkdown } from '~/components/LineAnnotatedMarkdown';
 import { AnnotationErrorBoundary } from '~/components/AnnotationErrorBoundary';
+import { Card, Button, Alert } from '@heroui/react';
 import '~/styles/themes.css';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -39,15 +40,17 @@ export default function MarkdownPage() {
           <h1 className="text-3xl font-bold">{title}</h1>
           <div className="flex items-center gap-4">
             <ThemeSwitcher />
-            <Link to="/" className="btn btn-ghost btn-sm">
-              ← Back to files
+            <Link to="/">
+              <Button variant="ghost" size="sm">
+                ← Back to files
+              </Button>
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="card bg-base-100 shadow-xl">
-        <div className="card-body">
+      <Card>
+        <Card.Content>
           <article>
             <AnnotationErrorBoundary>
               <LineAnnotatedMarkdown
@@ -57,8 +60,8 @@ export default function MarkdownPage() {
               />
             </AnnotationErrorBoundary>
           </article>
-        </div>
-      </main>
+        </Card.Content>
+      </Card>
     </AnnotationStoreProvider>
   );
 }
@@ -69,14 +72,16 @@ export function ErrorBoundary() {
   if (isRouteErrorResponse(error) && error.status === 404) {
     return (
       <div className="text-center py-12">
-        <div className="alert alert-error">
-          <div>
-            <h2 className="text-xl font-bold">404 - File Not Found</h2>
-            <p>The requested markdown file could not be found.</p>
-          </div>
-        </div>
-        <Link to="/" className="btn btn-primary mt-6">
-          ← Back to file list
+        <Alert status="danger">
+          <Alert.Content>
+            <Alert.Title>404 - File Not Found</Alert.Title>
+            <Alert.Description>The requested markdown file could not be found.</Alert.Description>
+          </Alert.Content>
+        </Alert>
+        <Link to="/">
+          <Button variant="primary" className="mt-6">
+            ← Back to file list
+          </Button>
         </Link>
       </div>
     );
@@ -86,14 +91,16 @@ export function ErrorBoundary() {
   
   return (
     <div className="text-center py-12">
-      <div className="alert alert-error">
-        <div>
-          <h2 className="text-xl font-bold">Something went wrong</h2>
-          <p>An unexpected error occurred. Please try refreshing the page.</p>
-        </div>
-      </div>
-      <Link to="/" className="btn btn-primary mt-6">
-        ← Back to file list
+      <Alert status="danger">
+        <Alert.Content>
+          <Alert.Title>Something went wrong</Alert.Title>
+          <Alert.Description>An unexpected error occurred. Please try refreshing the page.</Alert.Description>
+        </Alert.Content>
+      </Alert>
+      <Link to="/">
+        <Button variant="primary" className="mt-6">
+          ← Back to file list
+        </Button>
       </Link>
     </div>
   );

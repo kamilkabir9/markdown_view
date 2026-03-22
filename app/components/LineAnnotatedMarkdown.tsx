@@ -5,6 +5,7 @@ import rehypeHighlight from 'rehype-highlight';
 import { useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore';
 import { CommentHighlighter } from './CommentHighlighter';
 import { CommentSidebar } from './CommentSidebar';
+import { Button, Modal, TextArea, Spinner } from '@heroui/react';
 
 interface LineAnnotatedMarkdownProps {
   content: string;
@@ -29,15 +30,14 @@ export function LineAnnotatedMarkdown({
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
   const [isAnchoring, setIsAnchoring] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
   const handleMouseUp = useCallback(async (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     if (typeof window === 'undefined') return;
 
-    // Don't capture mouseup from inside the popover button
     if (popoverRef.current?.contains(e.target as Node)) return;
 
     const selection = window.getSelection();
@@ -85,11 +85,11 @@ export function LineAnnotatedMarkdown({
     setPopoverPos(null);
     setCommentText('');
     setIsGlobalComment(global);
-    dialogRef.current?.showModal();
+    setIsModalOpen(true);
   }, []);
 
   const closeDialog = useCallback(() => {
-    dialogRef.current?.close();
+    setIsModalOpen(false);
     setPendingAnchor(null);
     setCommentText('');
     setIsGlobalComment(false);
@@ -117,7 +117,6 @@ export function LineAnnotatedMarkdown({
     }
   }, []);
 
-  // Close popover on click outside
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
       if (popoverPos && popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
@@ -128,32 +127,40 @@ export function LineAnnotatedMarkdown({
     return () => document.removeEventListener('mousedown', handleMouseDown);
   }, [popoverPos]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  }, [handleSubmit]);
+
   return (
     <div className="flex gap-4">
       <div className="flex-1 min-w-0 overflow-hidden">
         <div className="flex items-center justify-end gap-2 mb-4">
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => openDialog(true)}
-            title="Add global comment"
+          <Button
+            variant="ghost"
+            size="sm"
+            onPress={() => openDialog(true)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             <span className="ml-1">Add Comment</span>
-          </button>
-          <button
-            className={`btn btn-ghost btn-sm ${sidebarOpen ? '' : 'btn-active'}`}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            title={sidebarOpen ? 'Hide comments' : 'Show comments'}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={sidebarOpen ? '' : 'bg-surface'}
+            onPress={() => setSidebarOpen(!sidebarOpen)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
             </svg>
             {annotations.length > 0 && (
-              <span className="badge badge-sm badge-primary">{annotations.length}</span>
+              <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full">{annotations.length}</span>
             )}
-          </button>
+          </Button>
         </div>
 
         <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>
@@ -168,10 +175,9 @@ export function LineAnnotatedMarkdown({
           onAnnotationClick={handleAnnotationClick}
         />
 
-        {/* Inline popover button — uses onMouseDown + preventDefault so it fires before selection clears */}
         {isAnchoring && (
           <div className="fixed z-50 top-4 right-4">
-            <span className="loading loading-spinner loading-sm" />
+            <Spinner size="sm" />
           </div>
         )}
         {popoverPos && pendingAnchor && (
@@ -184,84 +190,75 @@ export function LineAnnotatedMarkdown({
               transform: 'translate(-50%, -100%)',
             }}
           >
-            <button
-              className="btn btn-primary btn-sm shadow-lg"
+              <Button
+              variant="primary"
+              size="sm"
+              className="shadow-lg"
               onMouseDown={(e) => {
-                e.preventDefault(); // prevents selection from clearing before click
+                e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={(e) => {
-                e.stopPropagation();
+              onPress={() => {
                 openDialog();
               }}
             >
               + Comment
-            </button>
+            </Button>
           </div>
         )}
 
-        {/* Native <dialog> — immune to outside-click issues by spec */}
-        <dialog
-          ref={dialogRef}
-          className="modal"
-          onClick={(e) => {
-            // close only when clicking the backdrop (dialog itself), not its contents
-            if (e.target === dialogRef.current) closeDialog();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-          onClose={closeDialog}
-        >
-          {(pendingAnchor || isGlobalComment) && (
-            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-lg font-semibold mb-4">
-                {isGlobalComment ? 'Add Global Comment' : 'Add Comment'}
-              </h3>
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
+          <Modal.Backdrop isDismissable>
+            <Modal.Container size="sm" placement="center">
+              <Modal.Dialog>
+                <Modal.Header>
+                  <Modal.Heading>
+                    {isGlobalComment ? 'Add Global Comment' : 'Add Comment'}
+                  </Modal.Heading>
+                </Modal.Header>
+                <Modal.Body>
+                  {!isGlobalComment && pendingAnchor && (
+                    <div className="bg-surface rounded-lg p-3 mb-4 font-mono text-sm max-h-32 overflow-auto">
+                      <span className="whitespace-pre-wrap">{pendingAnchor.exact}</span>
+                    </div>
+                  )}
 
-              {!isGlobalComment && pendingAnchor && (
-                <div className="bg-base-200 rounded p-3 mb-4 font-mono text-sm max-h-32 overflow-auto">
-                  <span className="whitespace-pre-wrap">{pendingAnchor.exact}</span>
-                </div>
-              )}
+                  {isGlobalComment && (
+                    <div className="bg-surface rounded-lg p-3 mb-4 text-sm">
+                      <span className="text-muted">This comment applies to the entire document</span>
+                    </div>
+                  )}
 
-              {isGlobalComment && (
-                <div className="bg-base-200 rounded p-3 mb-4 text-sm">
-                  <span className="text-base-content/60">This comment applies to the entire document</span>
-                </div>
-              )}
+                  <TextArea
+                    placeholder="Enter your comment..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    autoFocus
+                    rows={4}
+                    fullWidth
+                    onKeyDown={handleKeyDown}
+                  />
 
-              <textarea
-                className="textarea textarea-bordered w-full h-24 resize-none"
-                placeholder="Enter your comment..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                autoFocus
-              />
-
-              <div className="modal-action">
-                <button type="button" className="btn btn-ghost" onClick={closeDialog}>
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  disabled={!commentText.trim()}
-                  onClick={handleSubmit}
-                >
-                  Add Comment
-                </button>
-              </div>
-
-              <p className="text-xs text-base-content/50 mt-3">
-                <kbd className="kbd kbd-sm">Cmd+Enter</kbd> to submit · <kbd className="kbd kbd-sm">Esc</kbd> to cancel
-              </p>
-            </div>
-          )}
-        </dialog>
+                  <p className="text-xs text-muted mt-2">
+                    <kbd className="px-1.5 py-0.5 bg-surface rounded text-xs">Cmd+Enter</kbd> to submit · <kbd className="px-1.5 py-0.5 bg-surface rounded text-xs">Esc</kbd> to cancel
+                  </p>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button slot="close" variant="ghost">
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary"
+                    isDisabled={!commentText.trim()}
+                    onPress={handleSubmit}
+                  >
+                    Add Comment
+                  </Button>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
       </div>
 
       {sidebarOpen && (

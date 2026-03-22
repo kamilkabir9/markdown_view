@@ -1,4 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { Alert } from '@heroui/react';
 
 interface Props {
   children: ReactNode;
@@ -27,9 +28,9 @@ export class AnnotationErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return this.props.fallback || (
-        <div className="alert alert-warning">
-          <span>Annotations temporarily unavailable. Please refresh.</span>
-        </div>
+        <Alert status="warning">
+          Annotations temporarily unavailable. Please refresh.
+        </Alert>
       );
     }
 
