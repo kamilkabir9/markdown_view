@@ -19,4 +19,6 @@ yarn-error.log*
 *.swo
 
 *.tsbuildinfo
+.playwright-cli/**
+screenshots/**
 scratchpad.txt
