@@ -108,6 +108,12 @@ export function LineAnnotatedMarkdown({
   const handleAnnotationClick = useCallback((annotation: Annotation) => {
     setActiveAnnotationId(annotation.id);
     setTimeout(() => setActiveAnnotationId(null), 2000);
+
+    if (!containerRef.current) return;
+    const mark = containerRef.current.querySelector(`mark[data-annotation-id="${annotation.id}"]`);
+    if (mark) {
+      mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }, []);
 
   // Close popover on click outside
@@ -127,6 +133,7 @@ export function LineAnnotatedMarkdown({
         annotations={annotations}
         rawContent={content}
         onRemove={removeAnnotation}
+        onAnnotationClick={handleAnnotationClick}
         activeAnnotationId={activeAnnotationId}
       />
 

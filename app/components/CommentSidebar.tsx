@@ -5,10 +5,11 @@ interface CommentSidebarProps {
   annotations: Annotation[];
   rawContent: string;
   onRemove: (id: string) => void;
+  onAnnotationClick?: (annotation: Annotation) => void;
   activeAnnotationId?: string | null;
 }
 
-export function CommentSidebar({ annotations, rawContent, onRemove, activeAnnotationId }: CommentSidebarProps) {
+export function CommentSidebar({ annotations, rawContent, onRemove, onAnnotationClick, activeAnnotationId }: CommentSidebarProps) {
   const activeRef = useRef<HTMLDivElement>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -134,7 +135,8 @@ export function CommentSidebar({ annotations, rawContent, onRemove, activeAnnota
             <div
               key={annotation.id}
               ref={annotation.id === activeAnnotationId ? activeRef : undefined}
-              className={`card card-compact bg-base-200 shadow-sm transition-all ${annotation.id === activeAnnotationId ? 'ring-2 ring-primary' : ''}`}
+              className={`card card-compact bg-base-200 shadow-sm transition-all cursor-pointer ${annotation.id === activeAnnotationId ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => onAnnotationClick?.(annotation)}
             >
               <div className="card-body">
                 {annotation.isGlobal ? (
