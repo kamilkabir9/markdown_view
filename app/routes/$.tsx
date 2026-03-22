@@ -1,12 +1,12 @@
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
-import { useLoaderData, Link, useParams, useRouteError, isRouteErrorResponse } from 'react-router';
+import { useLoaderData, Link, useNavigate, useParams, useRouteError, isRouteErrorResponse } from 'react-router';
 import { getMarkdownContent } from '~/utils/files.server';
 import { useTheme } from '~/contexts/ThemeContext';
 import { AnnotationStoreProvider } from '~/contexts/AnnotationStore';
 import { ThemeSwitcher } from '~/components/ThemeSwitcher';
 import { LineAnnotatedMarkdown } from '~/components/LineAnnotatedMarkdown';
 import { AnnotationErrorBoundary } from '~/components/AnnotationErrorBoundary';
-import { Card, Button, Alert, Breadcrumbs, Tooltip } from '@heroui/react';
+import { Button, Alert, Breadcrumbs } from '@heroui/react';
 import '~/styles/themes.css';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -26,6 +26,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export default function MarkdownPage() {
   const { content, path } = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
   const params = useParams();
   const title = params['*']?.split('/').pop() || 'Untitled';
   const { theme } = useTheme();
@@ -48,34 +49,20 @@ export default function MarkdownPage() {
           <h1 className="text-3xl font-bold">{title}</h1>
           <div className="flex items-center gap-4">
             <ThemeSwitcher />
-            <Tooltip delay={0}>
-              <Link to="/">
-                <Button variant="ghost" size="sm">
-                  Back to files
-                </Button>
-              </Link>
-              <Tooltip.Content showArrow placement="bottom">
-                <Tooltip.Arrow />
-                <p>Return to file list</p>
-              </Tooltip.Content>
-            </Tooltip>
+            <Button variant="ghost" size="sm" onPress={() => navigate('/')}>
+              Back to files
+            </Button>
           </div>
         </div>
       </header>
 
-      <Card>
-        <Card.Content>
-          <article>
-            <AnnotationErrorBoundary>
-              <LineAnnotatedMarkdown
-                content={content}
-                proseClass={proseClass}
-                themeClass={themeClass}
-              />
-            </AnnotationErrorBoundary>
-          </article>
-        </Card.Content>
-      </Card>
+      <AnnotationErrorBoundary>
+        <LineAnnotatedMarkdown
+          content={content}
+          proseClass={proseClass}
+          themeClass={themeClass}
+        />
+      </AnnotationErrorBoundary>
     </AnnotationStoreProvider>
   );
 }

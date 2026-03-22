@@ -4,15 +4,33 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigation,
 } from 'react-router';
 import type { LinksFunction } from 'react-router';
 import { useState, useEffect } from 'react';
-import { Button, Tooltip, Separator } from '@heroui/react';
+import { Button, Separator } from '@heroui/react';
 import { ThemeProvider } from '~/contexts/ThemeContext';
 
 import './styles/tailwind.css';
 
 export const links: LinksFunction = () => [];
+
+function LoadingBar() {
+  const navigation = useNavigation();
+  const isLoading = navigation.state === 'loading';
+
+  return (
+    <div
+      className={`fixed top-0 left-0 right-0 z-50 h-1 bg-accent transition-all duration-300 ${
+        isLoading ? 'opacity-100' : 'opacity-0'
+      }`}
+      style={{
+        transform: isLoading ? 'scaleX(1)' : 'scaleX(0)',
+        transformOrigin: 'left',
+      }}
+    />
+  );
+}
 
 function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -26,24 +44,18 @@ function ScrollToTopButton() {
   if (!visible) return null;
 
   return (
-    <Tooltip delay={0}>
-      <Button
-        variant="primary"
-        size="sm"
-        isIconOnly
-        className="fixed bottom-6 right-6 z-50 shadow-lg rounded-full"
-        onPress={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        aria-label="Scroll to top"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-        </svg>
-      </Button>
-      <Tooltip.Content showArrow placement="left">
-        <Tooltip.Arrow />
-        <p>Back to top</p>
-      </Tooltip.Content>
-    </Tooltip>
+    <Button
+      variant="primary"
+      size="sm"
+      isIconOnly
+      className="fixed bottom-6 right-6 z-50 shadow-lg rounded-full"
+      onPress={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      aria-label="Scroll to top"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+      </svg>
+    </Button>
   );
 }
 
@@ -59,6 +71,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen bg-background text-foreground">
         <ThemeProvider>
+          <LoadingBar />
           <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-accent-foreground focus:rounded-lg">
             Skip to content
           </a>

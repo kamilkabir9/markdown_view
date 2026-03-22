@@ -1,18 +1,21 @@
 import { useCallback, useRef, useEffect, useState } from 'react';
 import type { Annotation } from '~/contexts/AnnotationStore';
-import { Button, Card, CloseButton, Tooltip, Badge } from '@heroui/react';
+import { Button, Card, Badge } from '@heroui/react';
 
 interface CommentSidebarProps {
   annotations: Annotation[];
   rawContent: string;
+  onUpdate: (id: string, text: string) => void;
   onRemove: (id: string) => void;
   onAnnotationClick?: (annotation: Annotation) => void;
   activeAnnotationId?: string | null;
 }
 
-export function CommentSidebar({ annotations, rawContent, onRemove, onAnnotationClick, activeAnnotationId }: CommentSidebarProps) {
+export function CommentSidebar({ annotations, rawContent, onUpdate, onRemove, onAnnotationClick, activeAnnotationId }: CommentSidebarProps) {
   const activeRef = useRef<HTMLDivElement>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
 
   useEffect(() => {
     if (activeAnnotationId && activeRef.current) {
@@ -105,100 +108,150 @@ export function CommentSidebar({ annotations, rawContent, onRemove, onAnnotation
     copyToClipboard(allComments, '__all__');
   }, [annotations, findMarkdownContext, copyToClipboard]);
 
+  const startEditing = useCallback((annotation: Annotation) => {
+    setEditingId(annotation.id);
+    setEditingText(annotation.text);
+  }, []);
+
+  const cancelEditing = useCallback(() => {
+    setEditingId(null);
+    setEditingText('');
+  }, []);
+
+  const saveEditing = useCallback(() => {
+    if (!editingId) return;
+    const nextText = editingText.trim();
+    if (!nextText) return;
+    onUpdate(editingId, nextText);
+    setEditingId(null);
+    setEditingText('');
+  }, [editingId, editingText, onUpdate]);
+
   if (annotations.length === 0) return null;
 
   return (
-    <div className="w-full lg:w-64 lg:flex-shrink-0">
-      <div className="sticky top-4 max-h-[calc(100vh-2rem)] flex flex-col">
-        <div className="flex items-center justify-between mb-2 flex-shrink-0">
-          <h4 className="text-sm font-semibold text-muted flex items-center gap-2">
-            Comments
+    <div className="w-full xl:w-72 xl:flex-shrink-0">
+      <div className="flex max-h-[calc(100vh-8rem)] flex-col bg-background border border-default-200 rounded-lg shadow-sm">
+        <div className="flex items-center justify-between p-3 border-b border-default-200 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-foreground">
+              Comments
+            </h4>
             <Badge color="accent" size="sm" variant="soft">
               {annotations.length}
             </Badge>
-          </h4>
-          <Tooltip delay={0}>
-            <Button
-              variant="ghost"
-              size="sm"
-              isIconOnly
-              onPress={handleCopyAll}
-            >
-              {copiedId === '__all__' ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                </svg>
-              )}
-            </Button>
-            <Tooltip.Content showArrow>
-              <Tooltip.Arrow />
-              <p>Copy all comments</p>
-            </Tooltip.Content>
-          </Tooltip>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            isIconOnly
+            aria-label="Copy all comments"
+            onPress={handleCopyAll}
+          >
+            {copiedId === '__all__' ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+              </svg>
+            )}
+          </Button>
         </div>
-        <div className="space-y-2 overflow-y-auto flex-1 min-h-0">
+        <div className="p-3 space-y-3 overflow-y-auto">
           {annotations.map((annotation) => (
             <div
               key={annotation.id}
               ref={annotation.id === activeAnnotationId ? activeRef : undefined}
-              onClick={() => onAnnotationClick?.(annotation)}
+              onClick={(event) => {
+                const target = event.target as HTMLElement;
+                if (target.closest('button, textarea, input')) return;
+                onAnnotationClick?.(annotation);
+              }}
             >
               <Card
                 variant={annotation.id === activeAnnotationId ? 'secondary' : 'default'}
                 className={`cursor-pointer transition-all ${annotation.id === activeAnnotationId ? 'ring-2 ring-accent' : ''}`}
               >
-                <Card.Content className="p-3">
+                <Card.Content className="relative p-3">
+                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      isIconOnly
+                      aria-label="Edit comment"
+                      onPress={() => startEditing(annotation)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      isIconOnly
+                      aria-label="Copy comment"
+                      onPress={() => handleCopyOne(annotation)}
+                    >
+                      {copiedId === annotation.id ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      isIconOnly
+                      aria-label="Remove comment"
+                      onPress={() => onRemove(annotation.id)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </Button>
+                  </div>
                   {annotation.isGlobal ? (
-                    <p className="text-xs text-muted font-semibold flex items-center gap-1">
+                    <p className="text-xs text-muted font-semibold flex items-center gap-1 mb-2 pr-16">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Global Comment
                     </p>
                   ) : (
-                    <p className="text-xs text-muted line-clamp-2 font-mono">
-                      &ldquo;{annotation.anchor?.exact.slice(0, 50)}
-                      {(annotation.anchor?.exact.length || 0) > 50 ? '...' : ''}&rdquo;
-                    </p>
+                    <div className="bg-surface rounded-lg p-2.5 mb-2 pr-16">
+                      <p className="text-xs text-muted line-clamp-2 font-mono">
+                        &ldquo;{annotation.anchor?.exact.slice(0, 40)}
+                        {(annotation.anchor?.exact.length || 0) > 40 ? '...' : ''}&rdquo;
+                      </p>
+                    </div>
                   )}
-                  <p className="text-sm mt-1">{annotation.text}</p>
-                  <div className="flex justify-end gap-1 mt-2">
-                    <Tooltip delay={0}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        isIconOnly
-                        onPress={() => handleCopyOne(annotation)}
-                      >
-                        {copiedId === annotation.id ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                          </svg>
-                        )}
-                      </Button>
-                      <Tooltip.Content showArrow>
-                        <Tooltip.Arrow />
-                        <p>Copy comment</p>
-                      </Tooltip.Content>
-                    </Tooltip>
-                    <Tooltip delay={0}>
-                      <CloseButton
-                        onPress={() => onRemove(annotation.id)}
+                  {editingId === annotation.id ? (
+                    <div className="pr-16 space-y-2">
+                      <textarea
+                        value={editingText}
+                        onChange={(event) => setEditingText(event.target.value)}
+                        className="w-full rounded-md border border-default-300 bg-background px-2 py-1.5 text-sm text-foreground"
+                        rows={3}
+                        autoFocus
                       />
-                      <Tooltip.Content showArrow>
-                        <Tooltip.Arrow />
-                        <p>Remove comment</p>
-                      </Tooltip.Content>
-                    </Tooltip>
-                  </div>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="primary" isDisabled={!editingText.trim()} onPress={saveEditing}>
+                          Save
+                        </Button>
+                        <Button size="sm" variant="ghost" onPress={cancelEditing}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-foreground pr-16 break-words">{annotation.text}</p>
+                  )}
                 </Card.Content>
               </Card>
             </div>

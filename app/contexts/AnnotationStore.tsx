@@ -17,6 +17,7 @@ export interface Annotation {
 interface AnnotationStoreContextType {
   annotations: Annotation[];
   addAnnotation: (anchor: Anchor | null, text: string, isGlobal?: boolean) => void;
+  updateAnnotationText: (id: string, text: string) => void;
   removeAnnotation: (id: string) => void;
 }
 
@@ -47,15 +48,18 @@ function saveAnnotations(filePath: string, annotations: Annotation[]): void {
 }
 
 export function AnnotationStoreProvider({ children, filePath }: { children: ReactNode; filePath: string }) {
-  const [annotations, setAnnotations] = useState<Annotation[]>(() => loadAnnotations(filePath));
+  const [annotations, setAnnotations] = useState<Annotation[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     setAnnotations(loadAnnotations(filePath));
+    setIsHydrated(true);
   }, [filePath]);
 
   useEffect(() => {
+    if (!isHydrated) return;
     saveAnnotations(filePath, annotations);
-  }, [filePath, annotations]);
+  }, [filePath, annotations, isHydrated]);
 
   const addAnnotation = useCallback((anchor: Anchor | null, text: string, isGlobal = false) => {
     const newAnnotation: Annotation = {
@@ -72,11 +76,20 @@ export function AnnotationStoreProvider({ children, filePath }: { children: Reac
     setAnnotations((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
+  const updateAnnotationText = useCallback((id: string, text: string) => {
+    setAnnotations((prev) =>
+      prev.map((annotation) =>
+        annotation.id === id ? { ...annotation, text } : annotation,
+      ),
+    );
+  }, []);
+
   return (
     <AnnotationStoreContext.Provider
       value={{
         annotations,
         addAnnotation,
+        updateAnnotationText,
         removeAnnotation,
       }}
     >

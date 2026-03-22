@@ -66,7 +66,7 @@ export default function Index() {
         </div>
       </header>
 
-      {files.length > 3 && (
+      {files.length > 0 && (
         <SearchField className="mb-4" value={search} onChange={setSearch}>
           <SearchField.Group className="h-12">
             <SearchField.SearchIcon />
