@@ -1,4 +1,5 @@
 import { useTheme, type Theme } from '~/contexts/ThemeContext';
+import { Button, Dropdown, Label } from '@heroui/react';
 
 const themes: { value: Theme; label: string; description: string }[] = [
   { value: 'default', label: 'Default', description: 'Tailwind Typography' },
@@ -13,8 +14,8 @@ export function ThemeSwitcher() {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium">Theme:</span>
-      <div className="dropdown dropdown-end">
-        <label tabIndex={0} className="btn btn-sm btn-ghost">
+      <Dropdown>
+        <Button variant="ghost" size="sm">
           {themes.find(t => t.value === theme)?.label || 'Default'}
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -30,26 +31,29 @@ export function ThemeSwitcher() {
               d="M19 9l-7 7-7-7"
             />
           </svg>
-        </label>
-        <ul
-          tabIndex={0}
-          className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-300"
-        >
-          {themes.map(t => (
-            <li key={t.value}>
-              <button
-                onClick={() => setTheme(t.value)}
-                className={theme === t.value ? 'active' : ''}
-              >
-                <div>
-                  <div className="font-medium">{t.label}</div>
-                  <div className="text-xs opacity-70">{t.description}</div>
-                </div>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+        </Button>
+        <Dropdown.Popover placement="bottom end">
+          <Dropdown.Menu
+            selectionMode="single"
+            selectedKeys={new Set([theme])}
+            onSelectionChange={(keys) => {
+              const selected = Array.from(keys)[0] as Theme;
+              if (selected) setTheme(selected);
+            }}
+          >
+            {themes.map(t => (
+              <Dropdown.Item key={t.value} id={t.value} textValue={t.label}>
+                <Label>
+                  <div>
+                    <div className="font-medium">{t.label}</div>
+                    <div className="text-xs opacity-70">{t.description}</div>
+                  </div>
+                </Label>
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>
     </div>
   );
 }
