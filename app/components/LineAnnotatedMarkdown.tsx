@@ -5,7 +5,7 @@ import rehypeHighlight from 'rehype-highlight';
 import { useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore';
 import { CommentHighlighter } from './CommentHighlighter';
 import { CommentSidebar } from './CommentSidebar';
-import { Button, Modal, TextArea, Spinner } from '@heroui/react';
+import { Button, Modal, TextArea, Spinner, Tooltip, Badge } from '@heroui/react';
 
 interface LineAnnotatedMarkdownProps {
   content: string;
@@ -138,29 +138,44 @@ export function LineAnnotatedMarkdown({
     <div className="flex gap-4">
       <div className="flex-1 min-w-0 overflow-hidden">
         <div className="flex items-center justify-end gap-2 mb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onPress={() => openDialog(true)}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <span className="ml-1">Add Comment</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={sidebarOpen ? '' : 'bg-surface'}
-            onPress={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-            </svg>
-            {annotations.length > 0 && (
-              <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full">{annotations.length}</span>
-            )}
-          </Button>
+          <Tooltip delay={0}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onPress={() => openDialog(true)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span className="ml-1">Add Comment</span>
+            </Button>
+            <Tooltip.Content showArrow>
+              <Tooltip.Arrow />
+              <p>Add a global comment to this document</p>
+            </Tooltip.Content>
+          </Tooltip>
+          <Tooltip delay={0}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={sidebarOpen ? '' : 'bg-surface'}
+              onPress={() => setSidebarOpen(!sidebarOpen)}
+              aria-label={sidebarOpen ? 'Hide comments panel' : 'Show comments panel'}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+              </svg>
+              {annotations.length > 0 && (
+                <Badge color="accent" size="sm" className="ml-1">
+                  {annotations.length}
+                </Badge>
+              )}
+            </Button>
+            <Tooltip.Content showArrow>
+              <Tooltip.Arrow />
+              <p>{sidebarOpen ? 'Hide' : 'Show'} comments panel</p>
+            </Tooltip.Content>
+          </Tooltip>
         </div>
 
         <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>

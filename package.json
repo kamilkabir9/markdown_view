@@ -25,6 +25,7 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@react-router/dev": "^7.13.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",

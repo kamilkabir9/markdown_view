@@ -6,7 +6,7 @@ import { AnnotationStoreProvider } from '~/contexts/AnnotationStore';
 import { ThemeSwitcher } from '~/components/ThemeSwitcher';
 import { LineAnnotatedMarkdown } from '~/components/LineAnnotatedMarkdown';
 import { AnnotationErrorBoundary } from '~/components/AnnotationErrorBoundary';
-import { Card, Button, Alert } from '@heroui/react';
+import { Card, Button, Alert, Breadcrumbs, Tooltip } from '@heroui/react';
 import '~/styles/themes.css';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -35,16 +35,30 @@ export default function MarkdownPage() {
 
   return (
     <AnnotationStoreProvider filePath={path}>
+      <nav aria-label="Breadcrumb" className="mb-6">
+        <Breadcrumbs>
+          <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
+          <Breadcrumbs.Item>Markdown Files</Breadcrumbs.Item>
+          <Breadcrumbs.Item>{title}</Breadcrumbs.Item>
+        </Breadcrumbs>
+      </nav>
+
       <header className="mb-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">{title}</h1>
           <div className="flex items-center gap-4">
             <ThemeSwitcher />
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                ← Back to files
-              </Button>
-            </Link>
+            <Tooltip delay={0}>
+              <Link to="/">
+                <Button variant="ghost" size="sm">
+                  Back to files
+                </Button>
+              </Link>
+              <Tooltip.Content showArrow placement="bottom">
+                <Tooltip.Arrow />
+                <p>Return to file list</p>
+              </Tooltip.Content>
+            </Tooltip>
           </div>
         </div>
       </header>
