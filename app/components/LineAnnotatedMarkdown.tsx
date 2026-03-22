@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import { useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore';
 import { CommentHighlighter } from './CommentHighlighter';
 import { CommentSidebar } from './CommentSidebar';
@@ -25,6 +26,8 @@ export function LineAnnotatedMarkdown({
   const [pendingAnchor, setPendingAnchor] = useState<{ exact: string; prefix: string; suffix: string } | null>(null);
   const [commentText, setCommentText] = useState('');
   const [isGlobalComment, setIsGlobalComment] = useState(false);
+  const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
+  const [isAnchoring, setIsAnchoring] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -49,13 +52,20 @@ export function LineAnnotatedMarkdown({
     if (!range) return;
 
     try {
+      setIsAnchoring(true);
       const container = containerRef.current;
       const textQuote = await getTextQuote();
       const anchor = textQuote.fromRange(container, range);
-      if (!anchor?.exact?.trim()) return;
+      if (!anchor?.exact?.trim()) {
+        setIsAnchoring(false);
+        return;
+      }
 
       const rect = range.getBoundingClientRect();
-      if (!rect || rect.width === 0) return;
+      if (!rect || rect.width === 0) {
+        setIsAnchoring(false);
+        return;
+      }
 
       setPopoverPos({ x: rect.left + rect.width / 2, y: rect.top - 8 });
       setPendingAnchor({
@@ -63,8 +73,10 @@ export function LineAnnotatedMarkdown({
         prefix: anchor.prefix || '',
         suffix: anchor.suffix || '',
       });
+      setIsAnchoring(false);
     } catch (err) {
       console.warn('anchor error:', err);
+      setIsAnchoring(false);
     }
   }, []);
 
@@ -93,7 +105,10 @@ export function LineAnnotatedMarkdown({
     closeDialog();
   }, [pendingAnchor, commentText, addAnnotation, closeDialog, isGlobalComment]);
 
-  const handleAnnotationClick = useCallback((_annotation: Annotation) => {}, []);
+  const handleAnnotationClick = useCallback((annotation: Annotation) => {
+    setActiveAnnotationId(annotation.id);
+    setTimeout(() => setActiveAnnotationId(null), 2000);
+  }, []);
 
   // Close popover on click outside
   useEffect(() => {
@@ -112,6 +127,7 @@ export function LineAnnotatedMarkdown({
         annotations={annotations}
         rawContent={content}
         onRemove={removeAnnotation}
+        activeAnnotationId={activeAnnotationId}
       />
 
       <div className="flex-1 min-w-0 overflow-hidden">
@@ -130,7 +146,7 @@ export function LineAnnotatedMarkdown({
 
         <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>
           <div className={`${proseClass} ${themeClass} overflow-x-auto`}>
-            <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
+            <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{content}</Markdown>
           </div>
         </div>
 
@@ -141,6 +157,11 @@ export function LineAnnotatedMarkdown({
         />
 
         {/* Inline popover button — uses onMouseDown + preventDefault so it fires before selection clears */}
+        {isAnchoring && (
+          <div className="fixed z-50 top-4 right-4">
+            <span className="loading loading-spinner loading-sm" />
+          </div>
+        )}
         {popoverPos && pendingAnchor && (
           <div
             ref={popoverRef}

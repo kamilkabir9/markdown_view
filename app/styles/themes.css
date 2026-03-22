@@ -318,22 +318,3 @@
   font-weight: 600;
 }
 
-.markdown-line {
-  position: relative;
-}
-
-.markdown-line:hover {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-.markdown-line:has(.badge) {
-  background-color: rgba(59, 130, 246, 0.05);
-}
-
-[data-theme="dark"] .markdown-line:hover {
-  background-color: rgba(255, 255, 255, 0.02);
-}
-
-[data-theme="dark"] .markdown-line:has(.badge) {
-  background-color: rgba(59, 130, 246, 0.1);
-}

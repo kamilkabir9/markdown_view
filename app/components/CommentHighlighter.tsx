@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, type RefObject } from 'react';
 import type { Annotation } from '~/contexts/AnnotationStore';
 
 interface CommentHighlighterProps {
@@ -7,55 +7,54 @@ interface CommentHighlighterProps {
   onAnnotationClick?: (annotation: Annotation) => void;
 }
 
-export function CommentHighlighter({ 
-  containerRef, 
-  annotations, 
-  onAnnotationClick 
+export function CommentHighlighter({
+  containerRef,
+  annotations,
+  onAnnotationClick
 }: CommentHighlighterProps) {
-  const isProcessing = useRef(false);
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (isProcessing.current) return;
-    
+
     const container = containerRef.current;
     if (!container) return;
 
-    if (annotations.length === 0) {
-      const existingMarks = container.querySelectorAll('mark[data-annotation-id]');
+    const abortController = new AbortController();
+
+    function removeAllMarks() {
+      const existingMarks = container!.querySelectorAll('mark[data-annotation-id]');
       existingMarks.forEach((mark) => {
         try {
           const parent = mark.parentNode;
+          if (!parent) return;
           while (mark.firstChild) {
-            parent?.insertBefore(mark.firstChild, mark);
+            parent.insertBefore(mark.firstChild, mark);
           }
-          parent?.removeChild(mark);
+          parent.removeChild(mark);
         } catch {}
       });
+    }
+
+    if (annotations.length === 0) {
+      removeAllMarks();
       return;
     }
 
-    isProcessing.current = true;
+    const clickHandlers: Array<{ mark: Element; handler: () => void }> = [];
 
     import('dom-anchor-text-quote').then((textQuote) => {
+      if (abortController.signal.aborted) return;
+
       requestAnimationFrame(() => {
+        if (abortController.signal.aborted) return;
+
         try {
-          const existingMarks = container.querySelectorAll('mark[data-annotation-id]');
-          existingMarks.forEach((mark) => {
-            try {
-              const parent = mark.parentNode;
-              while (mark.firstChild) {
-                parent?.insertBefore(mark.firstChild, mark);
-              }
-              parent?.removeChild(mark);
-            } catch {}
-          });
+          removeAllMarks();
 
           annotations.forEach((annotation) => {
             try {
               if (!annotation.anchor) return;
-              const range = textQuote.toRange(container, annotation.anchor);
-              if (!range) return;
+              const range = textQuote.toRange(container!, annotation.anchor);
+              if (!range || range.collapsed) return;
 
               const contents = range.extractContents();
               const mark = document.createElement('mark');
@@ -66,15 +65,21 @@ export function CommentHighlighter({
 
               const clickHandler = () => onAnnotationClick?.(annotation);
               mark.addEventListener('click', clickHandler);
+              clickHandlers.push({ mark, handler: clickHandler });
             } catch {}
           });
-        } finally {
-          isProcessing.current = false;
-        }
+        } catch {}
       });
-    }).catch(() => {
-      isProcessing.current = false;
-    });
+    }).catch(() => {});
+
+    return () => {
+      abortController.abort();
+      clickHandlers.forEach(({ mark, handler }) => {
+        try {
+          mark.removeEventListener('click', handler);
+        } catch {}
+      });
+    };
   }, [containerRef, annotations, onAnnotationClick]);
 
   return null;

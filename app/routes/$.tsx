@@ -24,7 +24,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export default function MarkdownPage() {
-  const { content } = useLoaderData<typeof loader>();
+  const { content, path } = useLoaderData<typeof loader>();
   const params = useParams();
   const title = params['*']?.split('/').pop() || 'Untitled';
   const { theme } = useTheme();
@@ -33,7 +33,7 @@ export default function MarkdownPage() {
   const proseClass = theme === 'default' ? 'prose prose-slate max-w-none' : '';
 
   return (
-    <AnnotationStoreProvider>
+    <AnnotationStoreProvider filePath={path}>
       <header className="mb-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">{title}</h1>
