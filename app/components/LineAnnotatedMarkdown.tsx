@@ -28,6 +28,7 @@ export function LineAnnotatedMarkdown({
   const [isGlobalComment, setIsGlobalComment] = useState(false);
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
   const [isAnchoring, setIsAnchoring] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -129,16 +130,8 @@ export function LineAnnotatedMarkdown({
 
   return (
     <div className="flex gap-4">
-      <CommentSidebar
-        annotations={annotations}
-        rawContent={content}
-        onRemove={removeAnnotation}
-        onAnnotationClick={handleAnnotationClick}
-        activeAnnotationId={activeAnnotationId}
-      />
-
       <div className="flex-1 min-w-0 overflow-hidden">
-        <div className="flex items-center justify-end mb-4">
+        <div className="flex items-center justify-end gap-2 mb-4">
           <button
             className="btn btn-ghost btn-sm"
             onClick={() => openDialog(true)}
@@ -148,6 +141,18 @@ export function LineAnnotatedMarkdown({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             <span className="ml-1">Add Comment</span>
+          </button>
+          <button
+            className={`btn btn-ghost btn-sm ${sidebarOpen ? '' : 'btn-active'}`}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            title={sidebarOpen ? 'Hide comments' : 'Show comments'}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+            {annotations.length > 0 && (
+              <span className="badge badge-sm badge-primary">{annotations.length}</span>
+            )}
           </button>
         </div>
 
@@ -258,6 +263,16 @@ export function LineAnnotatedMarkdown({
           )}
         </dialog>
       </div>
+
+      {sidebarOpen && (
+        <CommentSidebar
+          annotations={annotations}
+          rawContent={content}
+          onRemove={removeAnnotation}
+          onAnnotationClick={handleAnnotationClick}
+          activeAnnotationId={activeAnnotationId}
+        />
+      )}
     </div>
   );
 }
