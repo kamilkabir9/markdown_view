@@ -9,7 +9,6 @@
     "dev": "react-router dev",
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
-    "link:cli": "npm run build && npm link",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

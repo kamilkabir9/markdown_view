@@ -34,7 +34,8 @@ You can link this app as a local CLI command:
 
 ```bash
 # Build and register the CLI command
-npm run link:cli
+npm run build
+npm link
 
 # Run in current directory
 markdown-viewer
