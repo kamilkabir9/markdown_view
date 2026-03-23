@@ -2,6 +2,7 @@ node_modules/
 build/
 .react-router/
 dist/
+bin/
 
 .env
 .env.local

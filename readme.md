@@ -1,21 +1,21 @@
 # Markdown Viewer
 
-A fast markdown viewer built with React Router v7 and Bun, featuring SSR out of the box.
+A fast markdown viewer built with React Router v7 and Node.js, featuring SSR out of the box.
 
 ## Quick Start
 
 ```bash
 # Install dependencies
-bun install
+npm install
 
 # Development mode with hot reload
-bun run dev
+npm run dev
 
 # Production build
-bun run build
+npm run build
 
 # Start production server
-bun run start
+npm run start
 ```
 
 ## Configuration
@@ -23,10 +23,42 @@ bun run start
 Set the port via environment variable:
 
 ```bash
-PORT=8080 bun run start
+PORT=8080 npm run start
 ```
 
 Default port is **3000**.
+
+## CLI Usage
+
+You can link this app as a local CLI command:
+
+```bash
+# Build and register the CLI command
+npm run link:cli
+
+# Run in current directory
+markdown-viewer
+
+# Custom port
+markdown-viewer --port 4000
+
+# Serve markdown files from another directory
+markdown-viewer --cwd ./docs
+
+# Start server without opening browser
+markdown-viewer --no-open
+```
+
+Show help:
+
+```bash
+markdown-viewer --help
+```
+
+CLI behavior:
+
+- If the requested port is busy, it automatically tries the next available port.
+- By default, it opens your browser to the running local URL.
 
 ## Usage
 
@@ -50,7 +82,7 @@ The copied format includes the selected markdown lines followed by the comment, 
 
 - **SSR (Server-Side Rendering)** - Fast initial page loads, good SEO
 - **React Router v7** - Full-stack framework with loaders
-- **Bun** - Fast JavaScript runtime
+- **Node.js** - Widely supported JavaScript runtime
 - Syntax highlighting for code blocks
 - Responsive design with DaisyUI components
 - Clean URLs (e.g., `/docs/readme` serves `docs/readme.md`)
@@ -75,13 +107,13 @@ The copied format includes the selected markdown lines followed by the comment, 
 
 ```bash
 # Run in development mode with hot reload
-bun run dev
+npm run dev
 
 # Type check
-bun run typecheck
+npm run typecheck
 
 # Build for production
-bun run build
+npm run build
 ```
 
 ## License

@@ -2,10 +2,14 @@
   "name": "markdown-viewer",
   "version": "1.0.0",
   "type": "module",
+  "bin": {
+    "markdown-viewer": "./scripts/markdown-viewer.js"
+  },
   "scripts": {
     "dev": "react-router dev",
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
+    "link:cli": "npm run build && npm link",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -81,7 +81,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </main>
             <Separator className="mt-8 mb-4" />
             <footer className="text-center text-muted text-sm">
-              <p>Served by Markdown Viewer · Built with React Router v7 & Bun</p>
+              <p>Served by Markdown Viewer · Built with React Router v7 & Node.js</p>
             </footer>
           </div>
           <ScrollToTopButton />
