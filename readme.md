@@ -37,7 +37,7 @@ You can link this app as a local CLI command:
 npm run build
 npm link
 
-# Run in current directory
+# Run in current directory (where your .md files are)
 markdown-viewer
 
 # Custom port
@@ -60,6 +60,13 @@ CLI behavior:
 
 - If the requested port is busy, it automatically tries the next available port.
 - By default, it opens your browser to the running local URL.
+- When linked globally, app assets are served from the package build while markdown files are read from your current directory (or `--cwd`).
+
+Why this works:
+
+- `npm run build` generates the app's compiled server and browser assets under `build/`.
+- The CLI serves those built assets from the installed package location.
+- Your markdown files are not bundled into the build; they are read at runtime from the current directory or `--cwd`.
 
 ## Usage
 

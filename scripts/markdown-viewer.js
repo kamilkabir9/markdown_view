@@ -114,6 +114,11 @@ if (!existsSync(serveBin)) {
   process.exit(1);
 }
 
+if (!existsSync(workingDir)) {
+  console.error(`Directory not found: ${workingDir}`);
+  process.exit(1);
+}
+
 async function main() {
   if (port && !isValidPort(port)) {
     console.error(`Invalid --port value: ${port}`);
@@ -130,10 +135,11 @@ async function main() {
   const serverUrl = `http://localhost:${selectedPort}`;
   const child = spawn('node', [serveBin, serverBuild], {
     stdio: 'inherit',
-    cwd: workingDir,
+    cwd: packageRoot,
     env: {
       ...process.env,
       PORT: String(selectedPort),
+      MARKDOWN_VIEWER_CONTENT_ROOT: workingDir,
     },
   });
 

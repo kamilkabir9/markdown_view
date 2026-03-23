@@ -1,7 +1,7 @@
 import { readdir, stat, readFile } from 'fs/promises';
 import { join, extname, relative, resolve, normalize } from 'path';
 
-const ROOT_DIR = resolve(process.cwd());
+const ROOT_DIR = resolve(process.env.MARKDOWN_VIEWER_CONTENT_ROOT || process.cwd());
 
 function isSafePath(pathname: string): boolean {
   const resolved = normalize(resolve(ROOT_DIR, pathname));
