@@ -8,10 +8,11 @@
   "scripts": {
     "dev": "react-router dev",
     "build": "react-router build",
-    "start": "react-router-serve ./build/server/index.js",
+    "start": "node ./scripts/start-server.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@react-router/express": "^7.0.0",
     "@heroui/react": "^3.0.1",
     "@heroui/styles": "^3.0.1",
     "@react-router/node": "^7.0.0",
@@ -19,6 +20,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.0",
     "dom-anchor-text-quote": "^4.0.2",
+    "express": "^4.22.1",
     "isbot": "^5.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
