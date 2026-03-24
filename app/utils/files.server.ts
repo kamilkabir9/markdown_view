@@ -16,6 +16,14 @@ export interface FileInfo {
   modified: string;
 }
 
+export interface MarkdownContent {
+  content: string;
+  path: string;
+  sourcePath: string;
+  size: number;
+  modified: string;
+}
+
 const SKIP_DIRS = new Set([
   'node_modules', '.git', '.react-router', 'build', 'dist',
   '.opencode', '.vscode', '.idea', '.next', '.cache',
@@ -52,7 +60,7 @@ export async function getMarkdownFiles(): Promise<FileInfo[]> {
   return walkDir(ROOT_DIR);
 }
 
-export async function getMarkdownContent(pathname: string): Promise<{ content: string; path: string } | null> {
+export async function getMarkdownContent(pathname: string): Promise<MarkdownContent | null> {
   const sanitized = pathname.replace(/\0/g, '');
 
   const possiblePaths = [
@@ -66,7 +74,15 @@ export async function getMarkdownContent(pathname: string): Promise<{ content: s
     if (!isSafePath(filePath)) continue;
     try {
       const content = await readFile(filePath, 'utf-8');
-      return { content, path: sanitized };
+      const fileStats = await stat(filePath);
+
+      return {
+        content,
+        path: sanitized,
+        sourcePath: relative(ROOT_DIR, filePath),
+        size: fileStats.size,
+        modified: fileStats.mtime.toISOString(),
+      };
     } catch {
       continue;
     }

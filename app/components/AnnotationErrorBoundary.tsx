@@ -29,7 +29,12 @@ export class AnnotationErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return this.props.fallback || (
         <Alert status="warning">
-          Annotations temporarily unavailable. Please refresh.
+          <Alert.Content>
+            <Alert.Title>Comments temporarily unavailable</Alert.Title>
+            <Alert.Description>
+              The document still rendered, but the annotation layer hit an error. Refresh to try again.
+            </Alert.Description>
+          </Alert.Content>
         </Alert>
       );
     }

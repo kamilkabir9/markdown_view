@@ -1,320 +1,98 @@
+.markdown-theme-default,
+.markdown-theme-github,
+.markdown-theme-dark,
+.markdown-theme-minimal {
+  --markdown-shell-bg: var(--surface);
+  --markdown-shell-border: color-mix(in oklab, var(--border) 76%, transparent);
+  --markdown-heading: color-mix(in oklab, var(--foreground) 96%, black);
+  --markdown-text: color-mix(in oklab, var(--foreground) 78%, transparent);
+  --markdown-link: var(--accent);
+  --markdown-link-hover: color-mix(in oklab, var(--accent) 82%, black);
+  --markdown-border: color-mix(in oklab, var(--border) 75%, transparent);
+  --markdown-code-bg: color-mix(in oklab, var(--surface-secondary) 92%, white);
+  --markdown-code-text: color-mix(in oklab, var(--foreground) 88%, transparent);
+  --markdown-pre-bg: color-mix(in oklab, var(--foreground) 5%, var(--surface));
+  --markdown-pre-border: color-mix(in oklab, var(--border) 72%, transparent);
+  --markdown-quote-bg: color-mix(in oklab, var(--accent) 6%, var(--surface));
+  --markdown-quote-border: color-mix(in oklab, var(--accent) 62%, white);
+  --markdown-quote-text: color-mix(in oklab, var(--foreground) 72%, transparent);
+  --markdown-table-stripe: color-mix(in oklab, var(--accent) 3%, var(--surface));
+  border: 1px solid var(--markdown-shell-border);
+  border-radius: 1.75rem;
+  background: var(--markdown-shell-bg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 28px 60px -46px rgba(15, 23, 42, 0.68);
+  padding: clamp(1.2rem, 3vw, 2rem);
+}
+
+.markdown-theme-default {
+  --markdown-shell-bg: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface) 82%, white) 0%,
+    color-mix(in oklab, var(--surface) 94%, transparent) 100%
+  );
+  --markdown-quote-bg: color-mix(in oklab, var(--accent) 7%, var(--surface));
+}
+
 .markdown-theme-github {
-  --heading-color: #24292f;
-  --text-color: #24292f;
-  --link-color: #0969da;
-  --code-bg: #f6f8fa;
-  --code-color: #24292f;
-  --pre-bg: #f6f8fa;
-  --border-color: #d0d7de;
-  --quote-color: #57606a;
-  --quote-border: #d0d7de;
-}
-
-.markdown-theme-github h1,
-.markdown-theme-github h2,
-.markdown-theme-github h3,
-.markdown-theme-github h4,
-.markdown-theme-github h5,
-.markdown-theme-github h6 {
-  color: var(--heading-color);
-  margin-top: 24px;
-  margin-bottom: 16px;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.markdown-theme-github h1 {
-  font-size: 2em;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.markdown-theme-github h2 {
-  font-size: 1.5em;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.markdown-theme-github p {
-  margin-bottom: 16px;
-  line-height: 1.6;
-}
-
-.markdown-theme-github code {
-  background-color: var(--code-bg);
-  color: var(--code-color);
-  padding: 0.2em 0.4em;
-  border-radius: 6px;
-  font-size: 85%;
-  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
-}
-
-.markdown-theme-github pre {
-  background-color: var(--pre-bg);
-  padding: 16px;
-  border-radius: 6px;
-  overflow-x: auto;
-  line-height: 1.45;
-}
-
-.markdown-theme-github pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.markdown-theme-github blockquote {
-  border-left: 0.25em solid var(--quote-border);
-  color: var(--quote-color);
-  padding: 0 1em;
-  margin: 0 0 16px 0;
-}
-
-.markdown-theme-github a {
-  color: var(--link-color);
-  text-decoration: none;
-}
-
-.markdown-theme-github a:hover {
-  text-decoration: underline;
-}
-
-.markdown-theme-github ul,
-.markdown-theme-github ol {
-  padding-left: 2em;
-  margin-bottom: 16px;
-}
-
-.markdown-theme-github table {
-  border-spacing: 0;
-  border-collapse: collapse;
-  margin-bottom: 16px;
-}
-
-.markdown-theme-github table th,
-.markdown-theme-github table td {
-  padding: 6px 13px;
-  border: 1px solid var(--border-color);
-}
-
-.markdown-theme-github table tr:nth-child(2n) {
-  background-color: #f6f8fa;
+  --markdown-shell-bg: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+  --markdown-shell-border: color-mix(in oklab, #d0d7de 90%, transparent);
+  --markdown-heading: #1f2328;
+  --markdown-text: #24292f;
+  --markdown-link: #0969da;
+  --markdown-link-hover: #0550ae;
+  --markdown-border: #d0d7de;
+  --markdown-code-bg: #f6f8fa;
+  --markdown-code-text: #24292f;
+  --markdown-pre-bg: #0d111714;
+  --markdown-pre-border: #d8dee4;
+  --markdown-quote-bg: #f6f8fa;
+  --markdown-quote-border: #0969da;
+  --markdown-quote-text: #57606a;
+  --markdown-table-stripe: #f6f8fa;
 }
 
 .markdown-theme-dark {
-  --heading-color: #e6edf3;
-  --text-color: #c9d1d9;
-  --link-color: #58a6ff;
-  --code-bg: #161b22;
-  --code-color: #c9d1d9;
-  --pre-bg: #0d1117;
-  --border-color: #30363d;
-  --quote-color: #8b949e;
-  --quote-border: #3b82f6;
+  --markdown-shell-bg: linear-gradient(180deg, #0f1622 0%, #0b111a 100%);
+  --markdown-shell-border: #273444;
+  --markdown-heading: #f3f5f8;
+  --markdown-text: #cfd7e2;
+  --markdown-link: #78b7ff;
+  --markdown-link-hover: #b2d5ff;
+  --markdown-border: #2a3748;
+  --markdown-code-bg: #182131;
+  --markdown-code-text: #e5ebf4;
+  --markdown-pre-bg: #0d1420;
+  --markdown-pre-border: #243040;
+  --markdown-quote-bg: #101b2b;
+  --markdown-quote-border: #5fa8ff;
+  --markdown-quote-text: #99a8ba;
+  --markdown-table-stripe: #111a28;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 34px 80px -56px rgba(0, 0, 0, 0.95);
 }
 
-.markdown-theme-dark {
-  background-color: #0d1117;
-  color: var(--text-color);
-}
-
-.markdown-theme-dark h1,
-.markdown-theme-dark h2,
-.markdown-theme-dark h3,
-.markdown-theme-dark h4,
-.markdown-theme-dark h5,
-.markdown-theme-dark h6 {
-  color: var(--heading-color);
-  margin-top: 24px;
-  margin-bottom: 16px;
-  font-weight: 600;
-  line-height: 1.25;
-  border-bottom-color: var(--border-color);
-}
-
-.markdown-theme-dark h1 {
-  font-size: 2em;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.markdown-theme-dark h2 {
-  font-size: 1.5em;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.markdown-theme-dark p {
-  margin-bottom: 16px;
-  line-height: 1.6;
-}
-
-.markdown-theme-dark code {
-  background-color: var(--code-bg);
-  color: var(--code-color);
-  padding: 0.2em 0.4em;
-  border-radius: 6px;
-  font-size: 85%;
-  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
-}
-
-.markdown-theme-dark pre {
-  background-color: var(--pre-bg);
-  padding: 16px;
-  border-radius: 6px;
-  overflow-x: auto;
-  line-height: 1.45;
-  border: 1px solid var(--border-color);
-}
-
+.markdown-theme-dark .hljs,
 .markdown-theme-dark pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.markdown-theme-dark blockquote {
-  border-left: 4px solid var(--quote-border);
-  color: var(--quote-color);
-  padding: 0 1em;
-  margin: 0 0 16px 0;
-}
-
-.markdown-theme-dark a {
-  color: var(--link-color);
-  text-decoration: none;
-}
-
-.markdown-theme-dark a:hover {
-  text-decoration: underline;
-}
-
-.markdown-theme-dark ul,
-.markdown-theme-dark ol {
-  padding-left: 2em;
-  margin-bottom: 16px;
-}
-
-.markdown-theme-dark table {
-  border-spacing: 0;
-  border-collapse: collapse;
-  margin-bottom: 16px;
-}
-
-.markdown-theme-dark table th,
-.markdown-theme-dark table td {
-  padding: 6px 13px;
-  border: 1px solid var(--border-color);
-}
-
-.markdown-theme-dark table tr:nth-child(2n) {
-  background-color: #161b22;
+  color: #dbe8ff;
 }
 
 .markdown-theme-minimal {
-  --heading-color: #111827;
-  --text-color: #374151;
-  --link-color: #059669;
-  --code-bg: #f3f4f6;
-  --code-color: #111827;
-  --pre-bg: #f9fafb;
-  --border-color: #e5e7eb;
-  --quote-color: #6b7280;
-  --quote-border: #10b981;
+  --markdown-shell-bg: linear-gradient(180deg, #fffdfa 0%, #faf6ee 100%);
+  --markdown-shell-border: #e8decb;
+  --markdown-heading: #1e2a24;
+  --markdown-text: #43514a;
+  --markdown-link: #1f8c6b;
+  --markdown-link-hover: #176e54;
+  --markdown-border: #e6dcc8;
+  --markdown-code-bg: #f3eee3;
+  --markdown-code-text: #25332d;
+  --markdown-pre-bg: #f7f2e8;
+  --markdown-pre-border: #e4d8c4;
+  --markdown-quote-bg: #f7f1e7;
+  --markdown-quote-border: #2c9b78;
+  --markdown-quote-text: #5d6d64;
+  --markdown-table-stripe: #f8f2e8;
 }
-
-.markdown-theme-minimal h1,
-.markdown-theme-minimal h2,
-.markdown-theme-minimal h3,
-.markdown-theme-minimal h4,
-.markdown-theme-minimal h5,
-.markdown-theme-minimal h6 {
-  color: var(--heading-color);
-  margin-top: 32px;
-  margin-bottom: 16px;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.markdown-theme-minimal h1 {
-  font-size: 2.25em;
-}
-
-.markdown-theme-minimal h2 {
-  font-size: 1.5em;
-}
-
-.markdown-theme-minimal p {
-  margin-bottom: 16px;
-  line-height: 1.7;
-  color: var(--text-color);
-}
-
-.markdown-theme-minimal code {
-  background-color: var(--code-bg);
-  color: var(--code-color);
-  padding: 0.2em 0.4em;
-  border-radius: 4px;
-  font-size: 90%;
-  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
-}
-
-.markdown-theme-minimal pre {
-  background-color: var(--pre-bg);
-  padding: 20px;
-  border-radius: 8px;
-  overflow-x: auto;
-  line-height: 1.6;
-  border: 1px solid var(--border-color);
-}
-
-.markdown-theme-minimal pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.markdown-theme-minimal blockquote {
-  border-left: 4px solid var(--quote-border);
-  color: var(--quote-color);
-  padding: 0.5em 1.5em;
-  margin: 0 0 16px 0;
-  font-style: italic;
-}
-
-.markdown-theme-minimal a {
-  color: var(--link-color);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.markdown-theme-minimal a:hover {
-  color: #047857;
-}
-
-.markdown-theme-minimal ul,
-.markdown-theme-minimal ol {
-  padding-left: 1.5em;
-  margin-bottom: 16px;
-}
-
-.markdown-theme-minimal li {
-  margin-bottom: 8px;
-}
-
-.markdown-theme-minimal table {
-  border-spacing: 0;
-  border-collapse: collapse;
-  margin-bottom: 16px;
-  width: 100%;
-}
-
-.markdown-theme-minimal table th,
-.markdown-theme-minimal table td {
-  padding: 12px 16px;
-  border: 1px solid var(--border-color);
-  text-align: left;
-}
-
-.markdown-theme-minimal table th {
-  background-color: #f9fafb;
-  font-weight: 600;
-}
-

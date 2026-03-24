@@ -1,12 +1,20 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react';
+import { createPortal } from 'react-dom';
 import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import remarkGfm from 'remark-gfm';
+import { Button, Card, Drawer, Modal, Spinner, TextArea } from '@heroui/react';
 import { useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore';
 import { CommentHighlighter } from './CommentHighlighter';
 import { CommentSidebar } from './CommentSidebar';
 import { ImageWithFallback } from './ImageWithFallback';
-import { Button, Card, Modal, TextArea, Spinner } from '@heroui/react';
 
 interface LineAnnotatedMarkdownProps {
   content: string;
@@ -25,21 +33,28 @@ export function LineAnnotatedMarkdown({
 }: LineAnnotatedMarkdownProps) {
   const { annotations, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null);
-  const [pendingAnchor, setPendingAnchor] = useState<{ exact: string; prefix: string; suffix: string } | null>(null);
+  const [pendingAnchor, setPendingAnchor] = useState<{
+    exact: string;
+    prefix: string;
+    suffix: string;
+  } | null>(null);
   const [commentText, setCommentText] = useState('');
   const [isGlobalComment, setIsGlobalComment] = useState(false);
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
   const [isAnchoring, setIsAnchoring] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isCommentsDrawerOpen, setIsCommentsDrawerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseUp = useCallback(async (e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    if (typeof window === 'undefined') return;
+  const lineCount = useMemo(() => content.split(/\r?\n/).length, [content]);
+  const annotationLabel = annotations.length === 1 ? '1 saved comment' : `${annotations.length} saved comments`;
 
-    if (popoverRef.current?.contains(e.target as Node)) return;
+  const handleMouseUp = useCallback(async (event: React.MouseEvent) => {
+    if (event.button !== 0) return;
+    if (typeof window === 'undefined') return;
+    if (popoverRef.current?.contains(event.target as Node)) return;
 
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) {
@@ -48,16 +63,20 @@ export function LineAnnotatedMarkdown({
     }
 
     const selectedText = selection.toString();
-    if (!selectedText.trim() || !containerRef.current) return;
+    const container = containerRef.current;
+    if (!selectedText.trim() || !container) return;
 
     const range = selection.getRangeAt(0);
-    if (!range) return;
+    if (!range || !container.contains(range.commonAncestorContainer)) {
+      setPopoverPos(null);
+      return;
+    }
 
     try {
       setIsAnchoring(true);
-      const container = containerRef.current;
       const textQuote = await getTextQuote();
       const anchor = textQuote.fromRange(container, range);
+
       if (!anchor?.exact?.trim()) {
         setIsAnchoring(false);
         return;
@@ -76,8 +95,8 @@ export function LineAnnotatedMarkdown({
         suffix: anchor.suffix || '',
       });
       setIsAnchoring(false);
-    } catch (err) {
-      console.warn('anchor error:', err);
+    } catch (error) {
+      console.warn('anchor error:', error);
       setIsAnchoring(false);
     }
   }, []);
@@ -86,6 +105,11 @@ export function LineAnnotatedMarkdown({
     setPopoverPos(null);
     setCommentText('');
     setIsGlobalComment(global);
+
+    if (global) {
+      setPendingAnchor(null);
+    }
+
     setIsModalOpen(true);
   }, []);
 
@@ -94,94 +118,144 @@ export function LineAnnotatedMarkdown({
     setPendingAnchor(null);
     setCommentText('');
     setIsGlobalComment(false);
-    window.getSelection()?.removeAllRanges();
+
+    if (typeof window !== 'undefined') {
+      window.getSelection()?.removeAllRanges();
+    }
   }, []);
 
   const handleSubmit = useCallback(() => {
     if (!commentText.trim()) return;
+
     if (isGlobalComment) {
       addAnnotation(null, commentText.trim(), true);
     } else if (pendingAnchor) {
       addAnnotation(pendingAnchor, commentText.trim());
     }
+
+    if (typeof window !== 'undefined' && window.innerWidth < 1280) {
+      setIsCommentsDrawerOpen(true);
+    }
+
     closeDialog();
-  }, [pendingAnchor, commentText, addAnnotation, closeDialog, isGlobalComment]);
+  }, [addAnnotation, closeDialog, commentText, isGlobalComment, pendingAnchor]);
 
   const handleAnnotationClick = useCallback((annotation: Annotation) => {
     setActiveAnnotationId(annotation.id);
     setTimeout(() => setActiveAnnotationId(null), 2000);
 
     if (!containerRef.current) return;
+
     const mark = containerRef.current.querySelector(`mark[data-annotation-id="${annotation.id}"]`);
     if (mark) {
       mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+
+    if (typeof window !== 'undefined' && window.innerWidth < 1280) {
+      setIsCommentsDrawerOpen(true);
+    }
   }, []);
 
   useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
-      if (popoverPos && popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+    const handleMouseDown = (event: MouseEvent) => {
+      if (popoverPos && popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
         setPopoverPos(null);
       }
     };
+
     document.addEventListener('mousedown', handleMouseDown);
     return () => document.removeEventListener('mousedown', handleMouseDown);
   }, [popoverPos]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  }, [handleSubmit]);
+  const handleKeyDown = useCallback(
+    (event: ReactKeyboardEvent) => {
+      if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        handleSubmit();
+      }
+    },
+    [handleSubmit],
+  );
+
+  const sidebar = (
+    <CommentSidebar
+      annotations={annotations}
+      rawContent={content}
+      onUpdate={updateAnnotationText}
+      onRemove={removeAnnotation}
+      onAnnotationClick={handleAnnotationClick}
+      activeAnnotationId={activeAnnotationId}
+      className="h-full"
+    />
+  );
 
   return (
     <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="mb-4 flex items-center justify-end gap-2 xl:pr-[21rem]">
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Add a global comment"
-            onPress={() => openDialog(true)}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <span className="ml-1">Add Comment</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            isIconOnly
-            className={`relative ${sidebarOpen ? '' : 'bg-surface'}`}
-            onPress={() => setSidebarOpen(!sidebarOpen)}
-            aria-label={sidebarOpen ? 'Hide comments panel' : 'Show comments panel'}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-            </svg>
-            {annotations.length > 0 && (
-              <span className="absolute -top-1 -right-1 flex min-w-5 h-5 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-accent-foreground shadow-sm pointer-events-none">
+      <div className="mx-auto max-w-[1450px] space-y-5">
+        <div className="flex flex-col gap-4 rounded-[1.9rem] border border-border/60 bg-background/72 px-4 py-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.72)] backdrop-blur-sm sm:px-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
+            <span className="rounded-full border border-border/60 bg-surface/88 px-3 py-1.5 font-medium">
+              {annotationLabel}
+            </span>
+            <span className="rounded-full border border-border/60 bg-surface/88 px-3 py-1.5 font-medium">
+              {lineCount} lines rendered
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" size="sm" className="rounded-full px-4" onPress={() => openDialog(true)}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 4.75v14.5M19.25 12H4.75" />
+              </svg>
+              Add document note
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full px-4 xl:hidden"
+              onPress={() => setIsCommentsDrawerOpen(true)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 8.75h10M7 12h7m-7 3.25h4.5M5.75 4.75h12.5A1.75 1.75 0 0120 6.5v8.75A1.75 1.75 0 0118.25 17H10l-4.25 3.25V17H5.75A1.75 1.75 0 014 15.25V6.5a1.75 1.75 0 011.75-1.75z" />
+              </svg>
+              Comments
+              <span className="rounded-full bg-accent px-2 py-0.5 text-[0.7rem] font-semibold text-accent-foreground">
                 {annotations.length}
               </span>
-            )}
-          </Button>
+            </Button>
+
+            <Button
+              variant={sidebarOpen ? 'secondary' : 'ghost'}
+              size="sm"
+              className="hidden rounded-full px-4 xl:inline-flex"
+              onPress={() => setSidebarOpen((open) => !open)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.75 6.75h14.5M4.75 12h14.5M4.75 17.25h8.5" />
+              </svg>
+              {sidebarOpen ? 'Hide comments' : 'Show comments'}
+            </Button>
+          </div>
         </div>
 
-        <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
-          <Card className="min-w-0">
-            <Card.Content>
-              <article>
+        <div className={`grid items-start gap-6 ${sidebarOpen ? 'xl:grid-cols-[minmax(0,1fr)_22.5rem]' : 'xl:grid-cols-1'}`}>
+          <Card className="min-w-0 overflow-hidden rounded-[2rem] border border-border/60 bg-surface/88 shadow-[0_28px_70px_-44px_rgba(15,23,42,0.72)]">
+            <Card.Header className="flex flex-col gap-3 border-b border-border/60 px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <Card.Title className="text-base tracking-tight">Rendered document</Card.Title>
+              </div>
+            </Card.Header>
+
+            <Card.Content className="p-4 sm:p-6">
+              <article className={`w-full ${sidebarOpen ? 'mx-auto max-w-5xl' : 'max-w-none'}`}>
                 <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>
-                  <div className={`${proseClass} ${themeClass} overflow-x-auto`}>
-                    <Markdown 
-                      remarkPlugins={[remarkGfm]} 
+                  <div className={`${proseClass} markdown-article ${themeClass}`.trim()}>
+                    <Markdown
+                      remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeHighlight]}
                       components={{
-                        img: ({ node, ...props }) => (
-                          <ImageWithFallback {...props} />
-                        )
+                        img: ({ node, ...props }) => <ImageWithFallback {...props} />,
                       }}
                     >
                       {content}
@@ -193,15 +267,8 @@ export function LineAnnotatedMarkdown({
           </Card>
 
           {sidebarOpen && (
-            <div className="min-w-0 xl:self-start xl:sticky xl:top-24">
-              <CommentSidebar
-                annotations={annotations}
-                rawContent={content}
-                onUpdate={updateAnnotationText}
-                onRemove={removeAnnotation}
-                onAnnotationClick={handleAnnotationClick}
-                activeAnnotationId={activeAnnotationId}
-              />
+            <div className="hidden min-w-0 xl:sticky xl:top-24 xl:block">
+              {sidebar}
             </div>
           )}
         </div>
@@ -213,12 +280,14 @@ export function LineAnnotatedMarkdown({
           activeAnnotationId={activeAnnotationId}
         />
 
-        {isAnchoring && (
-          <div className="fixed z-50 top-4 right-4">
+        {typeof document !== 'undefined' && isAnchoring && createPortal(
+          <div className="fixed right-4 top-4 z-50 rounded-full border border-border/60 bg-background/86 p-3 shadow-lg backdrop-blur-sm">
             <Spinner size="sm" />
-          </div>
+          </div>,
+          document.body,
         )}
-        {popoverPos && pendingAnchor && (
+
+        {typeof document !== 'undefined' && popoverPos && pendingAnchor && createPortal(
           <div
             ref={popoverRef}
             className="fixed z-50"
@@ -228,75 +297,101 @@ export function LineAnnotatedMarkdown({
               transform: 'translate(-50%, -100%)',
             }}
           >
-              <Button
-              variant="primary"
+            <Button
               size="sm"
-              className="shadow-lg"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
+              className="rounded-full px-4 shadow-[0_18px_40px_-24px_color-mix(in_oklab,var(--accent)_65%,transparent)]"
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
               }}
-              onPress={() => {
-                openDialog();
-              }}
+              onPress={() => openDialog()}
             >
               + Comment
             </Button>
-          </div>
+          </div>,
+          document.body,
         )}
 
-        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
-          <Modal.Backdrop isDismissable>
-            <Modal.Container size="sm" placement="center">
-              <Modal.Dialog>
-                <Modal.Header>
-                  <Modal.Heading>
-                    {isGlobalComment ? 'Add Global Comment' : 'Add Comment'}
-                  </Modal.Heading>
-                </Modal.Header>
-                <Modal.Body>
-                  {!isGlobalComment && pendingAnchor && (
-                    <div className="bg-surface rounded-lg p-3 mb-4 font-mono text-sm max-h-32 overflow-auto">
-                      <span className="whitespace-pre-wrap">{pendingAnchor.exact}</span>
-                    </div>
-                  )}
+        {isCommentsDrawerOpen && (
+          <Drawer.Backdrop
+            isOpen={isCommentsDrawerOpen}
+            onOpenChange={setIsCommentsDrawerOpen}
+            variant="blur"
+            className="xl:hidden"
+          >
+            <Drawer.Content placement="right" className="xl:hidden">
+              <Drawer.Dialog className="h-full w-[min(100vw,24rem)] border-l border-border/60 bg-overlay/94 backdrop-blur-xl">
+                <Drawer.CloseTrigger />
+                <Drawer.Header>
+                  <Drawer.Heading>Comments</Drawer.Heading>
+                </Drawer.Header>
+                <Drawer.Body className="px-4 pb-4 pt-0">{sidebar}</Drawer.Body>
+              </Drawer.Dialog>
+            </Drawer.Content>
+          </Drawer.Backdrop>
+        )}
 
-                  {isGlobalComment && (
-                    <div className="bg-surface rounded-lg p-3 mb-4 text-sm">
-                      <span className="text-muted">This comment applies to the entire document</span>
-                    </div>
-                  )}
+        {isModalOpen && (
+          <Modal
+            isOpen={isModalOpen}
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen) {
+                closeDialog();
+              }
+            }}
+          >
+            <Modal.Backdrop isDismissable>
+              <Modal.Container size="sm" placement="center">
+                <Modal.Dialog className="rounded-[1.8rem] border border-border/60 bg-overlay/95 backdrop-blur-xl">
+                  <Modal.Header>
+                    <Modal.Heading>
+                      {isGlobalComment ? 'Add document note' : 'Add inline comment'}
+                    </Modal.Heading>
+                  </Modal.Header>
 
-                  <TextArea
-                    placeholder="Enter your comment..."
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    autoFocus
-                    rows={4}
-                    fullWidth
-                    onKeyDown={handleKeyDown}
-                  />
+                  <Modal.Body>
+                    {!isGlobalComment && pendingAnchor && (
+                      <div className="mb-4 rounded-[1.25rem] border border-border/60 bg-background/72 p-3">
+                        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted">
+                          Selected text
+                        </p>
+                        <span className="mt-2 block whitespace-pre-wrap text-sm leading-6 text-foreground">
+                          “{pendingAnchor.exact}”
+                        </span>
+                      </div>
+                    )}
 
-                  <p className="text-xs text-muted mt-2">
-                    <kbd className="px-1.5 py-0.5 bg-surface rounded text-xs">Cmd+Enter</kbd> to submit · <kbd className="px-1.5 py-0.5 bg-surface rounded text-xs">Esc</kbd> to cancel
-                  </p>
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button slot="close" variant="ghost">
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="primary"
-                    isDisabled={!commentText.trim()}
-                    onPress={handleSubmit}
-                  >
-                    Add Comment
-                  </Button>
-                </Modal.Footer>
-              </Modal.Dialog>
-            </Modal.Container>
-          </Modal.Backdrop>
-        </Modal>
+                    {isGlobalComment && (
+                      <div className="mb-4 rounded-[1.25rem] border border-border/60 bg-background/72 p-3 text-sm leading-6 text-muted">
+                        Document note
+                      </div>
+                    )}
+
+                    <TextArea
+                      placeholder="Capture the review note, edit request, or open question..."
+                      value={commentText}
+                      onChange={(event) => setCommentText(event.target.value)}
+                      autoFocus
+                      rows={5}
+                      fullWidth
+                      onKeyDown={handleKeyDown}
+                    />
+
+                  </Modal.Body>
+
+                  <Modal.Footer>
+                    <Button slot="close" variant="ghost" className="rounded-full px-4" onPress={closeDialog}>
+                      Cancel
+                    </Button>
+                    <Button className="rounded-full px-4" isDisabled={!commentText.trim()} onPress={handleSubmit}>
+                      Add comment
+                    </Button>
+                  </Modal.Footer>
+                </Modal.Dialog>
+              </Modal.Container>
+            </Modal.Backdrop>
+          </Modal>
+        )}
       </div>
     </div>
   );
