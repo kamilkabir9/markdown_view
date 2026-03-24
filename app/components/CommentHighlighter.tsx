@@ -1,6 +1,8 @@
 import { useEffect, type RefObject } from 'react';
 import type { Annotation } from '~/contexts/AnnotationStore';
 
+const BLOCK_SELECTOR = 'p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6';
+
 interface CommentHighlighterProps {
   containerRef: RefObject<HTMLDivElement | null>;
   annotations: Annotation[];
@@ -61,7 +63,7 @@ function wrapRangeWithMarks(range: Range, annotationId: string, isActive: boolea
     mark.setAttribute('data-annotation-id', annotationId);
     mark.className = [
       'annotation-mark',
-      'box-decoration-clone bg-accent/14 rounded-md px-1 py-0.5 cursor-pointer hover:bg-accent/22 transition-colors shadow-[inset_0_-1px_0_var(--color-accent)]',
+      'box-decoration-clone cursor-pointer transition-colors',
       isActive ? 'annotation-mark--active' : '',
     ].filter(Boolean).join(' ');
 
@@ -72,6 +74,16 @@ function wrapRangeWithMarks(range: Range, annotationId: string, isActive: boolea
   });
 
   return marks;
+}
+
+function findAnnotatedBlock(mark: HTMLElement, container: HTMLElement): HTMLElement | null {
+  const block = mark.closest(BLOCK_SELECTOR);
+  if (block instanceof HTMLElement && container.contains(block)) {
+    return block;
+  }
+
+  const fallback = mark.parentElement;
+  return fallback && container.contains(fallback) ? fallback : null;
 }
 
 export function CommentHighlighter({
@@ -89,6 +101,12 @@ export function CommentHighlighter({
     const abortController = new AbortController();
 
     function removeAllMarks() {
+      const annotatedBlocks = container!.querySelectorAll('[data-annotation-block]');
+      annotatedBlocks.forEach((block) => {
+        block.removeAttribute('data-annotation-block');
+        block.removeAttribute('data-annotation-active');
+      });
+
       const existingMarks = container!.querySelectorAll('mark[data-annotation-id]');
       existingMarks.forEach((mark) => {
         try {
@@ -132,6 +150,14 @@ export function CommentHighlighter({
                   annotation.id === activeAnnotationId,
                 );
                 marks.forEach((mark) => {
+                  const block = findAnnotatedBlock(mark, container);
+                  if (block) {
+                    block.setAttribute('data-annotation-block', 'true');
+                    if (annotation.id === activeAnnotationId) {
+                      block.setAttribute('data-annotation-active', 'true');
+                    }
+                  }
+
                   const clickHandler = () => onAnnotationClick?.(annotation);
                   mark.addEventListener('click', clickHandler);
                   clickHandlers.push({ mark, handler: clickHandler });
