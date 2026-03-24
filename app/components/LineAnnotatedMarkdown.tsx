@@ -7,6 +7,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router';
 import Markdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
@@ -15,11 +16,13 @@ import { useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore'
 import { CommentHighlighter } from './CommentHighlighter';
 import { CommentSidebar } from './CommentSidebar';
 import { ImageWithFallback } from './ImageWithFallback';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 interface LineAnnotatedMarkdownProps {
   content: string;
   proseClass: string;
   themeClass: string;
+  filePath: string;
 }
 
 function getTextQuote() {
@@ -30,7 +33,9 @@ export function LineAnnotatedMarkdown({
   content,
   proseClass,
   themeClass,
+  filePath,
 }: LineAnnotatedMarkdownProps) {
+  const navigate = useNavigate();
   const { annotations, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null);
   const [pendingAnchor, setPendingAnchor] = useState<{
@@ -50,6 +55,10 @@ export function LineAnnotatedMarkdown({
 
   const lineCount = useMemo(() => content.split(/\r?\n/).length, [content]);
   const annotationLabel = annotations.length === 1 ? '1 saved comment' : `${annotations.length} saved comments`;
+  const readTime = useMemo(() => {
+    const words = content.trim().split(/\s+/).filter(Boolean).length;
+    return `${Math.max(1, Math.round(words / 220))} min read`;
+  }, [content]);
 
   const handleMouseUp = useCallback(async (event: React.MouseEvent) => {
     if (event.button !== 0) return;
@@ -191,19 +200,27 @@ export function LineAnnotatedMarkdown({
 
   return (
     <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
-      <div className="mx-auto max-w-[1450px] space-y-5">
-        <div className="flex flex-col gap-4 rounded-[1.9rem] border border-border/60 bg-background/72 px-4 py-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.72)] backdrop-blur-sm sm:px-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
-            <span className="rounded-full border border-border/60 bg-surface/88 px-3 py-1.5 font-medium">
+      <div className="mx-auto max-w-[1500px] space-y-4">
+        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-border/60 bg-background/72 px-3 py-3 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.72)] backdrop-blur-sm sm:px-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted sm:text-sm">
+            <span className="rounded-full border border-border/60 bg-surface/88 px-2.5 py-1 font-medium">
+              {filePath}
+            </span>
+            <span className="rounded-full border border-border/60 bg-surface/88 px-2.5 py-1 font-medium">
               {annotationLabel}
             </span>
-            <span className="rounded-full border border-border/60 bg-surface/88 px-3 py-1.5 font-medium">
+            <span className="rounded-full border border-border/60 bg-surface/88 px-2.5 py-1 font-medium">
               {lineCount} lines rendered
+            </span>
+            <span className="rounded-full border border-border/60 bg-surface/88 px-2.5 py-1 font-medium">
+              {readTime}
             </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="secondary" size="sm" className="rounded-full px-4" onPress={() => openDialog(true)}>
+            <ThemeSwitcher />
+
+            <Button variant="secondary" size="sm" className="rounded-full px-3.5" onPress={() => openDialog(true)}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 4.75v14.5M19.25 12H4.75" />
               </svg>
@@ -213,7 +230,7 @@ export function LineAnnotatedMarkdown({
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full px-4 xl:hidden"
+              className="rounded-full px-3.5 xl:hidden"
               onPress={() => setIsCommentsDrawerOpen(true)}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -226,9 +243,21 @@ export function LineAnnotatedMarkdown({
             </Button>
 
             <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full px-3.5"
+              onPress={() => navigate('/')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+              Back to files
+            </Button>
+
+            <Button
               variant={sidebarOpen ? 'secondary' : 'ghost'}
               size="sm"
-              className="hidden rounded-full px-4 xl:inline-flex"
+              className="hidden rounded-full px-3.5 xl:inline-flex"
               onPress={() => setSidebarOpen((open) => !open)}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -241,13 +270,7 @@ export function LineAnnotatedMarkdown({
 
         <div className={`grid items-start gap-6 ${sidebarOpen ? 'xl:grid-cols-[minmax(0,1fr)_22.5rem]' : 'xl:grid-cols-1'}`}>
           <Card className="min-w-0 overflow-hidden rounded-[2rem] border border-border/60 bg-surface/88 shadow-[0_28px_70px_-44px_rgba(15,23,42,0.72)]">
-            <Card.Header className="flex flex-col gap-3 border-b border-border/60 px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <Card.Title className="text-base tracking-tight">Rendered document</Card.Title>
-              </div>
-            </Card.Header>
-
-            <Card.Content className="p-4 sm:p-6">
+            <Card.Content className="p-3 sm:p-5">
               <article className={`w-full ${sidebarOpen ? 'mx-auto max-w-5xl' : 'max-w-none'}`}>
                 <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>
                   <div className={`${proseClass} markdown-article ${themeClass}`.trim()}>

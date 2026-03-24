@@ -3,7 +3,6 @@ import { useLoaderData, useNavigate, useRouteError, isRouteErrorResponse } from 
 import { Alert, Breadcrumbs, Button, Surface } from '@heroui/react';
 import { LineAnnotatedMarkdown } from '~/components/LineAnnotatedMarkdown';
 import { AnnotationErrorBoundary } from '~/components/AnnotationErrorBoundary';
-import { ThemeSwitcher } from '~/components/ThemeSwitcher';
 import { AnnotationStoreProvider } from '~/contexts/AnnotationStore';
 import { useTheme } from '~/contexts/ThemeContext';
 import { getMarkdownContent } from '~/utils/files.server';
@@ -38,58 +37,28 @@ function estimateReadTime(content: string): string {
 }
 
 export default function MarkdownPage() {
-  const { content, path, sourcePath, size } = useLoaderData<typeof loader>();
-  const navigate = useNavigate();
+  const { content, path, sourcePath } = useLoaderData<typeof loader>();
   const { theme } = useTheme();
   const title = sourcePath.split('/').pop()?.replace(/\.md$/i, '') || 'Untitled';
   const themeClass = `markdown-theme-${theme}`;
 
   return (
     <AnnotationStoreProvider filePath={path}>
-      <div className="space-y-6">
-        <nav aria-label="Breadcrumb">
-          <Breadcrumbs className="gap-2 text-sm">
-            <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
-            <Breadcrumbs.Item href="/">Markdown Files</Breadcrumbs.Item>
-            <Breadcrumbs.Item>{title}</Breadcrumbs.Item>
-          </Breadcrumbs>
-        </nav>
-
-        <Surface variant="transparent" className="app-shell-panel overflow-hidden rounded-[2rem] p-6 sm:p-8">
-          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-            <div className="max-w-3xl">
-              <h1 className="font-[var(--font-display)] text-4xl tracking-tight text-foreground sm:text-5xl">
-                {title}
-              </h1>
-
-              <p className="mt-4 text-base leading-7 text-muted">
-                Rendered from `{sourcePath}`.
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-2 text-sm text-muted">
-                <span className="rounded-full border border-border/60 bg-background/80 px-3 py-1.5">
-                  {formatFileSize(size)}
-                </span>
-                <span className="rounded-full border border-border/60 bg-background/80 px-3 py-1.5">
-                  {estimateReadTime(content)}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 xl:justify-end">
-              <ThemeSwitcher />
-              <Button variant="secondary" className="rounded-full px-4" onPress={() => navigate('/')}>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-                Back to files
-              </Button>
-            </div>
+      <div className="space-y-4">
+        <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
+          <div className="mx-auto max-w-[1500px]">
+            <nav aria-label="Breadcrumb" className="px-1 pb-1">
+              <Breadcrumbs className="gap-2 text-sm">
+                <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
+                <Breadcrumbs.Item href="/">Markdown Files</Breadcrumbs.Item>
+                <Breadcrumbs.Item>{title}</Breadcrumbs.Item>
+              </Breadcrumbs>
+            </nav>
           </div>
-        </Surface>
+        </div>
 
         <AnnotationErrorBoundary>
-          <LineAnnotatedMarkdown content={content} proseClass="" themeClass={themeClass} />
+          <LineAnnotatedMarkdown content={content} proseClass="" themeClass={themeClass} filePath={sourcePath} />
         </AnnotationErrorBoundary>
       </div>
     </AnnotationStoreProvider>

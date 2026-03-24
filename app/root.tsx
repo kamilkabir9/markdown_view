@@ -83,28 +83,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground">
             Skip to content
           </a>
-          <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1320px] flex-col px-4 pb-8 pt-5 sm:px-6 lg:px-8">
-            <header className="mb-8">
-              <div className="app-shell-panel overflow-hidden rounded-[2rem] px-5 py-4 sm:px-6">
+          <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1500px] flex-col px-3 pb-8 pt-4 sm:px-5 lg:px-6">
+            <header className="mb-5">
+              <div className="app-shell-panel overflow-hidden rounded-[1.6rem] px-4 py-3 sm:px-5">
                 <div className="flex items-center justify-between gap-4">
-                  <Link to="/" className="group flex min-w-0 items-center gap-4">
-                    <div className="flex h-11 w-11 flex-none items-center justify-center rounded-[1rem] bg-[linear-gradient(135deg,color-mix(in_oklab,var(--accent)_82%,white),color-mix(in_oklab,var(--warning)_42%,var(--accent)))] text-accent-foreground shadow-[0_18px_34px_-20px_color-mix(in_oklab,var(--accent)_75%,transparent)] transition-transform duration-300 group-hover:-translate-y-0.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <Link to="/" className="group flex min-w-0 items-center gap-3">
+                    <div className="flex h-9 w-9 flex-none items-center justify-center rounded-[0.9rem] bg-[linear-gradient(135deg,color-mix(in_oklab,var(--accent)_82%,white),color-mix(in_oklab,var(--warning)_42%,var(--accent)))] text-accent-foreground shadow-[0_18px_34px_-20px_color-mix(in_oklab,var(--accent)_75%,transparent)] transition-transform duration-300 group-hover:-translate-y-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 4.75h6.586a2 2 0 011.414.586l2.664 2.664A2 2 0 0118.25 9.414V18A2.25 2.25 0 0116 20.25H8A2.25 2.25 0 015.75 18V7A2.25 2.25 0 018 4.75zm1.75 4.5h6.5m-6.5 4h6.5m-6.5 4h4.25" />
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+                      <p className="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg">
                         Markdown Viewer
                       </p>
                     </div>
                   </Link>
 
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted">
-                    <span className="rounded-full border border-border/70 bg-background/80 px-3 py-1.5">
+                  <div className="flex flex-wrap items-center gap-2 text-[0.72rem] font-medium text-muted">
+                    <span className="rounded-full border border-border/70 bg-background/80 px-2.5 py-1">
                       {isHomePage ? 'Library' : 'Reader'}
                     </span>
-                    <span className="rounded-full border border-border/70 bg-background/80 px-3 py-1.5">
+                    <span className="rounded-full border border-border/70 bg-background/80 px-2.5 py-1">
                       v{APP_VERSION}
                     </span>
                   </div>
