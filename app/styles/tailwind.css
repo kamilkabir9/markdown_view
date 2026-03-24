@@ -69,6 +69,18 @@ body::after {
   color: var(--foreground);
 }
 
+[data-theme="dark"] ::selection {
+  background: color-mix(in oklab, var(--accent) 32%, transparent);
+  color: color-mix(in oklab, white 94%, var(--foreground));
+}
+
+[data-theme="dark"] .markdown-article :where(code)::selection,
+[data-theme="dark"] .markdown-article :where(strong)::selection,
+[data-theme="dark"] .markdown-article :where(a)::selection {
+  background: color-mix(in oklab, var(--accent) 24%, white 8%);
+  color: white;
+}
+
 .app-shell-panel {
   border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
   background:
@@ -287,6 +299,25 @@ body::after {
   background-size: 220% 100%;
   animation: annotation-shimmer 2.2s linear infinite;
   will-change: background-position;
+}
+
+[data-theme="dark"] .annotation-mark {
+  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--color-accent) 22%, transparent);
+}
+
+[data-theme="dark"] .annotation-mark--active {
+  background-color: color-mix(in oklab, var(--color-accent) 12%, transparent);
+  background-image: linear-gradient(
+    100deg,
+    color-mix(in oklab, var(--color-accent) 6%, transparent) 0%,
+    color-mix(in oklab, var(--color-accent) 12%, transparent) 38%,
+    color-mix(in oklab, white 28%, var(--color-accent)) 50%,
+    color-mix(in oklab, var(--color-accent) 12%, transparent) 62%,
+    color-mix(in oklab, var(--color-accent) 6%, transparent) 100%
+  );
+  box-shadow:
+    inset 0 -1px 0 color-mix(in oklab, var(--color-accent) 34%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--color-accent) 14%, transparent);
 }
 
 @media (max-width: 640px) {
