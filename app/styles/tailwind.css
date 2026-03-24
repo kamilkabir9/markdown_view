@@ -302,16 +302,16 @@ body::after {
 [data-theme="dark"] .annotation-mark {
   color: inherit;
   background: color-mix(in oklab, white 4%, transparent);
-  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--color-warning) 26%, transparent);
+  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--color-warning) 18%, transparent);
 }
 
 [data-theme="dark"] .annotation-mark--active {
-  background-color: color-mix(in oklab, var(--color-warning) 9%, transparent);
-  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--color-warning) 34%, transparent);
+  background-color: color-mix(in oklab, var(--color-warning) 6%, transparent);
+  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--color-warning) 24%, transparent);
 }
 
 [data-theme="dark"] .annotation-mark:hover {
-  background: color-mix(in oklab, var(--color-warning) 10%, transparent);
+  background: color-mix(in oklab, var(--color-warning) 7%, transparent);
 }
 
 [data-theme="dark"] .markdown-article :where(code).annotation-mark,
@@ -343,12 +343,12 @@ body::after {
 }
 
 [data-theme="dark"] .markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-block]::before {
-  background: color-mix(in oklab, var(--color-warning) 68%, transparent);
+  background: color-mix(in oklab, var(--color-warning) 44%, transparent);
 }
 
 [data-theme="dark"] .markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-active]::before {
-  background: color-mix(in oklab, var(--color-warning) 92%, white 10%);
-  box-shadow: 0 0 0.8rem color-mix(in oklab, var(--color-warning) 24%, transparent);
+  background: color-mix(in oklab, var(--color-warning) 68%, white 6%);
+  box-shadow: 0 0 0.55rem color-mix(in oklab, var(--color-warning) 14%, transparent);
 }
 
 @media (max-width: 640px) {
