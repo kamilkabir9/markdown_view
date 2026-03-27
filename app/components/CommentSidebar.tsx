@@ -225,15 +225,13 @@ export function CommentSidebar({
   );
 
   return (
-    <Card className={`h-full rounded-[1.8rem] border border-border/60 bg-surface/88 shadow-[0_26px_70px_-46px_rgba(15,23,42,0.7)] ${className}`.trim()}>
+    <Card className={`h-full rounded-[1.1rem] border border-border/60 bg-surface shadow-none ${className}`.trim()}>
       <Card.Header className="gap-3 border-b border-border/60 px-4 py-4">
         <div className="flex w-full items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
               <Card.Title className="text-base tracking-tight">Comments</Card.Title>
-              <span className="rounded-full border border-border/60 bg-background/80 px-2.5 py-1 text-xs font-medium text-muted">
-                {counts.all}
-              </span>
+              <span className="text-sm text-muted">{counts.all}</span>
             </div>
           </div>
 
@@ -241,7 +239,7 @@ export function CommentSidebar({
             variant="ghost"
             size="sm"
             isIconOnly
-            className="rounded-full"
+            className="rounded-[0.8rem]"
             aria-label="Copy all comments"
             isDisabled={!annotations.length}
             onPress={handleCopyAll}
@@ -270,23 +268,21 @@ export function CommentSidebar({
               key={item.key}
               size="sm"
               variant={filter === item.key ? 'secondary' : 'ghost'}
-              className="justify-between rounded-full px-3"
+              className="justify-between rounded-[0.8rem] px-3"
               onPress={() => setFilter(item.key)}
             >
               <span>{item.label}</span>
-              <span className="rounded-full bg-background/80 px-2 py-0.5 text-[0.7rem] text-muted">
-                {item.count}
-              </span>
+              <span className="text-xs text-muted">{item.count}</span>
             </Button>
           ))}
         </div>
 
         {counts.all === 0 ? (
-          <div className="rounded-[1.45rem] border border-dashed border-border/70 bg-background/72 p-5 text-sm">
+          <div className="rounded-[1rem] border border-dashed border-border/70 bg-background/72 p-5 text-sm">
             <p className="font-semibold tracking-tight text-foreground">No comments yet</p>
           </div>
         ) : filteredAnnotations.length === 0 ? (
-          <div className="rounded-[1.45rem] border border-dashed border-border/70 bg-background/72 p-5 text-sm">
+          <div className="rounded-[1rem] border border-dashed border-border/70 bg-background/72 p-5 text-sm">
             <p className="font-semibold tracking-tight text-foreground">No comments in this view</p>
           </div>
         ) : (
@@ -307,16 +303,16 @@ export function CommentSidebar({
                   >
                     <Card
                       variant={isActive ? 'secondary' : 'default'}
-                      className={`cursor-pointer rounded-[1.45rem] border transition-all duration-300 ${
+                      className={`cursor-pointer rounded-[1rem] border transition-all duration-200 ${
                         isActive
-                          ? 'border-accent/50 shadow-[0_20px_55px_-34px_color-mix(in_oklab,var(--accent)_55%,transparent)] ring-1 ring-accent/40'
-                          : 'border-border/60 bg-background/76 shadow-none hover:border-accent/25'
+                          ? 'border-foreground/12 bg-surface'
+                          : 'border-border/60 bg-background shadow-none hover:border-foreground/12'
                       }`}
                     >
                       <Card.Content className="space-y-4 p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3">
-                            <div className={`flex h-10 w-10 items-center justify-center rounded-[1rem] text-sm font-semibold ${isActive ? 'bg-accent text-accent-foreground' : 'bg-[linear-gradient(135deg,color-mix(in_oklab,var(--accent)_16%,white),color-mix(in_oklab,var(--warning)_18%,white))] text-accent'}`}>
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-[0.85rem] border text-sm font-semibold ${isActive ? 'border-foreground/12 bg-background text-foreground' : 'border-border/70 bg-surface text-muted'}`}>
                               {String(index + 1).padStart(2, '0')}
                             </div>
                             <div>
@@ -324,9 +320,7 @@ export function CommentSidebar({
                                 <p className="text-sm font-semibold tracking-tight text-foreground">
                                   {annotation.isGlobal ? 'Document note' : 'Inline note'}
                                 </p>
-                                <span className="rounded-full border border-border/60 bg-surface/88 px-2 py-0.5 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-muted">
-                                  {annotation.isGlobal ? 'Global' : 'Linked'}
-                                </span>
+                                <span className="text-xs text-muted">{annotation.isGlobal ? 'Document' : 'Linked'}</span>
                               </div>
                               <p className="mt-1 text-xs font-medium text-muted">
                                 {formatCreatedAt(annotation.createdAt)}
@@ -339,7 +333,7 @@ export function CommentSidebar({
                               variant="ghost"
                               size="sm"
                               isIconOnly
-                              className="rounded-full"
+                              className="rounded-[0.8rem]"
                               aria-label="Edit comment"
                               onPress={() => startEditing(annotation)}
                             >
@@ -351,7 +345,7 @@ export function CommentSidebar({
                               variant="ghost"
                               size="sm"
                               isIconOnly
-                              className="rounded-full"
+                              className="rounded-[0.8rem]"
                               aria-label="Copy comment"
                               onPress={() => handleCopyOne(annotation)}
                             >
@@ -369,7 +363,7 @@ export function CommentSidebar({
                               variant="ghost"
                               size="sm"
                               isIconOnly
-                              className="rounded-full"
+                              className="rounded-[0.8rem]"
                               aria-label="Remove comment"
                               onPress={() => onRemove(annotation.id)}
                             >
@@ -381,12 +375,12 @@ export function CommentSidebar({
                         </div>
 
                         {annotation.isGlobal ? (
-                          <div className="rounded-[1.15rem] border border-border/60 bg-background/72 px-3 py-2.5 text-sm text-muted">
+                          <div className="rounded-[0.9rem] border border-border/60 bg-surface px-3 py-2.5 text-sm text-muted">
                             Document note
                           </div>
                         ) : (
-                          <div className="rounded-[1.15rem] border border-border/60 bg-background/72 px-3 py-3">
-                            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted">
+                          <div className="rounded-[0.9rem] border border-border/60 bg-surface px-3 py-3">
+                            <p className="text-xs text-muted">
                               Selected text
                             </p>
                             <p className="mt-2 line-clamp-3 text-sm leading-6 text-foreground/90">
@@ -401,16 +395,16 @@ export function CommentSidebar({
                               value={editingText}
                               onChange={(event) => setEditingText(event.target.value)}
                               onKeyDown={handleEditKeyDown}
-                              className="min-h-[7rem] w-full rounded-[1rem] border border-border/70 bg-background px-3 py-2.5 text-sm leading-6 text-foreground outline-none transition focus:border-accent/45 focus:ring-2 focus:ring-accent/20"
+                              className="min-h-[7rem] w-full rounded-[0.9rem] border border-border/70 bg-background px-3 py-2.5 text-sm leading-6 text-foreground outline-none transition focus:border-foreground/20 focus:ring-2 focus:ring-foreground/8"
                               rows={4}
                               autoFocus
                             />
                             <div className="flex flex-wrap items-center justify-between gap-3">
                               <div className="flex items-center gap-2">
-                                <Button size="sm" variant="ghost" className="rounded-full px-3" onPress={cancelEditing}>
+                                <Button size="sm" variant="ghost" className="rounded-[0.8rem] px-3" onPress={cancelEditing}>
                                   Cancel
                                 </Button>
-                                <Button size="sm" className="rounded-full px-3" isDisabled={!editingText.trim()} onPress={saveEditing}>
+                                <Button size="sm" className="rounded-[0.8rem] px-3" isDisabled={!editingText.trim()} onPress={saveEditing}>
                                   Save
                                 </Button>
                               </div>

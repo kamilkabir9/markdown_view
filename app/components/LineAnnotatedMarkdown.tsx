@@ -59,6 +59,16 @@ export function LineAnnotatedMarkdown({
     const words = content.trim().split(/\s+/).filter(Boolean).length;
     return `${Math.max(1, Math.round(words / 220))} min read`;
   }, [content]);
+  const documentMeta = useMemo(() => {
+    const normalizedPath = filePath.replace(/\\/g, '/');
+    const parts = normalizedPath.split('/').filter(Boolean);
+    const filename = parts[parts.length - 1] || filePath;
+
+    return {
+      title: filename.replace(/\.md$/i, ''),
+      directory: parts.length > 1 ? parts.slice(0, -1).join(' / ') : 'Workspace root',
+    };
+  }, [filePath]);
 
   const handleMouseUp = useCallback(async (event: React.MouseEvent) => {
     if (event.button !== 0) return;
@@ -201,75 +211,86 @@ export function LineAnnotatedMarkdown({
   return (
     <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
       <div className="mx-auto max-w-[1500px] space-y-4">
-        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-border/60 bg-background/72 px-3 py-3 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.72)] backdrop-blur-sm sm:px-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted sm:text-sm">
-            <span className="rounded-full border border-border/60 bg-surface/88 px-2.5 py-1 font-medium">
-              {filePath}
-            </span>
-            <span className="rounded-full border border-border/60 bg-surface/88 px-2.5 py-1 font-medium">
-              {annotationLabel}
-            </span>
-            <span className="rounded-full border border-border/60 bg-surface/88 px-2.5 py-1 font-medium">
-              {lineCount} lines rendered
-            </span>
-            <span className="rounded-full border border-border/60 bg-surface/88 px-2.5 py-1 font-medium">
-              {readTime}
-            </span>
-          </div>
+        <div className="rounded-[1.1rem] border border-border/60 bg-surface px-4 py-4 sm:px-5">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0 space-y-3">
+              <div className="space-y-1.5">
+                <p className="truncate text-sm text-muted">{documentMeta.directory}</p>
+                <h1 className="break-words font-[var(--font-display)] text-[clamp(1.7rem,3vw,2.35rem)] leading-tight tracking-tight text-foreground">
+                  {documentMeta.title}
+                </h1>
+              </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <ThemeSwitcher />
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+                <span>{annotationLabel}</span>
+                <span aria-hidden="true">/</span>
+                <span>{lineCount} lines rendered</span>
+                <span aria-hidden="true">/</span>
+                <span>{readTime}</span>
+                <span aria-hidden="true">/</span>
+                <span className="truncate">{filePath}</span>
+              </div>
+            </div>
 
-            <Button variant="secondary" size="sm" className="rounded-full px-3.5" onPress={() => openDialog(true)}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 4.75v14.5M19.25 12H4.75" />
-              </svg>
-              Add document note
-            </Button>
+            <div className="flex flex-col gap-2 lg:min-w-[18rem] lg:items-end">
+              <div className="w-full lg:w-auto">
+                <ThemeSwitcher />
+              </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full px-3.5 xl:hidden"
-              onPress={() => setIsCommentsDrawerOpen(true)}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 8.75h10M7 12h7m-7 3.25h4.5M5.75 4.75h12.5A1.75 1.75 0 0120 6.5v8.75A1.75 1.75 0 0118.25 17H10l-4.25 3.25V17H5.75A1.75 1.75 0 014 15.25V6.5a1.75 1.75 0 011.75-1.75z" />
-              </svg>
-              Comments
-              <span className="rounded-full bg-accent px-2 py-0.5 text-[0.7rem] font-semibold text-accent-foreground">
-                {annotations.length}
-              </span>
-            </Button>
+              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-[0.8rem] px-3.5"
+                  onPress={() => navigate('/')}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                  <span className="hidden sm:inline">Back to files</span>
+                  <span className="sm:hidden">Back</span>
+                </Button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full px-3.5"
-              onPress={() => navigate('/')}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-              Back to files
-            </Button>
+                <Button variant="secondary" size="sm" className="rounded-[0.8rem] px-3.5" onPress={() => openDialog(true)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 4.75v14.5M19.25 12H4.75" />
+                  </svg>
+                  <span className="hidden sm:inline">Add note</span>
+                  <span className="sm:hidden">Note</span>
+                </Button>
 
-            <Button
-              variant={sidebarOpen ? 'secondary' : 'ghost'}
-              size="sm"
-              className="hidden rounded-full px-3.5 xl:inline-flex"
-              onPress={() => setSidebarOpen((open) => !open)}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.75 6.75h14.5M4.75 12h14.5M4.75 17.25h8.5" />
-              </svg>
-              {sidebarOpen ? 'Hide comments' : 'Show comments'}
-            </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-[0.8rem] px-3.5 xl:hidden"
+                  onPress={() => setIsCommentsDrawerOpen(true)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 8.75h10M7 12h7m-7 3.25h4.5M5.75 4.75h12.5A1.75 1.75 0 0120 6.5v8.75A1.75 1.75 0 0118.25 17H10l-4.25 3.25V17H5.75A1.75 1.75 0 014 15.25V6.5a1.75 1.75 0 011.75-1.75z" />
+                  </svg>
+                  <span className="hidden sm:inline">Comments</span>
+                  <span className="sm:hidden">Notes</span>
+                  <span className="text-sm text-muted">{annotations.length}</span>
+                </Button>
+
+                <Button
+                  variant={sidebarOpen ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className="hidden rounded-[0.8rem] px-3.5 xl:inline-flex"
+                  onPress={() => setSidebarOpen((open) => !open)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.75 6.75h14.5M4.75 12h14.5M4.75 17.25h8.5" />
+                  </svg>
+                  {sidebarOpen ? 'Hide comments' : 'Show comments'}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className={`grid items-start gap-6 ${sidebarOpen ? 'xl:grid-cols-[minmax(0,1fr)_22.5rem]' : 'xl:grid-cols-1'}`}>
-          <Card className="min-w-0 overflow-hidden rounded-[2rem] border border-border/60 bg-surface/88 shadow-[0_28px_70px_-44px_rgba(15,23,42,0.72)]">
+          <Card className="min-w-0 overflow-hidden rounded-[1.15rem] border border-border/60 bg-surface shadow-none">
             <Card.Content className="p-3 sm:p-5">
               <article className={`w-full ${sidebarOpen ? 'mx-auto max-w-5xl' : 'max-w-none'}`}>
                 <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>
@@ -304,7 +325,7 @@ export function LineAnnotatedMarkdown({
         />
 
         {typeof document !== 'undefined' && isAnchoring && createPortal(
-          <div className="fixed right-4 top-4 z-50 rounded-full border border-border/60 bg-background/86 p-3 shadow-lg backdrop-blur-sm">
+          <div className="fixed right-4 top-4 z-50 rounded-[0.85rem] border border-border/60 bg-surface p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.35)]">
             <Spinner size="sm" />
           </div>,
           document.body,
@@ -322,7 +343,7 @@ export function LineAnnotatedMarkdown({
           >
             <Button
               size="sm"
-              className="rounded-full px-4 shadow-[0_18px_40px_-24px_color-mix(in_oklab,var(--accent)_65%,transparent)]"
+              className="rounded-[0.8rem] px-4 shadow-[0_8px_18px_-16px_rgba(15,23,42,0.28)]"
               onMouseDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -339,11 +360,11 @@ export function LineAnnotatedMarkdown({
           <Drawer.Backdrop
             isOpen={isCommentsDrawerOpen}
             onOpenChange={setIsCommentsDrawerOpen}
-            variant="blur"
+            variant="transparent"
             className="xl:hidden"
           >
             <Drawer.Content placement="right" className="xl:hidden">
-              <Drawer.Dialog className="h-full w-[min(100vw,24rem)] border-l border-border/60 bg-overlay/94 backdrop-blur-xl">
+              <Drawer.Dialog className="h-full w-[min(100vw,24rem)] border-l border-border/60 bg-background">
                 <Drawer.CloseTrigger />
                 <Drawer.Header>
                   <Drawer.Heading>Comments</Drawer.Heading>
@@ -365,7 +386,7 @@ export function LineAnnotatedMarkdown({
           >
             <Modal.Backdrop isDismissable>
               <Modal.Container size="sm" placement="center">
-                <Modal.Dialog className="rounded-[1.8rem] border border-border/60 bg-overlay/95 backdrop-blur-xl">
+                <Modal.Dialog className="rounded-[1.1rem] border border-border/60 bg-background shadow-[0_20px_40px_-34px_rgba(15,23,42,0.24)]">
                   <Modal.Header>
                     <Modal.Heading>
                       {isGlobalComment ? 'Add document note' : 'Add inline comment'}
@@ -374,8 +395,8 @@ export function LineAnnotatedMarkdown({
 
                   <Modal.Body>
                     {!isGlobalComment && pendingAnchor && (
-                      <div className="mb-4 rounded-[1.25rem] border border-border/60 bg-background/72 p-3">
-                        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted">
+                      <div className="mb-4 rounded-[0.9rem] border border-border/60 bg-surface p-3">
+                        <p className="text-xs text-muted">
                           Selected text
                         </p>
                         <span className="mt-2 block whitespace-pre-wrap text-sm leading-6 text-foreground">
@@ -385,7 +406,7 @@ export function LineAnnotatedMarkdown({
                     )}
 
                     {isGlobalComment && (
-                      <div className="mb-4 rounded-[1.25rem] border border-border/60 bg-background/72 p-3 text-sm leading-6 text-muted">
+                      <div className="mb-4 rounded-[0.9rem] border border-border/60 bg-surface p-3 text-sm leading-6 text-muted">
                         Document note
                       </div>
                     )}
@@ -403,10 +424,10 @@ export function LineAnnotatedMarkdown({
                   </Modal.Body>
 
                   <Modal.Footer>
-                    <Button slot="close" variant="ghost" className="rounded-full px-4" onPress={closeDialog}>
+                    <Button slot="close" variant="ghost" className="rounded-[0.8rem] px-4" onPress={closeDialog}>
                       Cancel
                     </Button>
-                    <Button className="rounded-full px-4" isDisabled={!commentText.trim()} onPress={handleSubmit}>
+                    <Button className="rounded-[0.8rem] px-4" isDisabled={!commentText.trim()} onPress={handleSubmit}>
                       Add comment
                     </Button>
                   </Modal.Footer>

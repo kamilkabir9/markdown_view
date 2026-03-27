@@ -78,9 +78,9 @@ function ErrorState({ title, description }: { title: string; description: string
         </Breadcrumbs>
       </nav>
 
-      <Surface variant="transparent" className="app-shell-panel rounded-[2rem] p-8 text-center sm:p-10">
-        <div className="mx-auto max-w-xl space-y-5">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-[linear-gradient(135deg,color-mix(in_oklab,var(--danger)_78%,white),color-mix(in_oklab,var(--warning)_38%,var(--danger)))] text-danger-foreground shadow-[0_24px_48px_-28px_color-mix(in_oklab,var(--danger)_70%,transparent)]">
+      <Surface variant="transparent" className="app-shell-panel rounded-[1.2rem] p-8 sm:p-10">
+        <div className="max-w-xl space-y-5 text-left">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[0.9rem] border border-danger/25 bg-surface text-danger">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 9v4m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
             </svg>
@@ -102,8 +102,8 @@ function ErrorState({ title, description }: { title: string; description: string
             </Alert.Content>
           </Alert>
 
-          <div className="flex justify-center">
-            <Button className="rounded-full px-5" onPress={() => navigate('/')}>
+          <div className="flex">
+            <Button className="rounded-[0.8rem] px-5" onPress={() => navigate('/')}>
               Back to file list
             </Button>
           </div>

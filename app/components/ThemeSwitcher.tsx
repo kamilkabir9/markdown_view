@@ -16,18 +16,11 @@ export function ThemeSwitcher() {
     <Dropdown>
       <Button
         variant="ghost"
-        className="min-w-[10rem] justify-between rounded-full border border-border/60 bg-background/80 px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] backdrop-blur-sm transition hover:border-accent/35 hover:bg-background/92"
+        className="w-full min-w-[9.5rem] justify-between rounded-[0.85rem] border border-border/70 bg-background px-3 py-2 transition hover:border-border hover:bg-surface sm:w-auto"
       >
-        <span className="flex items-center gap-3 text-left">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[linear-gradient(135deg,color-mix(in_oklab,var(--accent)_16%,white),color-mix(in_oklab,var(--warning)_28%,white))] text-accent shadow-[0_10px_25px_-18px_color-mix(in_oklab,var(--accent)_70%,transparent)]">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6v12m6-6H6" />
-            </svg>
-          </span>
-          <span>
-            <span className="block text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted">Theme</span>
-            <span className="block text-xs font-semibold text-foreground sm:text-sm">{activeTheme.label}</span>
-          </span>
+        <span className="text-left">
+          <span className="block text-xs text-muted">Theme</span>
+          <span className="block text-sm font-semibold text-foreground">{activeTheme.label}</span>
         </span>
 
         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -35,7 +28,7 @@ export function ThemeSwitcher() {
         </svg>
       </Button>
 
-      <Dropdown.Popover placement="bottom end" className="min-w-[18rem] rounded-[1.5rem]">
+      <Dropdown.Popover placement="bottom end" className="min-w-[18rem] rounded-[1rem]">
         <Dropdown.Menu
           selectionMode="single"
           selectedKeys={new Set([theme])}
@@ -45,7 +38,7 @@ export function ThemeSwitcher() {
           }}
         >
           {themes.map((item) => (
-            <Dropdown.Item key={item.value} id={item.value} textValue={item.label} className="rounded-[1rem]">
+            <Dropdown.Item key={item.value} id={item.value} textValue={item.label} className="rounded-[0.8rem]">
               <Dropdown.ItemIndicator />
               <div className="flex flex-col">
                 <Label>{item.label}</Label>

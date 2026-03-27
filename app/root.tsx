@@ -26,7 +26,7 @@ function LoadingBar() {
 
   return (
     <div
-      className={`fixed top-0 left-0 right-0 z-50 h-1 bg-accent transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 h-px bg-accent/65 transition-all duration-200 ${
         isLoading ? 'opacity-100' : 'opacity-0'
       }`}
       style={{
@@ -53,7 +53,7 @@ function ScrollToTopButton() {
       variant="primary"
       size="sm"
       isIconOnly
-      className="fixed bottom-6 right-6 z-50 shadow-lg rounded-full"
+      className="fixed bottom-6 right-6 z-50 rounded-lg shadow-sm"
       onPress={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="Scroll to top"
     >
@@ -80,15 +80,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body className="min-h-screen bg-background text-foreground antialiased">
         <ThemeProvider>
           <LoadingBar />
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground">
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground">
             Skip to content
           </a>
           <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1500px] flex-col px-3 pb-8 pt-4 sm:px-5 lg:px-6">
             <header className="mb-5">
-              <div className="app-shell-panel overflow-hidden rounded-[1.6rem] px-4 py-3 sm:px-5">
+              <div className="app-shell-panel overflow-hidden rounded-[1.1rem] px-4 py-3 sm:px-5">
                 <div className="flex items-center justify-between gap-4">
                   <Link to="/" className="group flex min-w-0 items-center gap-3">
-                    <div className="flex h-9 w-9 flex-none items-center justify-center rounded-[0.9rem] bg-[linear-gradient(135deg,color-mix(in_oklab,var(--accent)_82%,white),color-mix(in_oklab,var(--warning)_42%,var(--accent)))] text-accent-foreground shadow-[0_18px_34px_-20px_color-mix(in_oklab,var(--accent)_75%,transparent)] transition-transform duration-300 group-hover:-translate-y-0.5">
+                    <div className="flex h-9 w-9 flex-none items-center justify-center rounded-[0.75rem] border border-border/70 bg-background text-foreground transition-colors duration-150 group-hover:border-foreground/12 group-hover:text-foreground/80">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 4.75h6.586a2 2 0 011.414.586l2.664 2.664A2 2 0 0118.25 9.414V18A2.25 2.25 0 0116 20.25H8A2.25 2.25 0 015.75 18V7A2.25 2.25 0 018 4.75zm1.75 4.5h6.5m-6.5 4h6.5m-6.5 4h4.25" />
                       </svg>
@@ -100,13 +100,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     </div>
                   </Link>
 
-                  <div className="flex flex-wrap items-center gap-2 text-[0.72rem] font-medium text-muted">
-                    <span className="rounded-full border border-border/70 bg-background/80 px-2.5 py-1">
-                      {isHomePage ? 'Library' : 'Reader'}
-                    </span>
-                    <span className="rounded-full border border-border/70 bg-background/80 px-2.5 py-1">
-                      v{APP_VERSION}
-                    </span>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
+                    <span>{isHomePage ? 'Library' : 'Reader'}</span>
+                    <span aria-hidden="true">/</span>
+                    <span>v{APP_VERSION}</span>
                   </div>
                 </div>
               </div>

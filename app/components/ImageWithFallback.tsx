@@ -66,9 +66,9 @@ export function ImageWithFallback({
           className={`inline-flex items-center justify-center p-4 bg-surface rounded-lg ${className}`}
         >
           <span className="animate-pulse flex space-x-2">
-            <span className="h-4 w-4 bg-muted rounded-full"></span>
-            <span className="h-4 w-4 bg-muted rounded-full"></span>
-            <span className="h-4 w-4 bg-muted rounded-full"></span>
+            <span className="h-3 w-6 rounded-[0.25rem] bg-muted/70"></span>
+            <span className="h-3 w-6 rounded-[0.25rem] bg-muted/70"></span>
+            <span className="h-3 w-6 rounded-[0.25rem] bg-muted/70"></span>
           </span>
         </span>
       )}

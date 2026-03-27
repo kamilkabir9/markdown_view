@@ -18,25 +18,19 @@
   --markdown-quote-text: color-mix(in oklab, var(--foreground) 72%, transparent);
   --markdown-table-stripe: color-mix(in oklab, var(--accent) 3%, var(--surface));
   border: 1px solid var(--markdown-shell-border);
-  border-radius: 1.75rem;
+  border-radius: 1.2rem;
   background: var(--markdown-shell-bg);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 28px 60px -46px rgba(15, 23, 42, 0.68);
+  box-shadow: 0 18px 42px -38px rgba(15, 23, 42, 0.22);
   padding: clamp(1.2rem, 3vw, 2rem);
 }
 
 .markdown-theme-default {
-  --markdown-shell-bg: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--surface) 82%, white) 0%,
-    color-mix(in oklab, var(--surface) 94%, transparent) 100%
-  );
+  --markdown-shell-bg: color-mix(in oklab, var(--surface) 96%, white 4%);
   --markdown-quote-bg: color-mix(in oklab, var(--accent) 7%, var(--surface));
 }
 
 .markdown-theme-github {
-  --markdown-shell-bg: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+  --markdown-shell-bg: #fcfcfc;
   --markdown-shell-border: color-mix(in oklab, #d0d7de 90%, transparent);
   --markdown-heading: #1f2328;
   --markdown-text: #24292f;
@@ -54,7 +48,7 @@
 }
 
 .markdown-theme-dark {
-  --markdown-shell-bg: linear-gradient(180deg, #0f1622 0%, #0b111a 100%);
+  --markdown-shell-bg: #0d131c;
   --markdown-shell-border: #273444;
   --markdown-heading: #f3f5f8;
   --markdown-text: #cfd7e2;
@@ -69,9 +63,7 @@
   --markdown-quote-border: #5fa8ff;
   --markdown-quote-text: #99a8ba;
   --markdown-table-stripe: #111a28;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 34px 80px -56px rgba(0, 0, 0, 0.95);
+  box-shadow: 0 20px 44px -40px rgba(0, 0, 0, 0.68);
 }
 
 .markdown-theme-dark .hljs,
@@ -80,7 +72,7 @@
 }
 
 .markdown-theme-minimal {
-  --markdown-shell-bg: linear-gradient(180deg, #fffdfa 0%, #faf6ee 100%);
+  --markdown-shell-bg: #fdf9f2;
   --markdown-shell-border: #e8decb;
   --markdown-heading: #1e2a24;
   --markdown-text: #43514a;

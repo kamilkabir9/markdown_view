@@ -63,7 +63,7 @@ function wrapRangeWithMarks(range: Range, annotationId: string, isActive: boolea
     mark.setAttribute('data-annotation-id', annotationId);
     mark.className = [
       'annotation-mark',
-      'box-decoration-clone cursor-pointer transition-colors',
+      'box-decoration-clone cursor-pointer',
       isActive ? 'annotation-mark--active' : '',
     ].filter(Boolean).join(' ');
 

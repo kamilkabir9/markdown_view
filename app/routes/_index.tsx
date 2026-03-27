@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { Link, useLoaderData } from 'react-router';
-import { Alert, Breadcrumbs, Card, SearchField, Surface } from '@heroui/react';
+import { Alert, Breadcrumbs, SearchField, Surface, Table } from '@heroui/react';
 import { getMarkdownFiles, type FileInfo } from '~/utils/files.server';
 
 export const meta: MetaFunction = () => [{ title: 'Markdown Viewer' }];
@@ -51,9 +51,9 @@ function getDirectoryCount(files: FileInfo[]) {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[1.5rem] border border-border/60 bg-background/78 p-4 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.7)] backdrop-blur-sm">
-      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted">{label}</p>
-      <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+    <div className="border-l border-border/80 pl-4">
+      <p className="text-sm text-muted">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
@@ -92,22 +92,17 @@ export default function Index() {
           </Breadcrumbs>
         </nav>
 
-        <Surface variant="transparent" className="app-shell-panel rounded-[2rem] p-8 text-center sm:p-10">
-          <div className="mx-auto max-w-xl space-y-5">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-[linear-gradient(135deg,color-mix(in_oklab,var(--accent)_85%,white),color-mix(in_oklab,var(--warning)_55%,var(--accent)))] text-accent-foreground shadow-[0_24px_48px_-28px_color-mix(in_oklab,var(--accent)_70%,transparent)]">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 4.75h6.586a2 2 0 011.414.586l2.664 2.664A2 2 0 0118.25 9.414V18A2.25 2.25 0 0116 20.25H8A2.25 2.25 0 015.75 18V7A2.25 2.25 0 018 4.75z" />
-              </svg>
-            </div>
+        <Surface variant="transparent" className="app-shell-panel rounded-[1.1rem] p-6 sm:p-8">
+          <div className="max-w-2xl space-y-4">
             <div>
-              <h1 className="font-[var(--font-display)] text-4xl tracking-tight text-foreground sm:text-5xl">
-                No markdown files found yet.
+              <h1 className="font-[var(--font-display)] text-4xl tracking-tight text-foreground sm:text-[2.8rem]">
+                No markdown files found.
               </h1>
               <p className="mt-3 text-base leading-7 text-muted">
-                Add a few `.md` files to this directory and the viewer will turn them into a searchable reading workspace.
+                Add a few `.md` files to this folder and they will appear here as a simple reading library.
               </p>
             </div>
-            <Alert status="accent" role="alert" className="text-left">
+            <Alert status="accent" role="alert" className="max-w-lg border-border/60 bg-surface text-left">
               <Alert.Content>
                 <Alert.Title>Tip</Alert.Title>
                 <Alert.Description>
@@ -131,18 +126,18 @@ export default function Index() {
       </nav>
 
       <section>
-        <Surface variant="transparent" className="app-shell-panel overflow-hidden rounded-[2rem] p-6 sm:p-8">
-          <div className="flex h-full flex-col gap-6">
-            <div className="max-w-2xl">
-              <h1 className="font-[var(--font-display)] text-4xl tracking-tight text-foreground sm:text-5xl">
-                Browse local markdown files.
-              </h1>
-              <p className="mt-4 text-base leading-7 text-muted">
-                Search the current folder and open any document in reader mode.
-              </p>
-            </div>
+        <Surface variant="transparent" className="app-shell-panel rounded-[1.1rem] p-6 sm:p-8">
+          <div className="flex flex-col gap-8">
+            <div className="max-w-3xl">
+               <h1 className="font-[var(--font-display)] text-4xl tracking-tight text-foreground sm:text-5xl">
+                 Markdown library
+               </h1>
+               <p className="mt-4 text-base leading-7 text-muted">
+                 Browse the current folder, search by name, and open any document in a quiet reading view.
+               </p>
+             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-5 border-t border-border/70 pt-5 sm:grid-cols-3">
               <StatCard
                 label="Files"
                 value={String(files.length)}
@@ -160,31 +155,29 @@ export default function Index() {
         </Surface>
       </section>
 
-      <Card className="overflow-hidden rounded-[2rem] border border-border/70 bg-surface/84 shadow-[0_28px_70px_-45px_rgba(15,23,42,0.72)]">
-        <Card.Header className="flex flex-col gap-5 border-b border-border/60 pb-5 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Card.Title className="text-2xl tracking-tight">Files ready to read</Card.Title>
-              <span className="rounded-full border border-border/60 bg-background/80 px-3 py-1 text-xs font-medium text-muted">
-                {search.trim() ? `${filteredFiles.length} matching` : `${files.length} total`}
-              </span>
-            </div>
+      <Surface variant="transparent" className="app-shell-panel rounded-[1.1rem] p-5 sm:p-6">
+        <div className="flex flex-col gap-5 border-b border-border/70 pb-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">Files</h2>
+            <p className="mt-1 text-sm text-muted">
+              {search.trim() ? `${filteredFiles.length} results for “${search}”` : `${files.length} documents in this folder`}
+            </p>
           </div>
 
           <div className="w-full max-w-xl">
             <SearchField aria-label="Search markdown files" value={search} onChange={setSearch}>
-              <SearchField.Group className="h-12 rounded-full border border-border/60 bg-background/80 pl-3 pr-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
+              <SearchField.Group className="h-11 rounded-[0.75rem] border border-border/70 bg-surface px-3">
                 <SearchField.SearchIcon />
-                <SearchField.Input placeholder="Search by file name or nested path..." className="h-12" />
+                <SearchField.Input placeholder="Search by file name or nested path..." className="h-11" />
                 <SearchField.ClearButton />
               </SearchField.Group>
             </SearchField>
           </div>
-        </Card.Header>
+        </div>
 
-        <Card.Content className="p-6">
+        <div className="pt-5">
           {filteredFiles.length === 0 && search.trim() ? (
-            <Alert status="accent" role="alert">
+            <Alert status="accent" role="alert" className="border-border/60 bg-surface">
               <Alert.Content>
                 <Alert.Title>No matches yet</Alert.Title>
                 <Alert.Description>
@@ -193,54 +186,60 @@ export default function Index() {
               </Alert.Content>
             </Alert>
           ) : (
-            <>
-              <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {filteredFiles.map((file: FileInfo) => {
-                  const { name, directory } = splitRelativePath(file.relativePath);
+            <Table variant="secondary" className="border border-border/60 rounded-[0.95rem]">
+              <Table.ScrollContainer>
+                <Table.Content aria-label="Markdown files" className="min-w-[42rem] bg-transparent">
+                  <Table.Header className="border-b border-border/60 bg-surface/70">
+                    <Table.Column isRowHeader className="px-4 py-3 text-sm font-medium text-muted">
+                      File
+                    </Table.Column>
+                    <Table.Column className="px-4 py-3 text-sm font-medium text-muted">
+                      Location
+                    </Table.Column>
+                    <Table.Column className="px-4 py-3 text-sm font-medium text-muted">
+                      Size
+                    </Table.Column>
+                    <Table.Column className="px-4 py-3 text-sm font-medium text-muted">
+                      Updated
+                    </Table.Column>
+                  </Table.Header>
+                  <Table.Body items={filteredFiles}>
+                    {(file) => {
+                      const { name, directory } = splitRelativePath(file.relativePath);
 
-                  return (
-                    <li key={file.path} className="h-full">
-                      <Link to={`/${file.relativePath}`} className="group block h-full">
-                        <Card className="flex h-full rounded-[1.6rem] border border-border/60 bg-background/74 shadow-none transition duration-300 hover:-translate-y-1 hover:border-accent/35 hover:shadow-[0_24px_60px_-35px_color-mix(in_oklab,var(--accent)_40%,transparent)]">
-                          <Card.Content className="flex h-full flex-col gap-5 p-5">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex h-12 w-12 flex-none items-center justify-center rounded-[1.1rem] bg-[linear-gradient(135deg,color-mix(in_oklab,var(--accent)_18%,white),color-mix(in_oklab,var(--warning)_22%,white))] text-accent shadow-[0_14px_34px_-24px_color-mix(in_oklab,var(--accent)_65%,transparent)]">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="M7 4.75h6.586a2 2 0 011.414.586l2.664 2.664A2 2 0 0118.25 9.414V18A2.25 2.25 0 0116 20.25H8A2.25 2.25 0 015.75 18V7A2.25 2.25 0 018 4.75zm1.75 4.5h6.5m-6.5 4h6.5m-6.5 4h4.25" />
-                                </svg>
-                              </div>
-                              <span className="rounded-full border border-border/60 bg-surface/90 px-2.5 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-muted">
-                                md
-                              </span>
-                            </div>
-
-                            <div className="space-y-2">
-                              <h2 className="text-xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-accent">
-                                {name}
-                              </h2>
-                              <p className="min-h-[3rem] text-sm leading-6 text-muted">{directory}</p>
-                            </div>
-
-                            <div className="mt-auto flex flex-wrap gap-2 text-xs text-muted">
-                              <span className="rounded-full border border-border/60 bg-surface/90 px-2.5 py-1">
-                                {formatFileSize(file.size)}
-                              </span>
-                              <span className="rounded-full border border-border/60 bg-surface/90 px-2.5 py-1">
-                                {formatRelativeDate(file.modified)}
-                              </span>
-                            </div>
-                          </Card.Content>
-                        </Card>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-
-            </>
+                      return (
+                        <Table.Row
+                          key={file.path}
+                          id={file.path}
+                          className="border-b border-border/60 last:border-b-0 data-[hovered]:bg-surface/55"
+                        >
+                          <Table.Cell className="px-4 py-3.5 align-top">
+                            <Link
+                              to={`/${file.relativePath}`}
+                              className="block min-w-0 text-foreground transition-colors duration-150 hover:text-foreground/82"
+                            >
+                              <span className="block truncate text-base font-semibold tracking-tight">{name}</span>
+                            </Link>
+                          </Table.Cell>
+                          <Table.Cell className="px-4 py-3.5 align-top text-sm text-muted">
+                            <span className="block min-w-0 truncate">{directory}</span>
+                          </Table.Cell>
+                          <Table.Cell className="px-4 py-3.5 align-top text-sm text-muted whitespace-nowrap">
+                            {formatFileSize(file.size)}
+                          </Table.Cell>
+                          <Table.Cell className="px-4 py-3.5 align-top text-sm text-muted whitespace-nowrap">
+                            {formatRelativeDate(file.modified)}
+                          </Table.Cell>
+                        </Table.Row>
+                      );
+                    }}
+                  </Table.Body>
+                </Table.Content>
+              </Table.ScrollContainer>
+            </Table>
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </Surface>
     </div>
   );
 }
