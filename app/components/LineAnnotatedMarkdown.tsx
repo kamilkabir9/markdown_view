@@ -50,6 +50,7 @@ export function LineAnnotatedMarkdown({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isCommentsDrawerOpen, setIsCommentsDrawerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +70,7 @@ export function LineAnnotatedMarkdown({
       directory: parts.length > 1 ? parts.slice(0, -1).join(' / ') : 'Workspace root',
     };
   }, [filePath]);
+  const commentsVisible = isDesktopViewport ? sidebarOpen : isCommentsDrawerOpen;
 
   const handleMouseUp = useCallback(async (event: React.MouseEvent) => {
     if (event.button !== 0) return;
@@ -132,6 +134,15 @@ export function LineAnnotatedMarkdown({
     setIsModalOpen(true);
   }, []);
 
+  const toggleComments = useCallback(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1280) {
+      setIsCommentsDrawerOpen((open) => !open);
+      return;
+    }
+
+    setSidebarOpen((open) => !open);
+  }, []);
+
   const closeDialog = useCallback(() => {
     setIsModalOpen(false);
     setPendingAnchor(null);
@@ -176,6 +187,16 @@ export function LineAnnotatedMarkdown({
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const syncViewport = () => setIsDesktopViewport(window.innerWidth >= 1280);
+    syncViewport();
+
+    window.addEventListener('resize', syncViewport, { passive: true });
+    return () => window.removeEventListener('resize', syncViewport);
+  }, []);
+
+  useEffect(() => {
     const handleMouseDown = (event: MouseEvent) => {
       if (popoverPos && popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
         setPopoverPos(null);
@@ -202,6 +223,7 @@ export function LineAnnotatedMarkdown({
       rawContent={content}
       onUpdate={updateAnnotationText}
       onRemove={removeAnnotation}
+      onClose={toggleComments}
       onAnnotationClick={handleAnnotationClick}
       activeAnnotationId={activeAnnotationId}
       className="h-full"
@@ -277,7 +299,7 @@ export function LineAnnotatedMarkdown({
                   variant={sidebarOpen ? 'secondary' : 'ghost'}
                   size="sm"
                   className="hidden rounded-[0.8rem] px-3.5 xl:inline-flex"
-                  onPress={() => setSidebarOpen((open) => !open)}
+                  onPress={toggleComments}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.75 6.75h14.5M4.75 12h14.5M4.75 17.25h8.5" />
@@ -328,6 +350,28 @@ export function LineAnnotatedMarkdown({
           <div className="fixed right-4 top-4 z-50 rounded-[0.85rem] border border-border/60 bg-surface p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.35)]">
             <Spinner size="sm" />
           </div>,
+          document.body,
+        )}
+
+        {typeof document !== 'undefined' && createPortal(
+          <Button
+            variant={commentsVisible ? 'secondary' : 'primary'}
+            size="sm"
+            isIconOnly
+            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg shadow-sm"
+            onPress={toggleComments}
+            aria-label={commentsVisible ? 'Hide comments' : 'Show comments'}
+          >
+            {commentsVisible ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 8.75h10M7 12h7m-7 3.25h4.5M5.75 4.75h12.5A1.75 1.75 0 0120 6.5v8.75A1.75 1.75 0 0118.25 17H10l-4.25 3.25V17H5.75A1.75 1.75 0 014 15.25V6.5a1.75 1.75 0 011.75-1.75z" />
+              </svg>
+            )}
+          </Button>,
           document.body,
         )}
 

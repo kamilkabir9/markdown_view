@@ -7,6 +7,7 @@ interface CommentSidebarProps {
   rawContent: string;
   onUpdate: (id: string, text: string) => void;
   onRemove: (id: string) => void;
+  onClose?: () => void;
   onAnnotationClick?: (annotation: Annotation) => void;
   activeAnnotationId?: string | null;
   className?: string;
@@ -38,6 +39,7 @@ export function CommentSidebar({
   rawContent,
   onUpdate,
   onRemove,
+  onClose,
   onAnnotationClick,
   activeAnnotationId,
   className = '',
@@ -235,25 +237,42 @@ export function CommentSidebar({
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            isIconOnly
-            className="rounded-[0.8rem]"
-            aria-label="Copy all comments"
-            isDisabled={!annotations.length}
-            onPress={handleCopyAll}
-          >
-            {copiedId === '__all__' ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7.75A2.25 2.25 0 0110.25 5.5h6A2.25 2.25 0 0118.5 7.75v8.5A2.25 2.25 0 0116.25 18.5h-6A2.25 2.25 0 018 16.25v-8.5zm-2.5 9V8.25A2.25 2.25 0 018 6" />
-              </svg>
-            )}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              isIconOnly
+              className="rounded-[0.8rem]"
+              aria-label="Copy all comments"
+              isDisabled={!annotations.length}
+              onPress={handleCopyAll}
+            >
+              {copiedId === '__all__' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7.75A2.25 2.25 0 0110.25 5.5h6A2.25 2.25 0 0118.5 7.75v8.5A2.25 2.25 0 0116.25 18.5h-6A2.25 2.25 0 018 16.25v-8.5zm-2.5 9V8.25A2.25 2.25 0 018 6" />
+                </svg>
+              )}
+            </Button>
+
+            {onClose ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                isIconOnly
+                className="rounded-[0.8rem]"
+                aria-label="Close comments"
+                onPress={onClose}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </Button>
+            ) : null}
+          </div>
         </div>
       </Card.Header>
 
