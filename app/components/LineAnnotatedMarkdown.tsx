@@ -11,7 +11,12 @@ import { useNavigate } from 'react-router';
 import Markdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
-import { Button, Card, Drawer, Modal, Spinner, TextArea } from '@heroui/react';
+import { Button } from '~/components/ui/button';
+import { Card, CardContent } from '~/components/ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '~/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '~/components/ui/dialog';
+import { Textarea } from '~/components/ui/textarea';
+import { Loader2Icon, ChevronLeftIcon, PlusIcon, MessageSquareIcon, XIcon, PanelRightIcon } from 'lucide-react';
 import { useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore';
 import { CommentHighlighter } from './CommentHighlighter';
 import { CommentSidebar } from './CommentSidebar';
@@ -232,18 +237,18 @@ export function LineAnnotatedMarkdown({
 
   return (
     <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
-      <div className="mx-auto max-w-[1500px] space-y-4">
-        <div className="rounded-[1.1rem] border border-border/60 bg-surface px-4 py-4 sm:px-5">
+      <div className="mx-auto max-w-[1420px] space-y-5">
+        <div className="rounded-md border border-border/65 bg-surface px-4 py-4 sm:px-5">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 space-y-3">
               <div className="space-y-1.5">
-                <p className="truncate text-sm text-muted">{documentMeta.directory}</p>
-                <h1 className="break-words font-[var(--font-display)] text-[clamp(1.7rem,3vw,2.35rem)] leading-tight tracking-tight text-foreground">
+                <p className="truncate text-xs tracking-[0.12em] text-muted-foreground uppercase">{documentMeta.directory}</p>
+                <h1 className="break-words font-[var(--font-display)] text-[clamp(1.95rem,4vw,2.9rem)] leading-[0.94] tracking-tight text-foreground">
                   {documentMeta.title}
                 </h1>
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tracking-[0.12em] text-muted-foreground uppercase">
                 <span>{annotationLabel}</span>
                 <span aria-hidden="true">/</span>
                 <span>{lineCount} lines rendered</span>
@@ -263,20 +268,16 @@ export function LineAnnotatedMarkdown({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-[0.8rem] px-3.5"
-                  onPress={() => navigate('/')}
+                  className="rounded-sm border border-border/70 px-3.5"
+                  onClick={() => navigate('/')}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 19.5L8.25 12l7.5-7.5" />
-                  </svg>
+                  <ChevronLeftIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">Back to files</span>
                   <span className="sm:hidden">Back</span>
                 </Button>
 
-                <Button variant="secondary" size="sm" className="rounded-[0.8rem] px-3.5" onPress={() => openDialog(true)}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 4.75v14.5M19.25 12H4.75" />
-                  </svg>
+                <Button variant="secondary" size="sm" className="rounded-sm px-3.5" onClick={() => openDialog(true)}>
+                  <PlusIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">Add note</span>
                   <span className="sm:hidden">Note</span>
                 </Button>
@@ -284,26 +285,22 @@ export function LineAnnotatedMarkdown({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-[0.8rem] px-3.5 xl:hidden"
-                  onPress={() => setIsCommentsDrawerOpen(true)}
+                  className="rounded-sm border border-border/70 px-3.5 xl:hidden"
+                  onClick={() => setIsCommentsDrawerOpen(true)}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 8.75h10M7 12h7m-7 3.25h4.5M5.75 4.75h12.5A1.75 1.75 0 0120 6.5v8.75A1.75 1.75 0 0118.25 17H10l-4.25 3.25V17H5.75A1.75 1.75 0 014 15.25V6.5a1.75 1.75 0 011.75-1.75z" />
-                  </svg>
+                  <MessageSquareIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">Comments</span>
                   <span className="sm:hidden">Notes</span>
-                  <span className="text-sm text-muted">{annotations.length}</span>
+                  <span className="text-sm text-muted-foreground">{annotations.length}</span>
                 </Button>
 
                 <Button
                   variant={sidebarOpen ? 'secondary' : 'ghost'}
                   size="sm"
-                  className="hidden rounded-[0.8rem] px-3.5 xl:inline-flex"
-                  onPress={toggleComments}
+                  className="hidden rounded-sm border border-border/70 px-3.5 xl:inline-flex"
+                  onClick={toggleComments}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.75 6.75h14.5M4.75 12h14.5M4.75 17.25h8.5" />
-                  </svg>
+                  <PanelRightIcon className="h-4 w-4" />
                   {sidebarOpen ? 'Hide comments' : 'Show comments'}
                 </Button>
               </div>
@@ -311,10 +308,10 @@ export function LineAnnotatedMarkdown({
           </div>
         </div>
 
-        <div className={`grid items-start gap-6 ${sidebarOpen ? 'xl:grid-cols-[minmax(0,1fr)_22.5rem]' : 'xl:grid-cols-1'}`}>
-          <Card className="min-w-0 overflow-hidden rounded-[1.15rem] border border-border/60 bg-surface shadow-none">
-            <Card.Content className="p-3 sm:p-5">
-              <article className={`w-full ${sidebarOpen ? 'mx-auto max-w-5xl' : 'max-w-none'}`}>
+        <div className={`grid items-start gap-5 ${sidebarOpen ? 'xl:grid-cols-[minmax(0,1fr)_21rem]' : 'xl:grid-cols-1'}`}>
+          <Card className="min-w-0 overflow-hidden rounded-md border border-border/65 bg-surface shadow-none">
+            <CardContent className="p-3 sm:p-4">
+              <article className={`w-full ${sidebarOpen ? 'mx-auto max-w-4xl' : 'max-w-none'}`}>
                 <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>
                   <div className={`${proseClass} markdown-article ${themeClass}`.trim()}>
                     <Markdown
@@ -329,11 +326,11 @@ export function LineAnnotatedMarkdown({
                   </div>
                 </div>
               </article>
-            </Card.Content>
+            </CardContent>
           </Card>
 
           {sidebarOpen && (
-            <div className="hidden min-w-0 xl:sticky xl:top-24 xl:block">
+            <div className="hidden min-w-0 xl:sticky xl:top-28 xl:block">
               {sidebar}
             </div>
           )}
@@ -347,29 +344,24 @@ export function LineAnnotatedMarkdown({
         />
 
         {typeof document !== 'undefined' && isAnchoring && createPortal(
-          <div className="fixed right-4 top-4 z-50 rounded-[0.85rem] border border-border/60 bg-surface p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.35)]">
-            <Spinner size="sm" />
+          <div className="fixed top-4 right-4 z-50 rounded-sm border border-border/70 bg-surface p-3 shadow-none">
+            <Loader2Icon className="h-4 w-4 animate-spin" />
           </div>,
           document.body,
         )}
 
         {typeof document !== 'undefined' && createPortal(
           <Button
-            variant={commentsVisible ? 'secondary' : 'primary'}
-            size="sm"
-            isIconOnly
-            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg shadow-sm"
-            onPress={toggleComments}
+            variant={commentsVisible ? 'secondary' : 'ghost'}
+            size="icon-sm"
+            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-sm border border-border/70 bg-surface shadow-none"
+            onClick={toggleComments}
             aria-label={commentsVisible ? 'Hide comments' : 'Show comments'}
           >
             {commentsVisible ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6 6l12 12M18 6L6 18" />
-              </svg>
+              <XIcon className="h-4 w-4" />
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 8.75h10M7 12h7m-7 3.25h4.5M5.75 4.75h12.5A1.75 1.75 0 0120 6.5v8.75A1.75 1.75 0 0118.25 17H10l-4.25 3.25V17H5.75A1.75 1.75 0 014 15.25V6.5a1.75 1.75 0 011.75-1.75z" />
-              </svg>
+              <MessageSquareIcon className="h-4 w-4" />
             )}
           </Button>,
           document.body,
@@ -387,99 +379,79 @@ export function LineAnnotatedMarkdown({
           >
             <Button
               size="sm"
-              className="rounded-[0.8rem] px-4 shadow-[0_8px_18px_-16px_rgba(15,23,42,0.28)]"
+              className="rounded-sm border border-border/70 px-4 shadow-none"
               onMouseDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
               }}
-              onPress={() => openDialog()}
+              onClick={() => openDialog()}
             >
-              + Comment
+              Add comment
             </Button>
           </div>,
           document.body,
         )}
 
-        {isCommentsDrawerOpen && (
-          <Drawer.Backdrop
-            isOpen={isCommentsDrawerOpen}
-            onOpenChange={setIsCommentsDrawerOpen}
-            variant="transparent"
-            className="xl:hidden"
-          >
-            <Drawer.Content placement="right" className="xl:hidden">
-              <Drawer.Dialog className="h-full w-[min(100vw,24rem)] border-l border-border/60 bg-background">
-                <Drawer.CloseTrigger />
-                <Drawer.Header>
-                  <Drawer.Heading>Comments</Drawer.Heading>
-                </Drawer.Header>
-                <Drawer.Body className="px-4 pb-4 pt-0">{sidebar}</Drawer.Body>
-              </Drawer.Dialog>
-            </Drawer.Content>
-          </Drawer.Backdrop>
-        )}
+        <Sheet open={isCommentsDrawerOpen} onOpenChange={setIsCommentsDrawerOpen}>
+          <SheetContent side="right" className="h-full w-[min(100vw,24rem)] border-l border-border/65 bg-background xl:hidden">
+            <SheetHeader>
+              <SheetTitle>Comments</SheetTitle>
+            </SheetHeader>
+            <div className="px-4 pb-4 pt-0">{sidebar}</div>
+          </SheetContent>
+        </Sheet>
 
-        {isModalOpen && (
-          <Modal
-            isOpen={isModalOpen}
-            onOpenChange={(nextOpen) => {
-              if (!nextOpen) {
-                closeDialog();
-              }
-            }}
-          >
-            <Modal.Backdrop isDismissable>
-              <Modal.Container size="sm" placement="center">
-                <Modal.Dialog className="rounded-[1.1rem] border border-border/60 bg-background shadow-[0_20px_40px_-34px_rgba(15,23,42,0.24)]">
-                  <Modal.Header>
-                    <Modal.Heading>
-                      {isGlobalComment ? 'Add document note' : 'Add inline comment'}
-                    </Modal.Heading>
-                  </Modal.Header>
+        <Dialog open={isModalOpen} onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            closeDialog();
+          }
+        }}>
+          <DialogContent className="rounded-md border border-border/65 bg-background shadow-none">
+            <DialogHeader>
+              <DialogTitle>
+                {isGlobalComment ? 'Add document note' : 'Add inline comment'}
+              </DialogTitle>
+            </DialogHeader>
 
-                  <Modal.Body>
-                    {!isGlobalComment && pendingAnchor && (
-                      <div className="mb-4 rounded-[0.9rem] border border-border/60 bg-surface p-3">
-                        <p className="text-xs text-muted">
-                          Selected text
-                        </p>
-                        <span className="mt-2 block whitespace-pre-wrap text-sm leading-6 text-foreground">
-                          “{pendingAnchor.exact}”
-                        </span>
-                      </div>
-                    )}
+            <div className="py-2">
+              {!isGlobalComment && pendingAnchor && (
+                <div className="mb-4 rounded-sm border border-border/65 bg-surface p-3">
+                  <p className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
+                    Selected text
+                  </p>
+                  <span className="mt-2 block whitespace-pre-wrap text-sm leading-6 text-foreground">
+                    "{pendingAnchor.exact}"
+                  </span>
+                </div>
+              )}
 
-                    {isGlobalComment && (
-                      <div className="mb-4 rounded-[0.9rem] border border-border/60 bg-surface p-3 text-sm leading-6 text-muted">
-                        Document note
-                      </div>
-                    )}
+              {isGlobalComment && (
+                <div className="mb-4 rounded-sm border border-border/65 bg-surface p-3 text-sm leading-6 text-muted-foreground">
+                  Document note
+                </div>
+              )}
 
-                    <TextArea
-                      placeholder="Capture the review note, edit request, or open question..."
-                      value={commentText}
-                      onChange={(event) => setCommentText(event.target.value)}
-                      autoFocus
-                      rows={5}
-                      fullWidth
-                      onKeyDown={handleKeyDown}
-                    />
+              <Textarea
+                placeholder="Capture the review note, edit request, or open question..."
+                value={commentText}
+                onChange={(event) => setCommentText(event.target.value)}
+                autoFocus
+                rows={5}
+                className="w-full"
+                onKeyDown={handleKeyDown}
+              />
+            </div>
 
-                  </Modal.Body>
-
-                  <Modal.Footer>
-                    <Button slot="close" variant="ghost" className="rounded-[0.8rem] px-4" onPress={closeDialog}>
-                      Cancel
-                    </Button>
-                    <Button className="rounded-[0.8rem] px-4" isDisabled={!commentText.trim()} onPress={handleSubmit}>
-                      Add comment
-                    </Button>
-                  </Modal.Footer>
-                </Modal.Dialog>
-              </Modal.Container>
-            </Modal.Backdrop>
-          </Modal>
-        )}
+            <DialogFooter>
+              <Button variant="ghost" className="rounded-sm border border-border/70 px-4" onClick={closeDialog}>
+                Cancel
+              </Button>
+              <Button className="rounded-sm px-4" disabled={!commentText.trim()} onClick={handleSubmit}>
+                Add comment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

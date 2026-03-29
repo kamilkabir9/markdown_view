@@ -2,89 +2,79 @@
 .markdown-theme-github,
 .markdown-theme-dark,
 .markdown-theme-minimal {
-  --markdown-shell-bg: var(--surface);
-  --markdown-shell-border: color-mix(in oklab, var(--border) 76%, transparent);
-  --markdown-heading: color-mix(in oklab, var(--foreground) 96%, black);
-  --markdown-text: color-mix(in oklab, var(--foreground) 78%, transparent);
-  --markdown-link: var(--accent);
-  --markdown-link-hover: color-mix(in oklab, var(--accent) 82%, black);
-  --markdown-border: color-mix(in oklab, var(--border) 75%, transparent);
-  --markdown-code-bg: color-mix(in oklab, var(--surface-secondary) 92%, white);
-  --markdown-code-text: color-mix(in oklab, var(--foreground) 88%, transparent);
-  --markdown-pre-bg: color-mix(in oklab, var(--foreground) 5%, var(--surface));
-  --markdown-pre-border: color-mix(in oklab, var(--border) 72%, transparent);
-  --markdown-quote-bg: color-mix(in oklab, var(--accent) 6%, var(--surface));
-  --markdown-quote-border: color-mix(in oklab, var(--accent) 62%, white);
-  --markdown-quote-text: color-mix(in oklab, var(--foreground) 72%, transparent);
-  --markdown-table-stripe: color-mix(in oklab, var(--accent) 3%, var(--surface));
+  --markdown-shell-bg: color-mix(in oklab, var(--surface) 97%, white 3%);
+  --markdown-shell-border: color-mix(in oklab, var(--border) 82%, transparent);
+  --markdown-heading: color-mix(in oklab, var(--foreground) 95%, black 5%);
+  --markdown-text: color-mix(in oklab, var(--foreground) 82%, transparent);
+  --markdown-link: color-mix(in oklab, var(--accent) 86%, var(--foreground));
+  --markdown-link-hover: color-mix(in oklab, var(--accent) 72%, var(--foreground) 28%);
+  --markdown-border: color-mix(in oklab, var(--border) 78%, transparent);
+  --markdown-code-bg: color-mix(in oklab, var(--surface-secondary) 90%, white 10%);
+  --markdown-code-text: color-mix(in oklab, var(--foreground) 86%, transparent);
+  --markdown-pre-bg: color-mix(in oklab, var(--foreground) 4%, var(--surface));
+  --markdown-pre-border: color-mix(in oklab, var(--border) 76%, transparent);
+  --markdown-quote-bg: color-mix(in oklab, var(--surface) 85%, var(--linen));
+  --markdown-quote-border: color-mix(in oklab, var(--accent) 52%, var(--border));
+  --markdown-quote-text: color-mix(in oklab, var(--foreground) 76%, transparent);
+  --markdown-table-stripe: color-mix(in oklab, var(--surface-secondary) 42%, transparent);
   border: 1px solid var(--markdown-shell-border);
-  border-radius: 1.2rem;
+  border-radius: 0.45rem;
   background: var(--markdown-shell-bg);
-  box-shadow: 0 18px 42px -38px rgba(15, 23, 42, 0.22);
-  padding: clamp(1.2rem, 3vw, 2rem);
+  box-shadow: none;
+  padding: clamp(1.15rem, 2.6vw, 1.8rem);
 }
 
 .markdown-theme-default {
-  --markdown-shell-bg: color-mix(in oklab, var(--surface) 96%, white 4%);
-  --markdown-quote-bg: color-mix(in oklab, var(--accent) 7%, var(--surface));
+  --markdown-link: color-mix(in oklab, var(--accent) 88%, var(--foreground));
 }
 
 .markdown-theme-github {
-  --markdown-shell-bg: #fcfcfc;
-  --markdown-shell-border: color-mix(in oklab, #d0d7de 90%, transparent);
-  --markdown-heading: #1f2328;
-  --markdown-text: #24292f;
-  --markdown-link: #0969da;
-  --markdown-link-hover: #0550ae;
-  --markdown-border: #d0d7de;
-  --markdown-code-bg: #f6f8fa;
-  --markdown-code-text: #24292f;
-  --markdown-pre-bg: #0d111714;
-  --markdown-pre-border: #d8dee4;
-  --markdown-quote-bg: #f6f8fa;
-  --markdown-quote-border: #0969da;
-  --markdown-quote-text: #57606a;
-  --markdown-table-stripe: #f6f8fa;
+  --markdown-shell-bg: color-mix(in oklab, var(--surface) 96%, var(--background));
+  --markdown-shell-border: color-mix(in oklab, var(--border) 84%, transparent);
+  --markdown-heading: color-mix(in oklab, var(--foreground) 94%, black 6%);
+  --markdown-text: color-mix(in oklab, var(--foreground) 84%, transparent);
+  --markdown-link: color-mix(in oklab, var(--foreground) 74%, var(--accent) 26%);
+  --markdown-link-hover: color-mix(in oklab, var(--foreground) 62%, var(--accent) 38%);
+  --markdown-quote-bg: color-mix(in oklab, var(--surface) 88%, var(--linen));
 }
 
 .markdown-theme-dark {
-  --markdown-shell-bg: #0d131c;
-  --markdown-shell-border: #273444;
-  --markdown-heading: #f3f5f8;
-  --markdown-text: #cfd7e2;
-  --markdown-link: #78b7ff;
-  --markdown-link-hover: #b2d5ff;
-  --markdown-border: #2a3748;
-  --markdown-code-bg: #182131;
-  --markdown-code-text: #e5ebf4;
-  --markdown-pre-bg: #0d1420;
-  --markdown-pre-border: #243040;
-  --markdown-quote-bg: #101b2b;
-  --markdown-quote-border: #5fa8ff;
-  --markdown-quote-text: #99a8ba;
-  --markdown-table-stripe: #111a28;
-  box-shadow: 0 20px 44px -40px rgba(0, 0, 0, 0.68);
+  --markdown-shell-bg: color-mix(in oklab, var(--surface) 88%, var(--background));
+  --markdown-shell-border: color-mix(in oklab, var(--border) 84%, transparent);
+  --markdown-heading: color-mix(in oklab, white 92%, var(--foreground));
+  --markdown-text: color-mix(in oklab, white 80%, var(--foreground));
+  --markdown-link: color-mix(in oklab, var(--accent) 92%, white 8%);
+  --markdown-link-hover: color-mix(in oklab, var(--accent) 72%, white 28%);
+  --markdown-border: color-mix(in oklab, var(--border) 80%, transparent);
+  --markdown-code-bg: color-mix(in oklab, var(--surface-secondary) 84%, var(--background));
+  --markdown-code-text: color-mix(in oklab, white 88%, var(--foreground));
+  --markdown-pre-bg: color-mix(in oklab, var(--background) 80%, black 20%);
+  --markdown-pre-border: color-mix(in oklab, var(--border) 72%, transparent);
+  --markdown-quote-bg: color-mix(in oklab, var(--surface) 80%, var(--background));
+  --markdown-quote-border: color-mix(in oklab, var(--accent) 48%, var(--border));
+  --markdown-quote-text: color-mix(in oklab, white 74%, var(--foreground));
+  --markdown-table-stripe: color-mix(in oklab, var(--surface-secondary) 35%, transparent);
 }
 
 .markdown-theme-dark .hljs,
 .markdown-theme-dark pre code {
-  color: #dbe8ff;
+  color: color-mix(in oklab, white 88%, var(--foreground));
 }
 
 .markdown-theme-minimal {
-  --markdown-shell-bg: #fdf9f2;
-  --markdown-shell-border: #e8decb;
-  --markdown-heading: #1e2a24;
-  --markdown-text: #43514a;
-  --markdown-link: #1f8c6b;
-  --markdown-link-hover: #176e54;
-  --markdown-border: #e6dcc8;
-  --markdown-code-bg: #f3eee3;
-  --markdown-code-text: #25332d;
-  --markdown-pre-bg: #f7f2e8;
-  --markdown-pre-border: #e4d8c4;
-  --markdown-quote-bg: #f7f1e7;
-  --markdown-quote-border: #2c9b78;
-  --markdown-quote-text: #5d6d64;
-  --markdown-table-stripe: #f8f2e8;
+  --markdown-shell-bg: color-mix(in oklab, var(--paper) 88%, var(--surface));
+  --markdown-shell-border: color-mix(in oklab, var(--border) 86%, transparent);
+  --markdown-heading: color-mix(in oklab, var(--foreground) 95%, black 5%);
+  --markdown-text: color-mix(in oklab, var(--foreground) 79%, transparent);
+  --markdown-link: color-mix(in oklab, var(--accent) 80%, var(--foreground) 20%);
+  --markdown-link-hover: color-mix(in oklab, var(--accent) 66%, var(--foreground) 34%);
+  --markdown-border: color-mix(in oklab, var(--border) 76%, transparent);
+  --markdown-code-bg: color-mix(in oklab, var(--linen) 58%, var(--surface));
+  --markdown-code-text: color-mix(in oklab, var(--foreground) 82%, transparent);
+  --markdown-pre-bg: color-mix(in oklab, var(--linen) 46%, var(--surface));
+  --markdown-pre-border: color-mix(in oklab, var(--border) 78%, transparent);
+  --markdown-quote-bg: color-mix(in oklab, var(--linen) 38%, var(--surface));
+  --markdown-quote-border: color-mix(in oklab, var(--accent) 45%, var(--border));
+  --markdown-quote-text: color-mix(in oklab, var(--foreground) 72%, transparent);
+  --markdown-table-stripe: color-mix(in oklab, var(--linen) 24%, transparent);
 }

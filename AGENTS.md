@@ -8,7 +8,7 @@
 ## Project Overview
 
 - **Framework**: React Router v7 with TypeScript
-- **UI Library**: HeroUI v3 (`@heroui/react`)
+- **UI Library**: shadcn/ui (file-based, in `app/components/ui/`)
 - **Styling**: Tailwind CSS v4
 - **React**: v19
 
@@ -37,7 +37,9 @@
 ```text
 app/
 |- components/   # Reusable UI components
+|  `- ui/        # shadcn/ui primitives (do not modify directly)
 |- contexts/     # React context providers
+|- lib/          # Utility functions (cn helper, etc.)
 |- routes/       # Route-level components
 |- styles/       # Global and shared styles
 `- utils/        # Utility functions and helpers
@@ -45,28 +47,36 @@ app/
 
 ---
 
-## HeroUI v3 Best Practices
+## shadcn/ui Best Practices
 
 ### Component Usage
 
-- Verify component availability with `heroui-react_list_components` before using
-- Use **compound component patterns** when the component supports them
-- Import from `@heroui/react`; never copy internal implementation code
-- Use official component docs for correct usage patterns and props
+- Components live in `app/components/ui/` — treat them as your own code
+- Import components with `~/components/ui/<component>` path alias
+- Use `cn()` from `~/lib/utils` for merging Tailwind classes
+- Use **lucide-react** for icons (`import { IconName } from 'lucide-react'`)
+- Use `variant` and `size` props defined by CVA in each component
 
 ### Styling
 
-- Use HeroUI built-in **variants and sizes** before custom styling
-- Leverage **theme variables** for consistent colors, spacing, and typography
+- Use shadcn built-in **variants and sizes** before custom styling
+- Leverage **CSS variables** (e.g., `--primary`, `--muted`, `--border`) for theming
 - Use Tailwind utility classes for layout adjustments
-- Avoid overriding HeroUI styles with `!important` or deep CSS selectors
+- Avoid overriding shadcn styles with `!important` or deep CSS selectors
 - Respect the existing theme system when changing colors or surfaces
 
 ### Theming
 
 - Use `oklch()` color format for custom colors when extending the theme
-- Define custom tokens via CSS variables when needed
+- Define custom tokens via CSS variables in `:root` and `.dark` blocks
 - Test both **light and dark mode** when modifying colors
+- The `data-theme="dark"` attribute and `.dark` class toggle dark mode
+
+### Adding New Components
+
+- Run `npx shadcn@latest add <component>` to add official shadcn components
+- Components are installed as source files — modify freely to fit the project
+- Use `npx shadcn@latest diff` to check for upstream updates
 
 ---
 
@@ -101,7 +111,7 @@ app/
 
 ### Loading & Feedback
 
-- Show **loading indicators** such as `Spinner` or `Skeleton` during async operations
+- Show **loading indicators** such as `Loader2Icon` with `animate-spin` during async operations
 - Use **Toast** notifications for success, error, and informational actions
 - Provide **optimistic updates** where appropriate
 - Disable interactive elements during submission to prevent double actions
@@ -109,7 +119,7 @@ app/
 ### Error Handling
 
 - Display **user-friendly error messages**, not raw stack traces
-- Use HeroUI `Alert` for inline errors when appropriate
+- Use shadcn `Alert` for inline errors when appropriate
 - Provide **recovery actions** such as retry or go back
 - Handle empty states gracefully with meaningful content
 
@@ -148,7 +158,7 @@ app/
 
 ### Touch & Interaction
 
-- Prefer **Drawer** over `Modal` for mobile-first flows when space is constrained
+- Prefer **Sheet** over `Dialog` for mobile-first flows when space is constrained
 - Ensure scrollable areas work with **touch gestures**
 - Avoid hover-dependent interactions on mobile
 - Use `hidden sm:block` and `block sm:hidden` when separate mobile and desktop UI is needed
@@ -181,9 +191,9 @@ app/
 
 ## Anti-Patterns to Avoid
 
-- Copying HeroUI internal source code into the project
+- Modifying shadcn/ui primitives without understanding the upstream API
 - Using `any` type to silence TypeScript errors
-- Inline styles when Tailwind or HeroUI variants exist
+- Inline styles when Tailwind or shadcn variants exist
 - Using array index as a key in dynamic lists
 - Massive components longer than necessary; split them up
 - Duplicated logic across components; extract to hooks or utilities
@@ -200,3 +210,5 @@ app/
 | Build | `npm run build` |
 | Typecheck | `npm run typecheck` |
 | Start production | `npm run start` |
+| Add shadcn component | `npx shadcn@latest add <name>` |
+| Check for updates | `npx shadcn@latest diff` |

@@ -10,7 +10,8 @@ import {
 } from 'react-router';
 import type { LinksFunction } from 'react-router';
 import { useState, useEffect } from 'react';
-import { Button, Separator } from '@heroui/react';
+import { Button } from '~/components/ui/button';
+import { Separator } from '~/components/ui/separator';
 import { ThemeProvider } from '~/contexts/ThemeContext';
 import packageJson from '../package.json';
 
@@ -50,11 +51,9 @@ function ScrollToTopButton() {
 
   return (
     <Button
-      variant="primary"
-      size="sm"
-      isIconOnly
-      className="fixed bottom-6 right-6 z-50 rounded-lg shadow-sm"
-      onPress={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      size="icon-sm"
+      className="fixed right-6 bottom-6 z-50 rounded-md border border-border/70 bg-surface shadow-none"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="Scroll to top"
     >
       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -73,7 +72,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>" />
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect x=%2212%22 y=%228%22 width=%2240%22 height=%2248%22 rx=%224%22 fill=%22%23171311%22/><line x1=%2220%22 y1=%2224%22 x2=%2244%22 y2=%2224%22 stroke=%22%23F4EFE7%22 stroke-width=%223%22/><line x1=%2220%22 y1=%2234%22 x2=%2244%22 y2=%2234%22 stroke=%22%23F4EFE7%22 stroke-width=%223%22/></svg>" />
         <Meta />
         <Links />
       </head>
@@ -83,24 +82,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground">
             Skip to content
           </a>
-          <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1500px] flex-col px-3 pb-8 pt-4 sm:px-5 lg:px-6">
-            <header className="mb-5">
-              <div className="app-shell-panel overflow-hidden rounded-[1.1rem] px-4 py-3 sm:px-5">
-                <div className="flex items-center justify-between gap-4">
-                  <Link to="/" className="group flex min-w-0 items-center gap-3">
-                    <div className="flex h-9 w-9 flex-none items-center justify-center rounded-[0.75rem] border border-border/70 bg-background text-foreground transition-colors duration-150 group-hover:border-foreground/12 group-hover:text-foreground/80">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 4.75h6.586a2 2 0 011.414.586l2.664 2.664A2 2 0 0118.25 9.414V18A2.25 2.25 0 0116 20.25H8A2.25 2.25 0 015.75 18V7A2.25 2.25 0 018 4.75zm1.75 4.5h6.5m-6.5 4h6.5m-6.5 4h4.25" />
-                      </svg>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg">
-                        Markdown Viewer
-                      </p>
-                    </div>
+          <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1420px] flex-col px-4 pb-10 pt-5 sm:px-6 lg:px-8">
+            <header className="mb-8">
+              <div className="app-shell-panel overflow-hidden rounded-md px-5 py-4 sm:px-6">
+                <div className="flex items-end justify-between gap-4">
+                  <Link to="/" className="group min-w-0">
+                    <p className="truncate font-[var(--font-display)] text-2xl leading-none tracking-tight text-foreground sm:text-3xl">
+                      Markdown Viewer
+                    </p>
+                    <p className="mt-2 text-xs tracking-[0.18em] text-muted-foreground uppercase">
+                      Editorial reading workspace
+                    </p>
                   </Link>
 
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
+                  <div className="flex flex-wrap items-center gap-3 text-xs tracking-[0.16em] text-muted-foreground uppercase">
                     <span>{isHomePage ? 'Library' : 'Reader'}</span>
                     <span aria-hidden="true">/</span>
                     <span>v{APP_VERSION}</span>
@@ -112,9 +107,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <main id="main-content" className="flex-1">
               <Outlet />
             </main>
-            <Separator className="mb-4 mt-10 opacity-60" />
-            <footer className="px-1 py-2 text-sm text-muted">
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <Separator className="mb-4 mt-12 opacity-55" />
+            <footer className="px-1 py-2 text-xs tracking-[0.14em] text-muted uppercase">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p>Markdown Viewer</p>
                 <p>v{APP_VERSION}</p>
               </div>

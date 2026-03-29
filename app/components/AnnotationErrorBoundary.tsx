@@ -1,5 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react';
-import { Alert } from '@heroui/react';
+import { Alert, AlertTitle, AlertDescription } from '~/components/ui/alert';
 
 interface Props {
   children: ReactNode;
@@ -28,13 +28,11 @@ export class AnnotationErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return this.props.fallback || (
-        <Alert status="warning">
-          <Alert.Content>
-            <Alert.Title>Comments temporarily unavailable</Alert.Title>
-            <Alert.Description>
-              The document still rendered, but the annotation layer hit an error. Refresh to try again.
-            </Alert.Description>
-          </Alert.Content>
+        <Alert>
+          <AlertTitle>Comments temporarily unavailable</AlertTitle>
+          <AlertDescription>
+            The document still rendered, but the annotation layer hit an error. Refresh to try again.
+          </AlertDescription>
         </Alert>
       );
     }

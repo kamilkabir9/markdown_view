@@ -1,6 +1,8 @@
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { useLoaderData, useNavigate, useRouteError, isRouteErrorResponse } from 'react-router';
-import { Alert, Breadcrumbs, Button, Surface } from '@heroui/react';
+import { Alert, AlertTitle, AlertDescription } from '~/components/ui/alert';
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
+import { Button } from '~/components/ui/button';
 import { LineAnnotatedMarkdown } from '~/components/LineAnnotatedMarkdown';
 import { AnnotationErrorBoundary } from '~/components/AnnotationErrorBoundary';
 import { AnnotationStoreProvider } from '~/contexts/AnnotationStore';
@@ -25,17 +27,6 @@ export async function loader({ params }: LoaderFunctionArgs) {
   return result;
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function estimateReadTime(content: string): string {
-  const words = content.trim().split(/\s+/).filter(Boolean).length;
-  return `${Math.max(1, Math.round(words / 220))} min read`;
-}
-
 export default function MarkdownPage() {
   const { content, path, sourcePath } = useLoaderData<typeof loader>();
   const { theme } = useTheme();
@@ -44,16 +35,24 @@ export default function MarkdownPage() {
 
   return (
     <AnnotationStoreProvider filePath={path}>
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
-          <div className="mx-auto max-w-[1500px]">
-            <nav aria-label="Breadcrumb" className="px-1 pb-1">
-              <Breadcrumbs className="gap-2 text-sm">
-                <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
-                <Breadcrumbs.Item href="/">Markdown Files</Breadcrumbs.Item>
-                <Breadcrumbs.Item>{title}</Breadcrumbs.Item>
-              </Breadcrumbs>
-            </nav>
+          <div className="mx-auto max-w-[1420px]">
+            <Breadcrumb className="px-1 pb-1">
+              <BreadcrumbList className="gap-2 text-sm">
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Markdown Files</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{title}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
           </div>
         </div>
 
@@ -70,17 +69,25 @@ function ErrorState({ title, description }: { title: string; description: string
 
   return (
     <div className="space-y-6">
-      <nav aria-label="Breadcrumb">
-        <Breadcrumbs className="gap-2 text-sm">
-          <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
-          <Breadcrumbs.Item href="/">Markdown Files</Breadcrumbs.Item>
-          <Breadcrumbs.Item>Error</Breadcrumbs.Item>
-        </Breadcrumbs>
-      </nav>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Markdown Files</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Error</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <Surface variant="transparent" className="app-shell-panel rounded-[1.2rem] p-8 sm:p-10">
+      <div className="app-shell-panel rounded-md p-8 sm:p-10">
         <div className="max-w-xl space-y-5 text-left">
-          <div className="flex h-12 w-12 items-center justify-center rounded-[0.9rem] border border-danger/25 bg-surface text-danger">
+          <div className="flex h-12 w-12 items-center justify-center rounded-sm border border-destructive/30 bg-surface text-destructive">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 9v4m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
             </svg>
@@ -90,25 +97,23 @@ function ErrorState({ title, description }: { title: string; description: string
             <h1 className="font-[var(--font-display)] text-4xl tracking-tight text-foreground sm:text-5xl">
               {title}
             </h1>
-            <p className="mt-3 text-base leading-7 text-muted">{description}</p>
+            <p className="mt-3 text-base leading-7 text-muted-foreground">{description}</p>
           </div>
 
-          <Alert status="danger" className="text-left">
-            <Alert.Content>
-              <Alert.Title>Reader unavailable</Alert.Title>
-              <Alert.Description>
-                Head back to the file list and choose another document, or verify the markdown file still exists.
-              </Alert.Description>
-            </Alert.Content>
+          <Alert variant="destructive" className="rounded-sm text-left shadow-none">
+            <AlertTitle>Reader unavailable</AlertTitle>
+            <AlertDescription>
+              Head back to the file list and choose another document, or verify the markdown file still exists.
+            </AlertDescription>
           </Alert>
 
           <div className="flex">
-            <Button className="rounded-[0.8rem] px-5" onPress={() => navigate('/')}>
+            <Button className="rounded-sm px-5" onClick={() => navigate('/')}>
               Back to file list
             </Button>
           </div>
         </div>
-      </Surface>
+      </div>
     </div>
   );
 }

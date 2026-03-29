@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "@heroui/styles";
 @plugin "@tailwindcss/typography";
 @import "highlight.js/styles/github.min.css";
 @import "tw-animate-css";
@@ -9,41 +8,51 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-ui: "Avenir Next", "Segoe UI Variable", "Segoe UI", "Helvetica Neue", sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-ui: "Instrument Sans", "Geist Variable", "Suisse Intl", "Avenir Next", "Segoe UI Variable", "Helvetica Neue", sans-serif;
+  --font-display: "Bodoni Moda", "Canela", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --font-reading: Charter, "Iowan Old Style", Georgia, serif;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --paper: #f4efe7;
+  --linen: #e7ddd0;
+  --ink: #171311;
+  --roast: #4b372c;
+  --brass: #9c7652;
+  --oxblood: #7a3a32;
+  --background: oklch(0.95 0.016 77.9);
+  --foreground: oklch(0.19 0.015 48.7);
+  --card: oklch(0.97 0.012 78.8);
+  --card-foreground: oklch(0.19 0.015 48.7);
+  --popover: oklch(0.975 0.01 78.8);
+  --popover-foreground: oklch(0.19 0.015 48.7);
+  --primary: oklch(0.34 0.04 53.1);
+  --primary-foreground: oklch(0.98 0.004 80);
+  --secondary: oklch(0.92 0.014 76.6);
+  --secondary-foreground: oklch(0.23 0.02 48.5);
+  --muted: oklch(0.92 0.009 75.7);
+  --muted-foreground: oklch(0.43 0.021 49.8);
+  --accent: oklch(0.61 0.052 60.9);
+  --accent-foreground: oklch(0.2 0.015 48.5);
+  --destructive: oklch(0.48 0.099 31.2);
+  --border: oklch(0.84 0.014 73.6);
+  --input: oklch(0.85 0.011 74.3);
+  --ring: oklch(0.62 0.05 60.5);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.45rem;
+  --sidebar: oklch(0.96 0.012 78);
+  --sidebar-foreground: oklch(0.19 0.015 48.7);
+  --sidebar-primary: oklch(0.34 0.04 53.1);
+  --sidebar-primary-foreground: oklch(0.98 0.004 80);
+  --sidebar-accent: oklch(0.92 0.014 76.6);
+  --sidebar-accent-foreground: oklch(0.23 0.02 48.5);
+  --sidebar-border: oklch(0.84 0.014 73.6);
+  --sidebar-ring: oklch(0.62 0.05 60.5);
+  --surface: oklch(0.965 0.01 78.3);
+  --surface-secondary: oklch(0.94 0.01 76.5);
+  --color-warning: oklch(0.71 0.09 77);
+  --color-success: oklch(0.58 0.06 145);
 }
 
 html {
@@ -54,7 +63,10 @@ body {
   position: relative;
   isolation: isolate;
   font-family: var(--font-ui);
-  background: color-mix(in oklab, var(--background) 94%, white);
+  background:
+    radial-gradient(circle at 14% 8%, color-mix(in oklab, var(--linen) 20%, transparent) 0, transparent 48%),
+    radial-gradient(circle at 86% 0%, color-mix(in oklab, var(--surface) 38%, transparent) 0, transparent 44%),
+    var(--background);
 }
 
 [data-theme="dark"] body {
@@ -62,7 +74,7 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--accent) 28%, white);
+  background: color-mix(in oklab, var(--accent) 26%, white);
   color: var(--foreground);
 }
 
@@ -79,21 +91,21 @@ body {
 }
 
 .app-shell-panel {
-  border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
-  background: color-mix(in oklab, var(--surface) 94%, white);
-  box-shadow: 0 18px 44px -40px rgba(15, 23, 42, 0.32);
+  border: 1px solid color-mix(in oklab, var(--border) 84%, transparent);
+  background: color-mix(in oklab, var(--surface) 96%, white);
+  box-shadow: none;
 }
 
 [data-theme="dark"] .app-shell-panel {
-  background: color-mix(in oklab, var(--surface) 90%, var(--background));
-  box-shadow: 0 18px 44px -40px rgba(0, 0, 0, 0.7);
+  background: color-mix(in oklab, var(--surface) 92%, var(--background));
+  box-shadow: none;
 }
 
 .markdown-article {
   color: var(--markdown-text);
   font-family: var(--font-reading);
-  font-size: 1.03rem;
-  line-height: 1.85;
+  font-size: 1.04rem;
+  line-height: 1.82;
 }
 
 .markdown-article > :first-child {
@@ -105,28 +117,28 @@ body {
 }
 
 .markdown-article :where(h1, h2, h3, h4, h5, h6) {
-  margin-top: 2.4rem;
+  margin-top: 2.2rem;
   margin-bottom: 1rem;
   color: var(--markdown-heading);
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
 }
 
 .markdown-article :where(h1) {
   margin-top: 0;
-  font-size: clamp(2.6rem, 4vw, 4rem);
+  font-size: clamp(2.35rem, 4vw, 3.5rem);
 }
 
 .markdown-article :where(h2) {
   padding-bottom: 0.65rem;
   border-bottom: 1px solid var(--markdown-border);
-  font-size: clamp(1.85rem, 3vw, 2.35rem);
+  font-size: clamp(1.75rem, 3vw, 2.2rem);
 }
 
 .markdown-article :where(h3) {
-  font-size: clamp(1.45rem, 2vw, 1.7rem);
+  font-size: clamp(1.35rem, 2vw, 1.6rem);
 }
 
 .markdown-article :where(h4, h5, h6) {
@@ -176,7 +188,7 @@ body {
 .markdown-article :where(code):not(pre code) {
   padding: 0.15rem 0.45rem;
   border: 1px solid var(--markdown-border);
-  border-radius: 0.55rem;
+  border-radius: 0.35rem;
   background: var(--markdown-code-bg);
   color: var(--markdown-code-text);
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, monospace;
@@ -186,9 +198,9 @@ body {
 .markdown-article :where(pre) {
   overflow-x: auto;
   border: 1px solid var(--markdown-pre-border);
-  border-radius: 1.4rem;
+  border-radius: 0.5rem;
   background: var(--markdown-pre-bg);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: none;
 }
 
 .markdown-article :where(pre code) {
@@ -203,8 +215,8 @@ body {
 .markdown-article :where(blockquote) {
   padding: 1rem 1.15rem;
   border: 1px solid var(--markdown-border);
-  border-left: 4px solid var(--markdown-quote-border);
-  border-radius: 1.1rem;
+  border-left: 2px solid var(--markdown-quote-border);
+  border-radius: 0.35rem;
   background: var(--markdown-quote-bg);
   color: var(--markdown-quote-text);
 }
@@ -222,7 +234,7 @@ body {
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid var(--markdown-border);
-  border-radius: 1rem;
+  border-radius: 0.4rem;
 }
 
 .markdown-article :where(th, td) {
@@ -252,8 +264,8 @@ body {
   width: min(100%, 100%);
   margin: 1.5rem auto;
   border: 1px solid var(--markdown-border);
-  border-radius: 1.5rem;
-  box-shadow: 0 28px 60px -42px rgba(15, 23, 42, 0.6);
+  border-radius: 0.5rem;
+  box-shadow: none;
 }
 
 .markdown-article :where(.hljs) {
@@ -272,19 +284,19 @@ body {
 
 .annotation-mark {
   position: relative;
-  border-radius: 0.3rem;
+  border-radius: 0.1rem;
   padding: 0.03rem 0.16rem;
-  background: color-mix(in oklab, var(--color-warning) 6%, transparent);
-  box-shadow: inset 0 -0.08rem 0 color-mix(in oklab, var(--color-warning) 22%, transparent);
+  background: color-mix(in oklab, var(--color-warning) 8%, transparent);
+  box-shadow: inset 0 -0.08rem 0 color-mix(in oklab, var(--color-warning) 26%, transparent);
 }
 
 .annotation-mark--active {
-  background-color: color-mix(in oklab, var(--color-warning) 9%, transparent);
+  background-color: color-mix(in oklab, var(--color-warning) 12%, transparent);
   animation: none;
 }
 
 .annotation-mark:hover {
-  background: color-mix(in oklab, var(--color-warning) 8%, transparent);
+  background: color-mix(in oklab, var(--color-warning) 11%, transparent);
 }
 
 [data-theme="dark"] .annotation-mark {
@@ -318,16 +330,16 @@ body {
   left: -1.1rem;
   top: 0.28em;
   bottom: 0.28em;
-  width: 0.14rem;
+  width: 0.1rem;
   border-radius: 999px;
-  background: color-mix(in oklab, var(--color-warning) 44%, transparent);
-  opacity: 0.7;
+  background: color-mix(in oklab, var(--color-warning) 30%, transparent);
+  opacity: 0.6;
 }
 
 .markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-active]::before {
-  width: 0.18rem;
-  background: color-mix(in oklab, var(--color-warning) 64%, white 6%);
-  box-shadow: 0 0 0.45rem color-mix(in oklab, var(--color-warning) 14%, transparent);
+  width: 0.14rem;
+  background: color-mix(in oklab, var(--color-warning) 52%, white 5%);
+  box-shadow: none;
 }
 
 [data-theme="dark"] .markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-block]::before {
@@ -361,8 +373,8 @@ body {
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-heading: var(--font-display);
+  --font-sans: var(--font-ui);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -394,6 +406,10 @@ body {
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-warning: var(--color-warning);
+  --color-success: var(--color-success);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -404,24 +420,24 @@ body {
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --background: oklch(0.19 0.012 66);
+  --foreground: oklch(0.94 0.006 85);
+  --card: oklch(0.23 0.01 68);
+  --card-foreground: oklch(0.94 0.006 85);
+  --popover: oklch(0.24 0.009 68);
+  --popover-foreground: oklch(0.94 0.006 85);
+  --primary: oklch(0.83 0.02 68);
+  --primary-foreground: oklch(0.21 0.01 68);
+  --secondary: oklch(0.29 0.008 67);
+  --secondary-foreground: oklch(0.94 0.006 85);
+  --muted: oklch(0.29 0.008 67);
+  --muted-foreground: oklch(0.74 0.01 75);
+  --accent: oklch(0.72 0.046 62);
+  --accent-foreground: oklch(0.19 0.012 66);
+  --destructive: oklch(0.58 0.091 33);
+  --border: oklch(0.38 0.01 67);
+  --input: oklch(0.4 0.009 67);
+  --ring: oklch(0.72 0.046 62);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -429,12 +445,16 @@ body {
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.72 0.046 62);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --surface: oklch(0.25 0.01 68);
+  --surface-secondary: oklch(0.28 0.009 68);
+  --color-warning: oklch(0.7 0.09 77);
+  --color-success: oklch(0.66 0.06 145);
 }
 
 @layer base {

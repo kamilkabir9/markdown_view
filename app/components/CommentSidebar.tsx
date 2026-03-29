@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { Button, Card, ScrollShadow } from '@heroui/react';
+import { Button } from '~/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card';
+import { CheckIcon, CopyIcon, PencilIcon, XIcon, ClipboardIcon } from 'lucide-react';
 import type { Annotation } from '~/contexts/AnnotationStore';
 
 interface CommentSidebarProps {
@@ -227,57 +229,49 @@ export function CommentSidebar({
   );
 
   return (
-    <Card className={`h-full rounded-[1.1rem] border border-border/60 bg-surface shadow-none ${className}`.trim()}>
-      <Card.Header className="gap-3 border-b border-border/60 px-4 py-4">
+    <Card className={`h-full rounded-md border border-border/65 bg-surface shadow-none ${className}`.trim()}>
+      <CardHeader className="gap-3 border-b border-border/65 px-4 py-4">
         <div className="flex w-full items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <Card.Title className="text-base tracking-tight">Comments</Card.Title>
-              <span className="text-sm text-muted">{counts.all}</span>
+                <CardTitle className="font-[var(--font-display)] text-2xl leading-none tracking-tight">Comments</CardTitle>
+                <span className="text-sm text-muted-foreground">{counts.all}</span>
+              </div>
             </div>
-          </div>
 
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="sm"
-              isIconOnly
-              className="rounded-[0.8rem]"
+              size="icon-sm"
+              className="rounded-sm border border-border/70"
               aria-label="Copy all comments"
-              isDisabled={!annotations.length}
-              onPress={handleCopyAll}
+              disabled={!annotations.length}
+              onClick={handleCopyAll}
             >
               {copiedId === '__all__' ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                <CheckIcon className="h-4 w-4 text-success" />
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7.75A2.25 2.25 0 0110.25 5.5h6A2.25 2.25 0 0118.5 7.75v8.5A2.25 2.25 0 0116.25 18.5h-6A2.25 2.25 0 018 16.25v-8.5zm-2.5 9V8.25A2.25 2.25 0 018 6" />
-                </svg>
+                <CopyIcon className="h-4 w-4" />
               )}
             </Button>
 
             {onClose ? (
               <Button
                 variant="ghost"
-                size="sm"
-                isIconOnly
-                className="rounded-[0.8rem]"
+                size="icon-sm"
+                className="rounded-sm border border-border/70"
                 aria-label="Close comments"
-                onPress={onClose}
+                onClick={onClose}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6 6l12 12M18 6L6 18" />
-                </svg>
+                <XIcon className="h-4 w-4" />
               </Button>
             ) : null}
           </div>
         </div>
-      </Card.Header>
+      </CardHeader>
 
-      <Card.Content className="flex flex-1 flex-col gap-4 p-4 pt-4">
-        <div className="grid grid-cols-3 gap-2">
+      <CardContent className="flex flex-1 flex-col gap-4 p-4 pt-4">
+        <div className="grid grid-cols-3 gap-2 border-b border-border/65 pb-4">
           {[
             { key: 'all' as const, label: 'All', count: counts.all },
             { key: 'linked' as const, label: 'Inline', count: counts.linked },
@@ -287,25 +281,25 @@ export function CommentSidebar({
               key={item.key}
               size="sm"
               variant={filter === item.key ? 'secondary' : 'ghost'}
-              className="justify-between rounded-[0.8rem] px-3"
-              onPress={() => setFilter(item.key)}
+              className="justify-between rounded-sm px-3"
+              onClick={() => setFilter(item.key)}
             >
               <span>{item.label}</span>
-              <span className="text-xs text-muted">{item.count}</span>
+              <span className="text-xs text-muted-foreground">{item.count}</span>
             </Button>
           ))}
         </div>
 
         {counts.all === 0 ? (
-          <div className="rounded-[1rem] border border-dashed border-border/70 bg-background/72 p-5 text-sm">
+          <div className="rounded-sm border border-dashed border-border/70 bg-background/72 p-5 text-sm">
             <p className="font-semibold tracking-tight text-foreground">No comments yet</p>
           </div>
         ) : filteredAnnotations.length === 0 ? (
-          <div className="rounded-[1rem] border border-dashed border-border/70 bg-background/72 p-5 text-sm">
+          <div className="rounded-sm border border-dashed border-border/70 bg-background/72 p-5 text-sm">
             <p className="font-semibold tracking-tight text-foreground">No comments in this view</p>
           </div>
         ) : (
-          <ScrollShadow className="max-h-[min(65vh,42rem)] pr-1" hideScrollBar>
+          <div className="max-h-[min(65vh,42rem)] overflow-y-auto pr-1 scrollbar-hide">
             <div className="space-y-3 pb-1">
               {filteredAnnotations.map((annotation, index) => {
                 const isActive = annotation.id === activeAnnotationId;
@@ -320,18 +314,17 @@ export function CommentSidebar({
                       onAnnotationClick?.(annotation);
                     }}
                   >
-                    <Card
-                      variant={isActive ? 'secondary' : 'default'}
-                      className={`cursor-pointer rounded-[1rem] border transition-all duration-200 ${
+                     <Card
+                       className={`cursor-pointer rounded-sm border transition-all duration-200 ${
                         isActive
-                          ? 'border-foreground/12 bg-surface'
-                          : 'border-border/60 bg-background shadow-none hover:border-foreground/12'
+                          ? 'border-foreground/16 bg-surface'
+                          : 'border-border/65 bg-background shadow-none hover:border-foreground/16'
                       }`}
                     >
-                      <Card.Content className="space-y-4 p-4">
+                      <CardContent className="space-y-4 p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3">
-                            <div className={`flex h-10 w-10 items-center justify-center rounded-[0.85rem] border text-sm font-semibold ${isActive ? 'border-foreground/12 bg-background text-foreground' : 'border-border/70 bg-surface text-muted'}`}>
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-sm border text-sm font-semibold ${isActive ? 'border-foreground/16 bg-background text-foreground' : 'border-border/70 bg-surface text-muted-foreground'}`}>
                               {String(index + 1).padStart(2, '0')}
                             </div>
                             <div>
@@ -339,9 +332,9 @@ export function CommentSidebar({
                                 <p className="text-sm font-semibold tracking-tight text-foreground">
                                   {annotation.isGlobal ? 'Document note' : 'Inline note'}
                                 </p>
-                                <span className="text-xs text-muted">{annotation.isGlobal ? 'Document' : 'Linked'}</span>
+                                <span className="text-[0.67rem] tracking-[0.12em] text-muted-foreground uppercase">{annotation.isGlobal ? 'Document' : 'Linked'}</span>
                               </div>
-                              <p className="mt-1 text-xs font-medium text-muted">
+                              <p className="mt-1 text-xs font-medium text-muted-foreground">
                                 {formatCreatedAt(annotation.createdAt)}
                               </p>
                             </div>
@@ -350,60 +343,49 @@ export function CommentSidebar({
                           <div className="flex items-center gap-1">
                             <Button
                               variant="ghost"
-                              size="sm"
-                              isIconOnly
-                              className="rounded-[0.8rem]"
+                              size="icon-sm"
+                              className="rounded-sm border border-border/70"
                               aria-label="Edit comment"
-                              onPress={() => startEditing(annotation)}
+                              onClick={() => startEditing(annotation)}
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16.862 4.487a2.1 2.1 0 112.97 2.97L8.75 18.539 5 19l.461-3.75 11.4-10.763z" />
-                              </svg>
+                              <PencilIcon className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
-                              isIconOnly
-                              className="rounded-[0.8rem]"
+                              size="icon-sm"
+                              className="rounded-sm border border-border/70"
                               aria-label="Copy comment"
-                              onPress={() => handleCopyOne(annotation)}
+                              onClick={() => handleCopyOne(annotation)}
                             >
                               {copiedId === annotation.id ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
+                                <CheckIcon className="h-4 w-4 text-success" />
                               ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7.75A2.25 2.25 0 0110.25 5.5h6A2.25 2.25 0 0118.5 7.75v8.5A2.25 2.25 0 0116.25 18.5h-6A2.25 2.25 0 018 16.25v-8.5zm-2.5 9V8.25A2.25 2.25 0 018 6" />
-                                </svg>
+                                <ClipboardIcon className="h-4 w-4" />
                               )}
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
-                              isIconOnly
-                              className="rounded-[0.8rem]"
+                              size="icon-sm"
+                              className="rounded-sm border border-border/70"
                               aria-label="Remove comment"
-                              onPress={() => onRemove(annotation.id)}
+                              onClick={() => onRemove(annotation.id)}
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6 6l12 12M18 6L6 18" />
-                              </svg>
+                              <XIcon className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
 
                         {annotation.isGlobal ? (
-                          <div className="rounded-[0.9rem] border border-border/60 bg-surface px-3 py-2.5 text-sm text-muted">
+                          <div className="rounded-sm border border-border/65 bg-surface px-3 py-2.5 text-sm text-muted-foreground">
                             Document note
                           </div>
                         ) : (
-                          <div className="rounded-[0.9rem] border border-border/60 bg-surface px-3 py-3">
-                            <p className="text-xs text-muted">
+                          <div className="rounded-sm border border-border/65 bg-surface px-3 py-3">
+                            <p className="text-[0.67rem] tracking-[0.12em] text-muted-foreground uppercase">
                               Selected text
                             </p>
                             <p className="mt-2 line-clamp-3 text-sm leading-6 text-foreground/90">
-                              “{annotation.anchor?.exact}”
+                              "{annotation.anchor?.exact}"
                             </p>
                           </div>
                         )}
@@ -414,16 +396,16 @@ export function CommentSidebar({
                               value={editingText}
                               onChange={(event) => setEditingText(event.target.value)}
                               onKeyDown={handleEditKeyDown}
-                              className="min-h-[7rem] w-full rounded-[0.9rem] border border-border/70 bg-background px-3 py-2.5 text-sm leading-6 text-foreground outline-none transition focus:border-foreground/20 focus:ring-2 focus:ring-foreground/8"
+                              className="min-h-[7rem] w-full rounded-sm border border-border/70 bg-background px-3 py-2.5 text-sm leading-6 text-foreground outline-none transition focus:border-foreground/20 focus:ring-2 focus:ring-foreground/8"
                               rows={4}
                               autoFocus
                             />
                             <div className="flex flex-wrap items-center justify-between gap-3">
                               <div className="flex items-center gap-2">
-                                <Button size="sm" variant="ghost" className="rounded-[0.8rem] px-3" onPress={cancelEditing}>
+                                <Button size="sm" variant="ghost" className="rounded-sm border border-border/70 px-3" onClick={cancelEditing}>
                                   Cancel
                                 </Button>
-                                <Button size="sm" className="rounded-[0.8rem] px-3" isDisabled={!editingText.trim()} onPress={saveEditing}>
+                                <Button size="sm" className="rounded-sm px-3" disabled={!editingText.trim()} onClick={saveEditing}>
                                   Save
                                 </Button>
                               </div>
@@ -432,15 +414,15 @@ export function CommentSidebar({
                         ) : (
                           <p className="text-sm leading-7 text-foreground">{annotation.text}</p>
                         )}
-                      </Card.Content>
+                      </CardContent>
                     </Card>
                   </div>
                 );
               })}
             </div>
-          </ScrollShadow>
+          </div>
         )}
-      </Card.Content>
+      </CardContent>
     </Card>
   );
 }

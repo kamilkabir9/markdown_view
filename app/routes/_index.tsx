@@ -1,7 +1,16 @@
 import { useMemo, useState } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { Link, useLoaderData } from 'react-router';
-import { Alert, Breadcrumbs, SearchField, Surface, Table } from '@heroui/react';
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '~/components/ui/breadcrumb';
+import { SearchIcon, XIcon } from 'lucide-react';
 import { getMarkdownFiles, type FileInfo } from '~/utils/files.server';
 
 export const meta: MetaFunction = () => [{ title: 'Markdown Viewer' }];
@@ -49,11 +58,11 @@ function getDirectoryCount(files: FileInfo[]) {
   ).size;
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-l border-border/80 pl-4">
-      <p className="text-sm text-muted">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+    <div className="space-y-1 border-l border-border/70 pl-4">
+      <p className="text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">{label}</p>
+      <p className="text-2xl leading-none font-semibold tracking-tight text-foreground">{value}</p>
     </div>
   );
 }
@@ -84,162 +93,145 @@ export default function Index() {
 
   if (files.length === 0) {
     return (
-      <div className="space-y-6">
-        <nav aria-label="Breadcrumb">
-          <Breadcrumbs className="gap-2 text-sm">
-            <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
-            <Breadcrumbs.Item>Markdown Files</Breadcrumbs.Item>
-          </Breadcrumbs>
-        </nav>
+      <div className="space-y-7">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Markdown Files</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-        <Surface variant="transparent" className="app-shell-panel rounded-[1.1rem] p-6 sm:p-8">
-          <div className="max-w-2xl space-y-4">
+        <section className="app-shell-panel rounded-md p-6 sm:p-8">
+          <div className="max-w-3xl space-y-5">
             <div>
-              <h1 className="font-[var(--font-display)] text-4xl tracking-tight text-foreground sm:text-[2.8rem]">
+              <h1 className="font-[var(--font-display)] text-[clamp(2rem,5vw,3.3rem)] leading-[0.95] tracking-tight text-foreground">
                 No markdown files found.
               </h1>
-              <p className="mt-3 text-base leading-7 text-muted">
-                Add a few `.md` files to this folder and they will appear here as a simple reading library.
+              <p className="mt-4 max-w-2xl text-base leading-8 text-muted-foreground">
+                Add a few `.md` files to this folder and they will appear here as a quiet, searchable library.
               </p>
             </div>
-            <Alert status="accent" role="alert" className="max-w-lg border-border/60 bg-surface text-left">
-              <Alert.Content>
-                <Alert.Title>Tip</Alert.Title>
-                <Alert.Description>
-                  The CLI can also point at another folder with `markdown-viewer --cwd ./docs`.
-                </Alert.Description>
-              </Alert.Content>
+
+            <Alert className="max-w-xl rounded-sm border-border/65 bg-surface text-left shadow-none">
+              <AlertTitle>Tip</AlertTitle>
+              <AlertDescription>
+                You can point the CLI at another folder with `markdown-viewer --cwd ./docs`.
+              </AlertDescription>
             </Alert>
           </div>
-        </Surface>
+        </section>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <nav aria-label="Breadcrumb">
-        <Breadcrumbs className="gap-2 text-sm">
-          <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
-          <Breadcrumbs.Item>Markdown Files</Breadcrumbs.Item>
-        </Breadcrumbs>
-      </nav>
+    <div className="space-y-7">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Markdown Files</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <section>
-        <Surface variant="transparent" className="app-shell-panel rounded-[1.1rem] p-6 sm:p-8">
-          <div className="flex flex-col gap-8">
-            <div className="max-w-3xl">
-               <h1 className="font-[var(--font-display)] text-4xl tracking-tight text-foreground sm:text-5xl">
-                 Markdown library
-               </h1>
-               <p className="mt-4 text-base leading-7 text-muted">
-                 Browse the current folder, search by name, and open any document in a quiet reading view.
-               </p>
-             </div>
-
-            <div className="grid gap-5 border-t border-border/70 pt-5 sm:grid-cols-3">
-              <StatCard
-                label="Files"
-                value={String(files.length)}
-              />
-              <StatCard
-                label="Folders"
-                value={String(directoryCount)}
-              />
-              <StatCard
-                label="Fresh This Week"
-                value={String(recentCount)}
-              />
-            </div>
-          </div>
-        </Surface>
-      </section>
-
-      <Surface variant="transparent" className="app-shell-panel rounded-[1.1rem] p-5 sm:p-6">
-        <div className="flex flex-col gap-5 border-b border-border/70 pb-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">Files</h2>
-            <p className="mt-1 text-sm text-muted">
-              {search.trim() ? `${filteredFiles.length} results for “${search}”` : `${files.length} documents in this folder`}
+      <section className="app-shell-panel rounded-md p-6 sm:p-8">
+        <div className="space-y-6">
+          <div className="max-w-3xl">
+            <h1 className="font-[var(--font-display)] text-[clamp(2.15rem,5vw,3.8rem)] leading-[0.92] tracking-tight text-foreground">
+              Markdown library
+            </h1>
+            <p className="mt-4 max-w-2xl text-base leading-8 text-muted-foreground">
+              Browse every file in this workspace, scan metadata quickly, and open each document in a focused reader.
             </p>
           </div>
 
-          <div className="w-full max-w-xl">
-            <SearchField aria-label="Search markdown files" value={search} onChange={setSearch}>
-              <SearchField.Group className="h-11 rounded-[0.75rem] border border-border/70 bg-surface px-3">
-                <SearchField.SearchIcon />
-                <SearchField.Input placeholder="Search by file name or nested path..." className="h-11" />
-                <SearchField.ClearButton />
-              </SearchField.Group>
-            </SearchField>
+          <div className="grid gap-5 border-y border-border/70 py-5 sm:grid-cols-3">
+            <Stat label="Files" value={String(files.length)} />
+            <Stat label="Folders" value={String(directoryCount)} />
+            <Stat label="Fresh this week" value={String(recentCount)} />
+          </div>
+
+          <div className="max-w-2xl">
+            <label htmlFor="file-search" className="mb-2 block text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">
+              Search files
+            </label>
+            <div className="flex h-11 items-center gap-3 border-b border-border/80 px-1">
+              <SearchIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <input
+                id="file-search"
+                type="text"
+                aria-label="Search markdown files"
+                placeholder="Type a file name or folder path"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="h-11 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/90 outline-none"
+              />
+              {search ? (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="rounded-sm p-1 text-muted-foreground transition hover:text-foreground"
+                  aria-label="Clear search"
+                >
+                  <XIcon className="h-4 w-4" />
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="pt-5">
-          {filteredFiles.length === 0 && search.trim() ? (
-            <Alert status="accent" role="alert" className="border-border/60 bg-surface">
-              <Alert.Content>
-                <Alert.Title>No matches yet</Alert.Title>
-                <Alert.Description>
-                  No files matched “{search}”. Try a shorter name, a folder segment, or clear the search.
-                </Alert.Description>
-              </Alert.Content>
-            </Alert>
-          ) : (
-            <Table variant="secondary" className="border border-border/60 rounded-[0.95rem]">
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Markdown files" className="min-w-[42rem] bg-transparent">
-                  <Table.Header className="border-b border-border/60 bg-surface/70">
-                    <Table.Column isRowHeader className="px-4 py-3 text-sm font-medium text-muted">
-                      File
-                    </Table.Column>
-                    <Table.Column className="px-4 py-3 text-sm font-medium text-muted">
-                      Location
-                    </Table.Column>
-                    <Table.Column className="px-4 py-3 text-sm font-medium text-muted">
-                      Size
-                    </Table.Column>
-                    <Table.Column className="px-4 py-3 text-sm font-medium text-muted">
-                      Updated
-                    </Table.Column>
-                  </Table.Header>
-                  <Table.Body items={filteredFiles}>
-                    {(file) => {
-                      const { name, directory } = splitRelativePath(file.relativePath);
-
-                      return (
-                        <Table.Row
-                          key={file.path}
-                          id={file.path}
-                          className="border-b border-border/60 last:border-b-0 data-[hovered]:bg-surface/55"
-                        >
-                          <Table.Cell className="px-4 py-3.5 align-top">
-                            <Link
-                              to={`/${file.relativePath}`}
-                              className="block min-w-0 text-foreground transition-colors duration-150 hover:text-foreground/82"
-                            >
-                              <span className="block truncate text-base font-semibold tracking-tight">{name}</span>
-                            </Link>
-                          </Table.Cell>
-                          <Table.Cell className="px-4 py-3.5 align-top text-sm text-muted">
-                            <span className="block min-w-0 truncate">{directory}</span>
-                          </Table.Cell>
-                          <Table.Cell className="px-4 py-3.5 align-top text-sm text-muted whitespace-nowrap">
-                            {formatFileSize(file.size)}
-                          </Table.Cell>
-                          <Table.Cell className="px-4 py-3.5 align-top text-sm text-muted whitespace-nowrap">
-                            {formatRelativeDate(file.modified)}
-                          </Table.Cell>
-                        </Table.Row>
-                      );
-                    }}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
-          )}
+      <section className="app-shell-panel rounded-md p-4 sm:p-5">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-border/70 pb-4">
+          <h2 className="font-[var(--font-display)] text-3xl leading-none tracking-tight text-foreground">Index</h2>
+          <p className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
+            {search.trim() ? `${filteredFiles.length} results for "${search}"` : `${files.length} documents in this folder`}
+          </p>
         </div>
-      </Surface>
+
+        {filteredFiles.length === 0 && search.trim() ? (
+          <Alert className="rounded-sm border-border/65 bg-surface shadow-none">
+            <AlertTitle>No matches yet</AlertTitle>
+            <AlertDescription>
+              No files matched "{search}". Try a shorter name, a folder segment, or clear the search.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <ul className="divide-y divide-border/65">
+            {filteredFiles.map((file: FileInfo) => {
+              const { name, directory } = splitRelativePath(file.relativePath);
+
+              return (
+                <li key={file.path}>
+                  <Link
+                    to={`/${file.relativePath}`}
+                    className="block px-1 py-4 transition-colors duration-150 hover:bg-surface-secondary/35"
+                  >
+                    <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(9rem,13rem)_minmax(8rem,10rem)_minmax(11rem,13rem)] md:items-start md:gap-4">
+                      <div className="min-w-0">
+                        <p className="truncate text-lg leading-tight font-semibold tracking-tight text-foreground">{name}</p>
+                        <p className="mt-1 truncate text-sm text-muted-foreground">{directory}</p>
+                      </div>
+                      <p className="text-xs tracking-[0.12em] text-muted-foreground uppercase md:text-right">{formatFileSize(file.size)}</p>
+                      <p className="text-xs tracking-[0.12em] text-muted-foreground uppercase md:text-right">{new Date(file.modified).toLocaleDateString()}</p>
+                      <p className="text-sm text-muted-foreground md:text-right">{formatRelativeDate(file.modified)}</p>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
