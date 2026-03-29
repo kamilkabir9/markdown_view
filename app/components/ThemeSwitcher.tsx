@@ -1,15 +1,13 @@
-import { useState } from 'react';
-import { Button } from '~/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-} from '~/components/ui/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
+import { cn } from '~/lib/utils';
 import { useTheme, type Theme } from '~/contexts/ThemeContext';
-import { ChevronDownIcon, CheckIcon } from 'lucide-react';
 
 const themes: { value: Theme; label: string; description: string }[] = [
   { value: 'default', label: 'Editorial', description: 'Warm, balanced manuscript styling' },
@@ -18,48 +16,49 @@ const themes: { value: Theme; label: string; description: string }[] = [
   { value: 'minimal', label: 'Paper', description: 'Dry, tactile pages for longer notes' },
 ];
 
-export function ThemeSwitcher() {
+interface ThemeSwitcherProps {
+  compact?: boolean;
+  className?: string;
+}
+
+export function ThemeSwitcher({ compact = false, className }: ThemeSwitcherProps) {
   const { theme, setTheme } = useTheme();
-  const activeTheme = themes.find((item) => item.value === theme) || themes[0];
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            className="w-full min-w-[9.5rem] justify-between rounded-sm border border-border/70 bg-background px-3 py-2 transition hover:border-border hover:bg-surface sm:w-auto"
-          />
-        }
+    <div className={cn('w-full sm:w-auto', compact ? 'min-w-[8.5rem]' : 'min-w-[11rem]', className)}>
+      <Select
+        value={theme}
+        onValueChange={(value) => {
+          if (value) setTheme(value as Theme);
+        }}
       >
-        <span className="text-left">
-          <span className="block text-[0.67rem] tracking-[0.12em] text-muted-foreground uppercase">Reader theme</span>
-          <span className="block text-sm font-semibold text-foreground">{activeTheme.label}</span>
-        </span>
-        <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="end" className="min-w-[18rem] rounded-sm">
-        <DropdownMenuRadioGroup
-          value={theme}
-          onValueChange={(value) => {
-            if (value) setTheme(value as Theme);
-          }}
+        <SelectTrigger
+          className={cn(
+            'h-auto w-full rounded-sm border-border/70 bg-background hover:bg-surface',
+            compact ? 'px-2.5 py-1.5' : 'px-3 py-2',
+          )}
         >
-          {themes.map((item) => (
-            <DropdownMenuRadioItem
-              key={item.value}
-              value={item.value}
-              className="rounded-sm py-2"
-            >
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">{item.label}</span>
-                <span className="text-xs text-muted-foreground">{item.description}</span>
-              </div>
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <SelectValue className="text-sm font-semibold text-foreground">
+            {(value: Theme | null) => {
+              const selected = themes.find((item) => item.value === value);
+              if (!selected) return compact ? 'Theme' : 'Select theme';
+              return compact ? selected.label : `${selected.label} theme`;
+            }}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent align="end" className="min-w-[18rem] rounded-sm">
+          <SelectGroup>
+            {themes.map((item) => (
+              <SelectItem key={item.value} value={item.value} className="rounded-sm py-2">
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-sm font-medium">{item.label} theme</span>
+                  <span className="text-xs text-muted-foreground">{item.description}</span>
+                </span>
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
   );
 }

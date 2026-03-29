@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { Link, useLoaderData } from 'react-router';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
@@ -11,6 +11,7 @@ import {
   BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
 import { SearchIcon, XIcon } from 'lucide-react';
+import { useAppChrome } from '~/contexts/AppChromeContext';
 import { getMarkdownFiles, type FileInfo } from '~/utils/files.server';
 
 export const meta: MetaFunction = () => [{ title: 'Markdown Viewer' }];
@@ -49,27 +50,32 @@ function splitRelativePath(relativePath: string) {
   return { name, directory };
 }
 
-function getDirectoryCount(files: FileInfo[]) {
-  return new Set(
-    files.map((file) => {
-      const segments = file.relativePath.split('/');
-      return segments.length > 1 ? segments.slice(0, -1).join('/') : '.';
-    }),
-  ).size;
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="space-y-1 border-l border-border/70 pl-4">
-      <p className="text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">{label}</p>
-      <p className="text-2xl leading-none font-semibold tracking-tight text-foreground">{value}</p>
-    </div>
-  );
-}
-
 export default function Index() {
   const { files } = useLoaderData<typeof loader>();
   const [search, setSearch] = useState('');
+  const { setActions, setBreadcrumbs } = useAppChrome();
+
+  useEffect(() => {
+    setBreadcrumbs(
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Markdown Files</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>,
+    );
+    setActions(null);
+
+    return () => {
+      setBreadcrumbs(null);
+      setActions(null);
+    };
+  }, [setActions, setBreadcrumbs]);
 
   const filteredFiles = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -82,30 +88,9 @@ export default function Index() {
     );
   }, [files, search]);
 
-  const directoryCount = useMemo(() => getDirectoryCount(files), [files]);
-  const recentCount = useMemo(
-    () =>
-      files.filter(
-        (file: FileInfo) => Date.now() - new Date(file.modified).getTime() < 1000 * 60 * 60 * 24 * 7,
-      ).length,
-    [files],
-  );
-
   if (files.length === 0) {
     return (
       <div className="space-y-7">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Markdown Files</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
         <section className="app-shell-panel rounded-md p-6 sm:p-8">
           <div className="max-w-3xl space-y-5">
             <div>
@@ -131,33 +116,12 @@ export default function Index() {
 
   return (
     <div className="space-y-7">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Markdown Files</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <section className="app-shell-panel rounded-md p-6 sm:p-8">
         <div className="space-y-6">
           <div className="max-w-3xl">
             <h1 className="font-[var(--font-display)] text-[clamp(2.15rem,5vw,3.8rem)] leading-[0.92] tracking-tight text-foreground">
               Markdown library
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-muted-foreground">
-              Browse every file in this workspace, scan metadata quickly, and open each document in a focused reader.
-            </p>
-          </div>
-
-          <div className="grid gap-5 border-y border-border/70 py-5 sm:grid-cols-3">
-            <Stat label="Files" value={String(files.length)} />
-            <Stat label="Folders" value={String(directoryCount)} />
-            <Stat label="Fresh this week" value={String(recentCount)} />
           </div>
 
           <div className="max-w-2xl">

@@ -18,12 +18,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '~/components/ui/sh
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '~/components/ui/dialog';
 import { Textarea } from '~/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
-import { Loader2Icon, PlusIcon, MessageSquareIcon, XIcon, PanelRightIcon } from 'lucide-react';
+import { Loader2Icon, PlusIcon, MessageSquareIcon, MessageSquareOffIcon, PanelRightIcon } from 'lucide-react';
 import { useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore';
+import { useAppChrome } from '~/contexts/AppChromeContext';
 import { CommentHighlighter } from './CommentHighlighter';
 import { CommentSidebar } from './CommentSidebar';
 import { ImageWithFallback } from './ImageWithFallback';
-import { ThemeSwitcher } from './ThemeSwitcher';
 
 interface LineAnnotatedMarkdownProps {
   content: string;
@@ -68,13 +68,8 @@ export function LineAnnotatedMarkdown({
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const { setActions, setBreadcrumbs } = useAppChrome();
 
-  const lineCount = useMemo(() => content.split(/\r?\n/).length, [content]);
-  const annotationLabel = annotations.length === 1 ? '1 saved comment' : `${annotations.length} saved comments`;
-  const readTime = useMemo(() => {
-    const words = content.trim().split(/\s+/).filter(Boolean).length;
-    return `${Math.max(1, Math.round(words / 220))} min read`;
-  }, [content]);
   const documentMeta = useMemo(() => {
     const normalizedPath = filePath.replace(/\\/g, '/');
     const parts = normalizedPath.split('/').filter(Boolean);
@@ -82,10 +77,11 @@ export function LineAnnotatedMarkdown({
 
     return {
       title: filename.replace(/\.md$/i, ''),
-      directory: parts.length > 1 ? parts.slice(0, -1).join(' / ') : 'Workspace root',
     };
   }, [filePath]);
   const commentsVisible = isDesktopViewport ? sidebarOpen : isCommentsDrawerOpen;
+  const showCommentsLabel = `Show comments (${annotations.length})`;
+  const hideCommentsLabel = `Hide comments (${annotations.length})`;
 
   const handleMouseUp = useCallback(async (event: React.MouseEvent) => {
     if (event.button !== 0) return;
@@ -222,6 +218,79 @@ export function LineAnnotatedMarkdown({
     return () => document.removeEventListener('mousedown', handleMouseDown);
   }, [popoverPos]);
 
+  useEffect(() => {
+    setBreadcrumbs(
+      <Breadcrumb>
+        <BreadcrumbList className="gap-2 text-sm">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Markdown Files</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{documentMeta.title}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>,
+    );
+
+    setActions(
+      <>
+        <ButtonTooltip label="Add note">
+          <Button variant="secondary" size="sm" className="rounded-sm px-3.5" onClick={() => openDialog(true)}>
+            <PlusIcon className="h-4 w-4" />
+            <span className="hidden sm:inline">Add note</span>
+            <span className="sm:hidden">Note</span>
+          </Button>
+        </ButtonTooltip>
+
+        {isDesktopViewport ? (
+          <ButtonTooltip label={sidebarOpen ? hideCommentsLabel : showCommentsLabel}>
+            <Button
+              variant={sidebarOpen ? 'secondary' : 'ghost'}
+              size="sm"
+              className="rounded-sm border border-border/70 px-3.5"
+              onClick={toggleComments}
+            >
+              <PanelRightIcon className="h-4 w-4" />
+              {sidebarOpen ? hideCommentsLabel : showCommentsLabel}
+            </Button>
+          </ButtonTooltip>
+        ) : (
+          <ButtonTooltip label={showCommentsLabel}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-sm border border-border/70 px-3.5"
+              onClick={() => setIsCommentsDrawerOpen(true)}
+            >
+              <MessageSquareIcon className="h-4 w-4" />
+              {showCommentsLabel}
+            </Button>
+          </ButtonTooltip>
+        )}
+      </>,
+    );
+
+    return () => {
+      setBreadcrumbs(null);
+      setActions(null);
+    };
+  }, [
+    documentMeta.title,
+    hideCommentsLabel,
+    isDesktopViewport,
+    openDialog,
+    setActions,
+    setBreadcrumbs,
+    showCommentsLabel,
+    sidebarOpen,
+    toggleComments,
+  ]);
+
   const handleKeyDown = useCallback(
     (event: ReactKeyboardEvent) => {
       if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
@@ -249,114 +318,33 @@ export function LineAnnotatedMarkdown({
     <TooltipProvider delay={180}>
       <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
         <div className="mx-auto max-w-[1420px] space-y-5">
-        <div className="rounded-md border border-border/65 bg-surface px-4 py-4 sm:px-5">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0 space-y-3">
-              <div className="space-y-1.5">
-                <p className="truncate text-xs tracking-[0.12em] text-muted-foreground uppercase">{documentMeta.directory}</p>
-                <h1 className="break-words font-[var(--font-display)] text-[clamp(1.95rem,4vw,2.9rem)] leading-[0.94] tracking-tight text-foreground">
-                  {documentMeta.title}
-                </h1>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tracking-[0.12em] text-muted-foreground uppercase">
-                <span>{annotationLabel}</span>
-                <span aria-hidden="true">/</span>
-                <span>{lineCount} lines rendered</span>
-                <span aria-hidden="true">/</span>
-                <span>{readTime}</span>
-                <span aria-hidden="true">/</span>
-                <span className="truncate">{filePath}</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2 lg:min-w-[18rem] lg:items-end">
-              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                <div className="w-full sm:w-auto">
-                  <ThemeSwitcher />
-                </div>
-
-                <ButtonTooltip label="Add note">
-                  <Button variant="secondary" size="sm" className="rounded-sm px-3.5" onClick={() => openDialog(true)}>
-                    <PlusIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">Add note</span>
-                    <span className="sm:hidden">Note</span>
-                  </Button>
-                </ButtonTooltip>
-
-                <ButtonTooltip label="Show comments">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-sm border border-border/70 px-3.5 xl:hidden"
-                    onClick={() => setIsCommentsDrawerOpen(true)}
-                  >
-                    <MessageSquareIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">Comments</span>
-                    <span className="sm:hidden">Notes</span>
-                    <span className="text-sm text-muted-foreground">{annotations.length}</span>
-                  </Button>
-                </ButtonTooltip>
-
-                <ButtonTooltip label={sidebarOpen ? 'Hide comments' : 'Show comments'}>
-                  <Button
-                    variant={sidebarOpen ? 'secondary' : 'ghost'}
-                    size="sm"
-                    className="hidden rounded-sm border border-border/70 px-3.5 xl:inline-flex"
-                    onClick={toggleComments}
-                  >
-                    <PanelRightIcon className="h-4 w-4" />
-                    {sidebarOpen ? 'Hide comments' : 'Show comments'}
-                  </Button>
-                </ButtonTooltip>
-              </div>
-            </div>
-          </div>
-
-          <Breadcrumb className="mt-4 border-t border-border/65 pt-3">
-            <BreadcrumbList className="gap-2 text-sm">
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Markdown Files</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{documentMeta.title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-
-        <div className={`grid items-start gap-5 ${sidebarOpen ? 'xl:grid-cols-[minmax(0,1fr)_21rem]' : 'xl:grid-cols-1'}`}>
-          <Card className="min-w-0 overflow-hidden rounded-md border border-border/65 bg-surface shadow-none">
-            <CardContent className="p-3 sm:p-4">
-              <article className={`w-full ${sidebarOpen ? 'mx-auto max-w-4xl' : 'max-w-none'}`}>
-                <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>
-                  <div className={`${proseClass} markdown-article ${themeClass}`.trim()}>
-                    <Markdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeHighlight]}
-                      components={{
-                        img: ({ node, ...props }) => <ImageWithFallback {...props} />,
-                      }}
-                    >
-                      {content}
-                    </Markdown>
+          <div className={`grid items-start gap-5 ${sidebarOpen ? 'xl:grid-cols-[minmax(0,1fr)_21rem]' : 'xl:grid-cols-1'}`}>
+            <Card className="min-w-0 overflow-hidden rounded-md border border-border/65 bg-surface shadow-none">
+              <CardContent className="p-3 sm:p-4">
+                <article className={`w-full ${sidebarOpen ? 'mx-auto max-w-4xl' : 'max-w-none'}`}>
+                  <div ref={containerRef} className="min-w-0 overflow-hidden" onMouseUp={handleMouseUp}>
+                    <div className={`${proseClass} markdown-article ${themeClass}`.trim()}>
+                      <Markdown
+                        remarkPlugins={[remarkGfm]}
+                        rehypePlugins={[rehypeHighlight]}
+                        components={{
+                          img: ({ node, ...props }) => <ImageWithFallback {...props} />,
+                        }}
+                      >
+                        {content}
+                      </Markdown>
+                    </div>
                   </div>
-                </div>
-              </article>
-            </CardContent>
-          </Card>
+                </article>
+              </CardContent>
+            </Card>
 
-          {sidebarOpen && (
-            <div className="hidden min-w-0 xl:sticky xl:top-28 xl:block">
-              {sidebar}
-            </div>
-          )}
-        </div>
+            {sidebarOpen && (
+              <div className="hidden min-w-0 xl:sticky xl:top-28 xl:block">
+                {sidebar}
+              </div>
+            )}
+          </div>
 
         <CommentHighlighter
           containerRef={containerRef}
@@ -382,7 +370,7 @@ export function LineAnnotatedMarkdown({
               aria-label={commentsVisible ? 'Hide comments' : 'Show comments'}
             >
               {commentsVisible ? (
-                <XIcon className="h-4 w-4" />
+                <MessageSquareOffIcon className="h-4 w-4" />
               ) : (
                 <MessageSquareIcon className="h-4 w-4" />
               )}

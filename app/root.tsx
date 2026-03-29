@@ -1,4 +1,5 @@
 import {
+  Link,
   Links,
   Meta,
   Outlet,
@@ -9,8 +10,10 @@ import {
 import type { LinksFunction } from 'react-router';
 import { useState, useEffect } from 'react';
 import type { ComponentType } from 'react';
+import { ThemeSwitcher } from '~/components/ThemeSwitcher';
 import { Button } from '~/components/ui/button';
 import { Separator } from '~/components/ui/separator';
+import { AppChromeProvider, useAppChrome } from '~/contexts/AppChromeContext';
 import { ThemeProvider } from '~/contexts/ThemeContext';
 import packageJson from '../package.json';
 
@@ -78,6 +81,62 @@ function ScrollToTopButton() {
   );
 }
 
+function AppShell() {
+  return (
+    <AppChromeProvider>
+      <AppShellInner />
+    </AppChromeProvider>
+  );
+}
+
+function AppShellInner() {
+  const { breadcrumbs, actions } = useAppChrome();
+
+  return (
+    <>
+      <LoadingBar />
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground">
+        Skip to content
+      </a>
+      <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1420px] flex-col px-4 pb-10 pt-5 sm:px-6 lg:px-8">
+        <header className="sticky top-3 z-40 mb-5 space-y-3 rounded-md border border-border/65 bg-background/88 px-3 py-2.5 backdrop-blur-sm supports-[backdrop-filter]:bg-background/72 sm:px-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <Link to="/" className="inline-flex items-center text-xs tracking-[0.18em] text-muted-foreground uppercase transition-colors hover:text-foreground">
+                Markdown Viewer
+              </Link>
+            </div>
+
+            <div className="w-auto shrink-0">
+              <ThemeSwitcher compact />
+            </div>
+          </div>
+
+          {(breadcrumbs || actions) && (
+            <div className="flex flex-col gap-3 border-t border-border/65 pt-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0">{breadcrumbs}</div>
+              <div className="flex flex-wrap items-center gap-2 lg:justify-end">{actions}</div>
+            </div>
+          )}
+        </header>
+
+        <main id="main-content" className="flex-1">
+          <Outlet />
+        </main>
+        <Separator className="mb-4 mt-12 opacity-55" />
+        <footer className="px-1 py-2 text-xs tracking-[0.14em] text-muted uppercase">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p>Markdown Viewer</p>
+            <p>v{APP_VERSION}</p>
+          </div>
+        </footer>
+      </div>
+      <ScrollToTopButton />
+      <DevAgentation />
+    </>
+  );
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -90,24 +149,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
         <ThemeProvider>
-          <LoadingBar />
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground">
-            Skip to content
-          </a>
-          <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1420px] flex-col px-4 pb-10 pt-5 sm:px-6 lg:px-8">
-            <main id="main-content" className="flex-1">
-              <Outlet />
-            </main>
-            <Separator className="mb-4 mt-12 opacity-55" />
-            <footer className="px-1 py-2 text-xs tracking-[0.14em] text-muted uppercase">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p>Markdown Viewer</p>
-                <p>v{APP_VERSION}</p>
-              </div>
-            </footer>
-          </div>
-          <ScrollToTopButton />
-          <DevAgentation />
+          <AppShell />
         </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
