@@ -30,32 +30,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
 export default function MarkdownPage() {
   const { content, path, sourcePath } = useLoaderData<typeof loader>();
   const { theme } = useTheme();
-  const title = sourcePath.split('/').pop()?.replace(/\.md$/i, '') || 'Untitled';
   const themeClass = `markdown-theme-${theme}`;
 
   return (
     <AnnotationStoreProvider filePath={path}>
       <div className="space-y-5">
-        <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
-          <div className="mx-auto max-w-[1420px]">
-            <Breadcrumb className="px-1 pb-1">
-              <BreadcrumbList className="gap-2 text-sm">
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Markdown Files</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{title}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </div>
-
         <AnnotationErrorBoundary>
           <LineAnnotatedMarkdown content={content} proseClass="" themeClass={themeClass} filePath={sourcePath} />
         </AnnotationErrorBoundary>

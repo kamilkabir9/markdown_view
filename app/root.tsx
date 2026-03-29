@@ -1,15 +1,14 @@
 import {
-  Link,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLocation,
   useNavigation,
 } from 'react-router';
 import type { LinksFunction } from 'react-router';
 import { useState, useEffect } from 'react';
+import type { ComponentType } from 'react';
 import { Button } from '~/components/ui/button';
 import { Separator } from '~/components/ui/separator';
 import { ThemeProvider } from '~/contexts/ThemeContext';
@@ -20,6 +19,22 @@ import './styles/tailwind.css';
 export const links: LinksFunction = () => [];
 
 const APP_VERSION = packageJson.version;
+
+function DevAgentation() {
+  const [Agentation, setAgentation] = useState<ComponentType | null>(null);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+
+    void import('agentation').then((mod) => {
+      setAgentation(() => mod.Agentation);
+    });
+  }, []);
+
+  if (!import.meta.env.DEV || !Agentation) return null;
+
+  return <Agentation />;
+}
 
 function LoadingBar() {
   const navigation = useNavigation();
@@ -64,9 +79,6 @@ function ScrollToTopButton() {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
-
   return (
     <html lang="en">
       <head>
@@ -83,27 +95,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
             Skip to content
           </a>
           <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1420px] flex-col px-4 pb-10 pt-5 sm:px-6 lg:px-8">
-            <header className="mb-8">
-              <div className="app-shell-panel overflow-hidden rounded-md px-5 py-4 sm:px-6">
-                <div className="flex items-end justify-between gap-4">
-                  <Link to="/" className="group min-w-0">
-                    <p className="truncate font-[var(--font-display)] text-2xl leading-none tracking-tight text-foreground sm:text-3xl">
-                      Markdown Viewer
-                    </p>
-                    <p className="mt-2 text-xs tracking-[0.18em] text-muted-foreground uppercase">
-                      Editorial reading workspace
-                    </p>
-                  </Link>
-
-                  <div className="flex flex-wrap items-center gap-3 text-xs tracking-[0.16em] text-muted-foreground uppercase">
-                    <span>{isHomePage ? 'Library' : 'Reader'}</span>
-                    <span aria-hidden="true">/</span>
-                    <span>v{APP_VERSION}</span>
-                  </div>
-                </div>
-              </div>
-            </header>
-
             <main id="main-content" className="flex-1">
               <Outlet />
             </main>
@@ -116,6 +107,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </footer>
           </div>
           <ScrollToTopButton />
+          <DevAgentation />
         </ThemeProvider>
         <ScrollRestoration />
         <Scripts />

@@ -4,19 +4,21 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactElement,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router';
 import Markdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '~/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '~/components/ui/dialog';
 import { Textarea } from '~/components/ui/textarea';
-import { Loader2Icon, ChevronLeftIcon, PlusIcon, MessageSquareIcon, XIcon, PanelRightIcon } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
+import { Loader2Icon, PlusIcon, MessageSquareIcon, XIcon, PanelRightIcon } from 'lucide-react';
 import { useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore';
 import { CommentHighlighter } from './CommentHighlighter';
 import { CommentSidebar } from './CommentSidebar';
@@ -34,13 +36,21 @@ function getTextQuote() {
   return import('dom-anchor-text-quote');
 }
 
+function ButtonTooltip({ label, children }: { label: string; children: ReactElement }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger render={children} />
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function LineAnnotatedMarkdown({
   content,
   proseClass,
   themeClass,
   filePath,
 }: LineAnnotatedMarkdownProps) {
-  const navigate = useNavigate();
   const { annotations, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null);
   const [pendingAnchor, setPendingAnchor] = useState<{
@@ -236,8 +246,9 @@ export function LineAnnotatedMarkdown({
   );
 
   return (
-    <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
-      <div className="mx-auto max-w-[1420px] space-y-5">
+    <TooltipProvider delay={180}>
+      <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
+        <div className="mx-auto max-w-[1420px] space-y-5">
         <div className="rounded-md border border-border/65 bg-surface px-4 py-4 sm:px-5">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 space-y-3">
@@ -260,52 +271,63 @@ export function LineAnnotatedMarkdown({
             </div>
 
             <div className="flex flex-col gap-2 lg:min-w-[18rem] lg:items-end">
-              <div className="w-full lg:w-auto">
-                <ThemeSwitcher />
-              </div>
-
               <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-sm border border-border/70 px-3.5"
-                  onClick={() => navigate('/')}
-                >
-                  <ChevronLeftIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Back to files</span>
-                  <span className="sm:hidden">Back</span>
-                </Button>
+                <div className="w-full sm:w-auto">
+                  <ThemeSwitcher />
+                </div>
 
-                <Button variant="secondary" size="sm" className="rounded-sm px-3.5" onClick={() => openDialog(true)}>
-                  <PlusIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Add note</span>
-                  <span className="sm:hidden">Note</span>
-                </Button>
+                <ButtonTooltip label="Add note">
+                  <Button variant="secondary" size="sm" className="rounded-sm px-3.5" onClick={() => openDialog(true)}>
+                    <PlusIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">Add note</span>
+                    <span className="sm:hidden">Note</span>
+                  </Button>
+                </ButtonTooltip>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-sm border border-border/70 px-3.5 xl:hidden"
-                  onClick={() => setIsCommentsDrawerOpen(true)}
-                >
-                  <MessageSquareIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Comments</span>
-                  <span className="sm:hidden">Notes</span>
-                  <span className="text-sm text-muted-foreground">{annotations.length}</span>
-                </Button>
+                <ButtonTooltip label="Show comments">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-sm border border-border/70 px-3.5 xl:hidden"
+                    onClick={() => setIsCommentsDrawerOpen(true)}
+                  >
+                    <MessageSquareIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">Comments</span>
+                    <span className="sm:hidden">Notes</span>
+                    <span className="text-sm text-muted-foreground">{annotations.length}</span>
+                  </Button>
+                </ButtonTooltip>
 
-                <Button
-                  variant={sidebarOpen ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="hidden rounded-sm border border-border/70 px-3.5 xl:inline-flex"
-                  onClick={toggleComments}
-                >
-                  <PanelRightIcon className="h-4 w-4" />
-                  {sidebarOpen ? 'Hide comments' : 'Show comments'}
-                </Button>
+                <ButtonTooltip label={sidebarOpen ? 'Hide comments' : 'Show comments'}>
+                  <Button
+                    variant={sidebarOpen ? 'secondary' : 'ghost'}
+                    size="sm"
+                    className="hidden rounded-sm border border-border/70 px-3.5 xl:inline-flex"
+                    onClick={toggleComments}
+                  >
+                    <PanelRightIcon className="h-4 w-4" />
+                    {sidebarOpen ? 'Hide comments' : 'Show comments'}
+                  </Button>
+                </ButtonTooltip>
               </div>
             </div>
           </div>
+
+          <Breadcrumb className="mt-4 border-t border-border/65 pt-3">
+            <BreadcrumbList className="gap-2 text-sm">
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Markdown Files</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{documentMeta.title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
 
         <div className={`grid items-start gap-5 ${sidebarOpen ? 'xl:grid-cols-[minmax(0,1fr)_21rem]' : 'xl:grid-cols-1'}`}>
@@ -351,19 +373,21 @@ export function LineAnnotatedMarkdown({
         )}
 
         {typeof document !== 'undefined' && createPortal(
-          <Button
-            variant={commentsVisible ? 'secondary' : 'ghost'}
-            size="icon-sm"
-            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-sm border border-border/70 bg-surface shadow-none"
-            onClick={toggleComments}
-            aria-label={commentsVisible ? 'Hide comments' : 'Show comments'}
-          >
-            {commentsVisible ? (
-              <XIcon className="h-4 w-4" />
-            ) : (
-              <MessageSquareIcon className="h-4 w-4" />
-            )}
-          </Button>,
+          <ButtonTooltip label={commentsVisible ? 'Hide comments' : 'Show comments'}>
+            <Button
+              variant={commentsVisible ? 'secondary' : 'ghost'}
+              size="icon-sm"
+              className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-sm border border-border/70 bg-surface shadow-none"
+              onClick={toggleComments}
+              aria-label={commentsVisible ? 'Hide comments' : 'Show comments'}
+            >
+              {commentsVisible ? (
+                <XIcon className="h-4 w-4" />
+              ) : (
+                <MessageSquareIcon className="h-4 w-4" />
+              )}
+            </Button>
+          </ButtonTooltip>,
           document.body,
         )}
 
@@ -377,17 +401,19 @@ export function LineAnnotatedMarkdown({
               transform: 'translate(-50%, -100%)',
             }}
           >
-            <Button
-              size="sm"
-              className="rounded-sm border border-border/70 px-4 shadow-none"
-              onMouseDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              onClick={() => openDialog()}
-            >
-              Add comment
-            </Button>
+            <ButtonTooltip label="Add comment">
+              <Button
+                size="sm"
+                className="rounded-sm border border-border/70 px-4 shadow-none"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
+                onClick={() => openDialog()}
+              >
+                Add comment
+              </Button>
+            </ButtonTooltip>
           </div>,
           document.body,
         )}
@@ -443,16 +469,21 @@ export function LineAnnotatedMarkdown({
             </div>
 
             <DialogFooter>
-              <Button variant="ghost" className="rounded-sm border border-border/70 px-4" onClick={closeDialog}>
-                Cancel
-              </Button>
-              <Button className="rounded-sm px-4" disabled={!commentText.trim()} onClick={handleSubmit}>
-                Add comment
-              </Button>
+              <ButtonTooltip label="Cancel">
+                <Button variant="ghost" className="rounded-sm border border-border/70 px-4" onClick={closeDialog}>
+                  Cancel
+                </Button>
+              </ButtonTooltip>
+              <ButtonTooltip label="Add comment">
+                <Button className="rounded-sm px-4" disabled={!commentText.trim()} onClick={handleSubmit}>
+                  Add comment
+                </Button>
+              </ButtonTooltip>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

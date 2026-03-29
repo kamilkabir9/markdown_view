@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactElement } from 'react';
 import { Button } from '~/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { CheckIcon, CopyIcon, PencilIcon, XIcon, ClipboardIcon } from 'lucide-react';
 import type { Annotation } from '~/contexts/AnnotationStore';
 
@@ -36,6 +37,15 @@ function formatCreatedAt(value: string): string {
   });
 }
 
+function ButtonTooltip({ label, children }: { label: string; children: ReactElement }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger render={children} />
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function CommentSidebar({
   annotations,
   rawContent,
@@ -50,6 +60,7 @@ export function CommentSidebar({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterKey>('all');
 
   const sortedAnnotations = useMemo(
@@ -229,7 +240,8 @@ export function CommentSidebar({
   );
 
   return (
-    <Card className={`h-full rounded-md border border-border/65 bg-surface shadow-none ${className}`.trim()}>
+    <TooltipProvider delay={180}>
+      <Card className={`h-full rounded-md border border-border/65 bg-surface shadow-none ${className}`.trim()}>
       <CardHeader className="gap-3 border-b border-border/65 px-4 py-4">
         <div className="flex w-full items-start justify-between gap-3">
           <div>
@@ -240,31 +252,35 @@ export function CommentSidebar({
             </div>
 
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="rounded-sm border border-border/70"
-              aria-label="Copy all comments"
-              disabled={!annotations.length}
-              onClick={handleCopyAll}
-            >
-              {copiedId === '__all__' ? (
-                <CheckIcon className="h-4 w-4 text-success" />
-              ) : (
-                <CopyIcon className="h-4 w-4" />
-              )}
-            </Button>
-
-            {onClose ? (
+            <ButtonTooltip label="Copy all comments">
               <Button
                 variant="ghost"
                 size="icon-sm"
                 className="rounded-sm border border-border/70"
-                aria-label="Close comments"
-                onClick={onClose}
+                aria-label="Copy all comments"
+                disabled={!annotations.length}
+                onClick={handleCopyAll}
               >
-                <XIcon className="h-4 w-4" />
+                {copiedId === '__all__' ? (
+                  <CheckIcon className="h-4 w-4 text-success" />
+                ) : (
+                  <CopyIcon className="h-4 w-4" />
+                )}
               </Button>
+            </ButtonTooltip>
+
+            {onClose ? (
+              <ButtonTooltip label="Close comments">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="rounded-sm border border-border/70"
+                  aria-label="Close comments"
+                  onClick={onClose}
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              </ButtonTooltip>
             ) : null}
           </div>
         </div>
@@ -277,16 +293,17 @@ export function CommentSidebar({
             { key: 'linked' as const, label: 'Inline', count: counts.linked },
             { key: 'global' as const, label: 'Document', count: counts.global },
           ].map((item) => (
-            <Button
-              key={item.key}
-              size="sm"
-              variant={filter === item.key ? 'secondary' : 'ghost'}
-              className="justify-between rounded-sm px-3"
-              onClick={() => setFilter(item.key)}
-            >
-              <span>{item.label}</span>
-              <span className="text-xs text-muted-foreground">{item.count}</span>
-            </Button>
+            <ButtonTooltip key={item.key} label={`Show ${item.label.toLowerCase()} comments`}>
+              <Button
+                size="sm"
+                variant={filter === item.key ? 'secondary' : 'ghost'}
+                className="justify-between rounded-sm px-3"
+                onClick={() => setFilter(item.key)}
+              >
+                <span>{item.label}</span>
+                <span className="text-xs text-muted-foreground">{item.count}</span>
+              </Button>
+            </ButtonTooltip>
           ))}
         </div>
 
@@ -303,11 +320,14 @@ export function CommentSidebar({
             <div className="space-y-3 pb-1">
               {filteredAnnotations.map((annotation, index) => {
                 const isActive = annotation.id === activeAnnotationId;
+                const showActions = hoveredId === annotation.id || editingId === annotation.id;
 
                 return (
                   <div
                     key={annotation.id}
                     ref={isActive ? activeRef : undefined}
+                    onMouseEnter={() => setHoveredId(annotation.id)}
+                    onMouseLeave={() => setHoveredId((current) => (current === annotation.id ? null : current))}
                     onClick={(event) => {
                       const target = event.target as HTMLElement;
                       if (target.closest('button, textarea, input')) return;
@@ -340,38 +360,47 @@ export function CommentSidebar({
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              className="rounded-sm border border-border/70"
-                              aria-label="Edit comment"
-                              onClick={() => startEditing(annotation)}
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              className="rounded-sm border border-border/70"
-                              aria-label="Copy comment"
-                              onClick={() => handleCopyOne(annotation)}
-                            >
-                              {copiedId === annotation.id ? (
-                                <CheckIcon className="h-4 w-4 text-success" />
-                              ) : (
-                                <ClipboardIcon className="h-4 w-4" />
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              className="rounded-sm border border-border/70"
-                              aria-label="Remove comment"
-                              onClick={() => onRemove(annotation.id)}
-                            >
-                              <XIcon className="h-4 w-4" />
-                            </Button>
+                          <div className={`flex items-center gap-1 transition-opacity ${showActions ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
+                            <ButtonTooltip label="Edit comment">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="rounded-sm border border-border/70"
+                                aria-label="Edit comment"
+                                onClick={() => startEditing(annotation)}
+                                tabIndex={showActions ? 0 : -1}
+                              >
+                                <PencilIcon className="h-4 w-4" />
+                              </Button>
+                            </ButtonTooltip>
+                            <ButtonTooltip label="Copy comment">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="rounded-sm border border-border/70"
+                                aria-label="Copy comment"
+                                onClick={() => handleCopyOne(annotation)}
+                                tabIndex={showActions ? 0 : -1}
+                              >
+                                {copiedId === annotation.id ? (
+                                  <CheckIcon className="h-4 w-4 text-success" />
+                                ) : (
+                                  <ClipboardIcon className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </ButtonTooltip>
+                            <ButtonTooltip label="Remove comment">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="rounded-sm border border-border/70"
+                                aria-label="Remove comment"
+                                onClick={() => onRemove(annotation.id)}
+                                tabIndex={showActions ? 0 : -1}
+                              >
+                                <XIcon className="h-4 w-4" />
+                              </Button>
+                            </ButtonTooltip>
                           </div>
                         </div>
 
@@ -402,12 +431,16 @@ export function CommentSidebar({
                             />
                             <div className="flex flex-wrap items-center justify-between gap-3">
                               <div className="flex items-center gap-2">
-                                <Button size="sm" variant="ghost" className="rounded-sm border border-border/70 px-3" onClick={cancelEditing}>
-                                  Cancel
-                                </Button>
-                                <Button size="sm" className="rounded-sm px-3" disabled={!editingText.trim()} onClick={saveEditing}>
-                                  Save
-                                </Button>
+                                <ButtonTooltip label="Cancel editing">
+                                  <Button size="sm" variant="ghost" className="rounded-sm border border-border/70 px-3" onClick={cancelEditing}>
+                                    Cancel
+                                  </Button>
+                                </ButtonTooltip>
+                                <ButtonTooltip label="Save comment">
+                                  <Button size="sm" className="rounded-sm px-3" disabled={!editingText.trim()} onClick={saveEditing}>
+                                    Save
+                                  </Button>
+                                </ButtonTooltip>
                               </div>
                             </div>
                           </div>
@@ -423,6 +456,7 @@ export function CommentSidebar({
           </div>
         )}
       </CardContent>
-    </Card>
+      </Card>
+    </TooltipProvider>
   );
 }
