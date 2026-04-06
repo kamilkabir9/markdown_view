@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 
 import { existsSync, statSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(scriptDir, '..');
-const startServerScript = resolve(packageRoot, 'scripts/start-server.js');
 const serverBuild = resolve(packageRoot, 'build/server/index.js');
+const clientBuildDir = resolve(packageRoot, 'build/client');
+const publicDir = resolve(packageRoot, 'public');
 const args = process.argv.slice(2);
 
 const DEFAULT_PORT = 3000;
@@ -112,11 +114,6 @@ if (!existsSync(serverBuild)) {
   process.exit(1);
 }
 
-if (!existsSync(startServerScript)) {
-  console.error('Missing start server script at scripts/start-server.js.');
-  process.exit(1);
-}
-
 if (!existsSync(workingDir)) {
   console.error(`Directory not found: ${workingDir}`);
   process.exit(1);
@@ -133,7 +130,13 @@ async function main() {
     process.exit(1);
   }
 
-  const requestedPort = port ? Number.parseInt(port, 10) : DEFAULT_PORT;
+  process.env.NODE_ENV = process.env.NODE_ENV ?? 'production';
+
+  const requestedPort = port
+    ? Number.parseInt(port, 10)
+    : isValidPort(process.env.PORT)
+      ? Number.parseInt(process.env.PORT, 10)
+      : DEFAULT_PORT;
   const selectedPort = await pickAvailablePort(requestedPort);
 
   if (selectedPort !== requestedPort) {
@@ -141,27 +144,46 @@ async function main() {
   }
 
   const serverUrl = `http://localhost:${selectedPort}`;
-  const child = spawn('node', [startServerScript], {
-    stdio: 'inherit',
-    cwd: packageRoot,
-    env: {
-      ...process.env,
-      PORT: String(selectedPort),
-      MARKDOWN_VIEWER_CONTENT_ROOT: workingDir,
-    },
-  });
+  process.env.PORT = String(selectedPort);
+  process.env.MARKDOWN_VIEWER_CONTENT_ROOT = workingDir;
 
-  child.on('error', (error) => {
-    console.error(`Failed to start server: ${error.message}`);
-    process.exit(1);
-  });
+  const [{ default: express }, { createRequestHandler }] = await Promise.all([
+    import('express'),
+    import('@react-router/express'),
+  ]);
 
-  child.on('exit', (code, signal) => {
-    if (signal) {
-      process.kill(process.pid, signal);
-      return;
-    }
-    process.exit(code ?? 0);
+  const build = await import(pathToFileURL(serverBuild).href);
+  const app = express();
+  const host = process.env.HOST;
+
+  app.disable('x-powered-by');
+  app.use('/assets', express.static(join(clientBuildDir, 'assets'), {
+    immutable: true,
+    maxAge: '1y',
+  }));
+  app.use(express.static(clientBuildDir));
+
+  if (existsSync(publicDir)) {
+    app.use(express.static(publicDir, { maxAge: '1h' }));
+  }
+
+  app.all('*', createRequestHandler({
+    build,
+    mode: process.env.NODE_ENV,
+  }));
+
+  const server = host
+    ? app.listen(selectedPort, host, () => {
+        console.log(`[markdown-viewer] http://${host}:${selectedPort}`);
+      })
+    : app.listen(selectedPort, () => {
+        console.log(`[markdown-viewer] http://localhost:${selectedPort}`);
+      });
+
+  ['SIGTERM', 'SIGINT'].forEach((signal) => {
+    process.once(signal, () => {
+      server.close(() => process.exit(0));
+    });
   });
 
   if (shouldOpenBrowser) {
