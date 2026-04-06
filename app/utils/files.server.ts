@@ -52,6 +52,7 @@ export interface MarkdownContent {
   content: string;
   path: string;
   sourcePath: string;
+  absolutePath: string;
   size: number;
   modified: string;
 }
@@ -75,8 +76,8 @@ async function walkDir(dir: string, files: FileInfo[] = []): Promise<FileInfo[]>
       const stats = await stat(fullPath);
       files.push({
         path: fullPath,
-        name: entry.name.replace(/\.md$/i, ''),
-        relativePath: relative(ROOT_DIR, fullPath).replace(/\.md$/i, ''),
+        name: entry.name,
+        relativePath: relative(ROOT_DIR, fullPath).replace(/\\/g, '/'),
         size: stats.size,
         modified: stats.mtime.toISOString(),
       });
@@ -110,6 +111,7 @@ export async function getMarkdownContent(pathname: string): Promise<MarkdownCont
         content,
         path: sourcePath.replace(/\.md$/i, ''),
         sourcePath,
+        absolutePath: filePath.replace(/\\/g, '/'),
         size: fileStats.size,
         modified: fileStats.mtime.toISOString(),
       };

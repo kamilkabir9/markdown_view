@@ -4,10 +4,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { CheckIcon, CopyIcon, PencilIcon, XIcon, ClipboardIcon } from 'lucide-react';
 import type { Annotation } from '~/contexts/AnnotationStore';
+import { getCopyFormatFallbacks, useCopySettings } from '~/contexts/CopySettingsContext';
 
 interface CommentSidebarProps {
   annotations: Annotation[];
   rawContent: string;
+  relativeFilePath: string;
+  fullFilePath: string;
   onUpdate: (id: string, text: string) => void;
   onRemove: (id: string) => void;
   onClose?: () => void;
@@ -49,6 +52,8 @@ function ButtonTooltip({ label, children }: { label: string; children: ReactElem
 export function CommentSidebar({
   annotations,
   rawContent,
+  relativeFilePath,
+  fullFilePath,
   onUpdate,
   onRemove,
   onClose,
@@ -56,6 +61,7 @@ export function CommentSidebar({
   activeAnnotationId,
   className = '',
 }: CommentSidebarProps) {
+  const { contextPrefix, commentPrefix, commentsDelimiter, pathMode } = useCopySettings();
   const activeRef = useRef<HTMLDivElement>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -181,32 +187,44 @@ export function CommentSidebar({
 
   const handleCopyOne = useCallback(
     (annotation: Annotation) => {
+      const fallbackValues = getCopyFormatFallbacks();
+      const normalizedContextPrefix = contextPrefix.trim() || fallbackValues.context;
+      const normalizedCommentPrefix = commentPrefix.trim() || fallbackValues.comment;
+      const selectedPath = pathMode === 'full' ? fullFilePath : relativeFilePath;
+      const filePrefix = `File Path: ${selectedPath}`;
+
       if (annotation.isGlobal || !annotation.anchor) {
-        copyToClipboard(`// Global Comment: ${annotation.text}`, annotation.id);
+        copyToClipboard(`${filePrefix}\n\n// ${normalizedCommentPrefix}: ${annotation.text}`, annotation.id);
         return;
       }
 
       const context = findMarkdownContext(annotation.anchor.exact);
-      const copyText = `${context}\n\n// Comment: ${annotation.text}`;
+      const copyText = `${filePrefix}\n\n// ${normalizedContextPrefix}:\n${context}\n\n// ${normalizedCommentPrefix}: ${annotation.text}`;
       copyToClipboard(copyText, annotation.id);
     },
-    [copyToClipboard, findMarkdownContext],
+    [commentPrefix, contextPrefix, copyToClipboard, fullFilePath, findMarkdownContext, pathMode, relativeFilePath],
   );
 
   const handleCopyAll = useCallback(() => {
+    const fallbackValues = getCopyFormatFallbacks();
+    const normalizedContextPrefix = contextPrefix.trim() || fallbackValues.context;
+    const normalizedCommentPrefix = commentPrefix.trim() || fallbackValues.comment;
+    const normalizedDelimiter = commentsDelimiter.trim() || fallbackValues.delimiter;
+    const selectedPath = pathMode === 'full' ? fullFilePath : relativeFilePath;
+
     const allComments = annotations
       .map((annotation) => {
         if (annotation.isGlobal || !annotation.anchor) {
-          return `// Global Comment: ${annotation.text}`;
+          return `// ${normalizedCommentPrefix}: ${annotation.text}`;
         }
 
         const context = findMarkdownContext(annotation.anchor.exact);
-        return `${context}\n\n// Comment: ${annotation.text}`;
+        return `// ${normalizedContextPrefix}:\n${context}\n\n// ${normalizedCommentPrefix}: ${annotation.text}`;
       })
-      .join('\n\n---\n\n');
+      .join(`\n\n${normalizedDelimiter}\n\n`);
 
-    copyToClipboard(allComments, '__all__');
-  }, [annotations, copyToClipboard, findMarkdownContext]);
+    copyToClipboard(`File Path: ${selectedPath}\n\n${allComments}`, '__all__');
+  }, [annotations, commentPrefix, commentsDelimiter, contextPrefix, copyToClipboard, findMarkdownContext, fullFilePath, pathMode, relativeFilePath]);
 
   const startEditing = useCallback((annotation: Annotation) => {
     setEditingId(annotation.id);

@@ -28,7 +28,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export default function MarkdownPage() {
-  const { content, path, sourcePath } = useLoaderData<typeof loader>();
+  const { content, path, sourcePath, absolutePath } = useLoaderData<typeof loader>();
   const { theme } = useTheme();
   const themeClass = `markdown-theme-${theme}`;
 
@@ -36,7 +36,13 @@ export default function MarkdownPage() {
     <AnnotationStoreProvider filePath={path}>
       <div className="space-y-5">
         <AnnotationErrorBoundary>
-          <LineAnnotatedMarkdown content={content} proseClass="" themeClass={themeClass} filePath={sourcePath} />
+          <LineAnnotatedMarkdown
+            content={content}
+            proseClass=""
+            themeClass={themeClass}
+            relativeFilePath={sourcePath}
+            fullFilePath={absolutePath}
+          />
         </AnnotationErrorBoundary>
       </div>
     </AnnotationStoreProvider>

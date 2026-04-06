@@ -29,7 +29,8 @@ interface LineAnnotatedMarkdownProps {
   content: string;
   proseClass: string;
   themeClass: string;
-  filePath: string;
+  relativeFilePath: string;
+  fullFilePath: string;
 }
 
 function getTextQuote() {
@@ -49,7 +50,8 @@ export function LineAnnotatedMarkdown({
   content,
   proseClass,
   themeClass,
-  filePath,
+  relativeFilePath,
+  fullFilePath,
 }: LineAnnotatedMarkdownProps) {
   const { annotations, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null);
@@ -71,14 +73,14 @@ export function LineAnnotatedMarkdown({
   const { setActions, setBreadcrumbs } = useAppChrome();
 
   const documentMeta = useMemo(() => {
-    const normalizedPath = filePath.replace(/\\/g, '/');
+    const normalizedPath = relativeFilePath.replace(/\\/g, '/');
     const parts = normalizedPath.split('/').filter(Boolean);
-    const filename = parts[parts.length - 1] || filePath;
+    const filename = parts[parts.length - 1] || relativeFilePath;
 
     return {
-      title: filename.replace(/\.md$/i, ''),
+      title: filename,
     };
-  }, [filePath]);
+  }, [relativeFilePath]);
   const commentsVisible = isDesktopViewport ? sidebarOpen : isCommentsDrawerOpen;
   const showCommentsLabel = `Show comments (${annotations.length})`;
   const hideCommentsLabel = `Hide comments (${annotations.length})`;
@@ -305,6 +307,8 @@ export function LineAnnotatedMarkdown({
     <CommentSidebar
       annotations={annotations}
       rawContent={content}
+      relativeFilePath={relativeFilePath}
+      fullFilePath={fullFilePath}
       onUpdate={updateAnnotationText}
       onRemove={removeAnnotation}
       onClose={toggleComments}
