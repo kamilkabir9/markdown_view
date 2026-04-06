@@ -78,7 +78,7 @@ function isPortAvailable(portNumber) {
     const server = createServer();
     server.unref();
     server.on('error', () => resolveAvailability(false));
-    server.listen({ port: portNumber, host: '127.0.0.1' }, () => {
+    server.listen({ port: portNumber }, () => {
       server.close(() => resolveAvailability(true));
     });
   });
