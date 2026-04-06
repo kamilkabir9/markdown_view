@@ -19,13 +19,13 @@ function printHelp() {
   console.log('markdown-viewer');
   console.log('');
   console.log('Usage:');
-  console.log('  markdown-viewer [start] [--port <number>] [--cwd <path>] [--no-open]');
+  console.log('  markdown-viewer [directory] [--port <number>] [--no-open]');
   console.log('  markdown-viewer --help');
   console.log('');
   console.log('Examples:');
   console.log('  markdown-viewer');
+  console.log('  markdown-viewer ./docs');
   console.log('  markdown-viewer --port 4000');
-  console.log('  markdown-viewer --cwd ./docs');
   console.log('  markdown-viewer --no-open');
 }
 
@@ -34,35 +34,38 @@ if (args.includes('--help') || args.includes('-h')) {
   process.exit(0);
 }
 
-const command = args[0] && !args[0].startsWith('-') ? args[0] : 'start';
-if (command !== 'start') {
-  console.error(`Unknown command: ${command}`);
-  printHelp();
-  process.exit(1);
+let directoryArg;
+let optionArgs = args;
+
+if (args[0] && !args[0].startsWith('-')) {
+  directoryArg = args[0];
+  optionArgs = args.slice(1);
 }
 
 let port;
-let workingDir = process.cwd();
+let workingDir = directoryArg ? resolve(process.cwd(), directoryArg) : process.cwd();
 let shouldOpenBrowser = true;
 
-for (let i = 0; i < args.length; i += 1) {
-  const arg = args[i];
+for (let i = 0; i < optionArgs.length; i += 1) {
+  const arg = optionArgs[i];
   if (arg === '--port') {
-    port = args[i + 1];
+    port = optionArgs[i + 1];
     i += 1;
-    continue;
-  }
-  if (arg === '--cwd') {
-    const next = args[i + 1];
-    if (next) {
-      workingDir = resolve(process.cwd(), next);
-      i += 1;
-    }
     continue;
   }
   if (arg === '--no-open') {
     shouldOpenBrowser = false;
+    continue;
   }
+  if (arg.startsWith('-')) {
+    console.error(`Unknown option: ${arg}`);
+    printHelp();
+    process.exit(1);
+  }
+
+  console.error(`Unexpected argument: ${arg}`);
+  printHelp();
+  process.exit(1);
 }
 
 function isValidPort(value) {
@@ -120,7 +123,7 @@ if (!existsSync(workingDir)) {
 }
 
 if (!statSync(workingDir).isDirectory()) {
-  console.error(`--cwd must point to a directory: ${workingDir}`);
+  console.error(`Directory argument must point to a directory: ${workingDir}`);
   process.exit(1);
 }
 

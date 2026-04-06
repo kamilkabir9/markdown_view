@@ -44,7 +44,7 @@ markdown-viewer
 markdown-viewer --port 4000
 
 # Serve markdown files from another directory
-markdown-viewer --cwd ./docs
+markdown-viewer ./docs
 
 # Start server without opening browser
 markdown-viewer --no-open
@@ -60,13 +60,13 @@ CLI behavior:
 
 - If the requested port is busy, it automatically tries the next available port.
 - By default, it opens your browser to the running local URL.
-- When linked globally, app assets are served from the package build while markdown files are read from your current directory (or `--cwd`).
+- When linked globally, app assets are served from the package build while markdown files are read from your current directory (or the first positional directory argument).
 
 Why this works:
 
 - `npm run build` generates the app's compiled server and browser assets under `build/`.
 - The CLI serves those built assets from the installed package location.
-- Your markdown files are not bundled into the build; they are read at runtime from the current directory or `--cwd`.
+- Your markdown files are not bundled into the build; they are read at runtime from the current directory or the first positional directory argument.
 
 ## Usage
 
