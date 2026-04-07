@@ -1,12 +1,12 @@
 import { readdir, stat, readFile } from 'fs/promises';
-import { join, extname, relative, resolve, normalize } from 'path';
+import { join, extname, relative, resolve, normalize, sep } from 'path';
 
 const ROOT_DIR = resolve(process.env.MARKDOWN_VIEWER_CONTENT_ROOT || process.cwd());
 const MARKDOWN_EXTENSION = '.md';
 
 function isSafePath(pathname: string): boolean {
   const resolved = normalize(resolve(ROOT_DIR, pathname));
-  return resolved.startsWith(ROOT_DIR + '/') || resolved === ROOT_DIR;
+  return resolved.startsWith(ROOT_DIR + sep) || resolved === ROOT_DIR;
 }
 
 function normalizeRoutePath(pathname: string): string {
