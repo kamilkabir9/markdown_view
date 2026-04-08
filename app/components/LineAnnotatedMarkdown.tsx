@@ -24,6 +24,7 @@ import { useAppChrome } from '~/contexts/AppChromeContext';
 import { CommentHighlighter } from './CommentHighlighter';
 import { CommentSidebar } from './CommentSidebar';
 import { ImageWithFallback } from './ImageWithFallback';
+import { MermaidBlock } from './MermaidBlock';
 
 interface LineAnnotatedMarkdownProps {
   content: string;
@@ -84,6 +85,7 @@ export function LineAnnotatedMarkdown({
   const commentsVisible = isDesktopViewport ? sidebarOpen : isCommentsDrawerOpen;
   const showCommentsLabel = `Show comments (${annotations.length})`;
   const hideCommentsLabel = `Hide comments (${annotations.length})`;
+  const isDarkTheme = themeClass.includes('dark');
 
   const handleMouseUp = useCallback(async (event: React.MouseEvent) => {
     if (event.button !== 0) return;
@@ -106,19 +108,25 @@ export function LineAnnotatedMarkdown({
       return;
     }
 
+    let anchoringSpinnerTimeout: number | undefined;
+
     try {
-      setIsAnchoring(true);
+      anchoringSpinnerTimeout = window.setTimeout(() => {
+        setIsAnchoring(true);
+      }, 150);
+
       const textQuote = await getTextQuote();
       const anchor = textQuote.fromRange(container, range);
 
+      window.clearTimeout(anchoringSpinnerTimeout);
+      setIsAnchoring(false);
+
       if (!anchor?.exact?.trim()) {
-        setIsAnchoring(false);
         return;
       }
 
       const rect = range.getBoundingClientRect();
       if (!rect || rect.width === 0) {
-        setIsAnchoring(false);
         return;
       }
 
@@ -128,10 +136,12 @@ export function LineAnnotatedMarkdown({
         prefix: anchor.prefix || '',
         suffix: anchor.suffix || '',
       });
-      setIsAnchoring(false);
     } catch (error) {
-      console.warn('anchor error:', error);
+      if (anchoringSpinnerTimeout !== undefined) {
+        window.clearTimeout(anchoringSpinnerTimeout);
+      }
       setIsAnchoring(false);
+      console.warn('anchor error:', error);
     }
   }, []);
 
@@ -333,6 +343,22 @@ export function LineAnnotatedMarkdown({
                         rehypePlugins={[rehypeHighlight]}
                         components={{
                           img: ({ node, ...props }) => <ImageWithFallback {...props} />,
+                          code: ({ children, className, ...props }) => {
+                            const language = className?.match(/language-(\w+)/)?.[1];
+                            const code = Array.isArray(children)
+                              ? children.map((child) => String(child)).join('')
+                              : String(children ?? '');
+
+                            if (language === 'mermaid') {
+                              return <MermaidBlock code={code.replace(/\n$/, '')} isDarkTheme={isDarkTheme} />;
+                            }
+
+                            return (
+                              <code className={className} {...props}>
+                                {children}
+                              </code>
+                            );
+                          },
                         }}
                       >
                         {content}

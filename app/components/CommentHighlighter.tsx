@@ -97,17 +97,22 @@ export function CommentHighlighter({
 
     const container = containerRef.current;
     if (!container) return;
+    const highlightContainer = container;
 
     const abortController = new AbortController();
+    let isApplyingHighlights = false;
+    let pendingFrame: number | null = null;
+    let mutationObserver: MutationObserver | null = null;
+    let clickHandlers: Array<{ mark: Element; handler: () => void }> = [];
 
     function removeAllMarks() {
-      const annotatedBlocks = container!.querySelectorAll('[data-annotation-block]');
+      const annotatedBlocks = highlightContainer.querySelectorAll('[data-annotation-block]');
       annotatedBlocks.forEach((block) => {
         block.removeAttribute('data-annotation-block');
         block.removeAttribute('data-annotation-active');
       });
 
-      const existingMarks = container!.querySelectorAll('mark[data-annotation-id]');
+      const existingMarks = highlightContainer.querySelectorAll('mark[data-annotation-id]');
       existingMarks.forEach((mark) => {
         try {
           const parent = mark.parentNode;
@@ -119,63 +124,116 @@ export function CommentHighlighter({
           parent.normalize();
         } catch {}
       });
-    }
 
-    if (annotations.length === 0) {
-      removeAllMarks();
-      return;
-    }
-
-    const clickHandlers: Array<{ mark: Element; handler: () => void }> = [];
-
-    import('dom-anchor-text-quote')
-      .then((textQuote) => {
-        if (abortController.signal.aborted) return;
-
-        requestAnimationFrame(() => {
-          if (abortController.signal.aborted) return;
-
-          try {
-            removeAllMarks();
-
-            annotations.forEach((annotation) => {
-              try {
-                if (!annotation.anchor) return;
-                const range = textQuote.toRange(container, annotation.anchor);
-                if (!range || range.collapsed) return;
-
-                const marks = wrapRangeWithMarks(
-                  range,
-                  annotation.id,
-                  annotation.id === activeAnnotationId,
-                );
-                marks.forEach((mark) => {
-                  const block = findAnnotatedBlock(mark, container);
-                  if (block) {
-                    block.setAttribute('data-annotation-block', 'true');
-                    if (annotation.id === activeAnnotationId) {
-                      block.setAttribute('data-annotation-active', 'true');
-                    }
-                  }
-
-                  const clickHandler = () => onAnnotationClick?.(annotation);
-                  mark.addEventListener('click', clickHandler);
-                  clickHandlers.push({ mark, handler: clickHandler });
-                });
-              } catch {}
-            });
-          } catch {}
-        });
-      })
-      .catch(() => {});
-
-    return () => {
-      abortController.abort();
       clickHandlers.forEach(({ mark, handler }) => {
         try {
           mark.removeEventListener('click', handler);
         } catch {}
       });
+      clickHandlers = [];
+    }
+
+    function applyHighlights() {
+      if (pendingFrame !== null) {
+        cancelAnimationFrame(pendingFrame);
+      }
+
+      pendingFrame = requestAnimationFrame(() => {
+        pendingFrame = null;
+        if (abortController.signal.aborted) return;
+
+        isApplyingHighlights = true;
+
+        if (annotations.length === 0) {
+          removeAllMarks();
+          isApplyingHighlights = false;
+          return;
+        }
+
+        import('dom-anchor-text-quote')
+          .then((textQuote) => {
+            if (abortController.signal.aborted) return;
+
+            try {
+              removeAllMarks();
+
+              annotations.forEach((annotation) => {
+                try {
+                  if (!annotation.anchor) return;
+                  const range = textQuote.toRange(highlightContainer, annotation.anchor);
+                  if (!range || range.collapsed) return;
+
+                  const marks = wrapRangeWithMarks(
+                    range,
+                    annotation.id,
+                    annotation.id === activeAnnotationId,
+                  );
+                  marks.forEach((mark) => {
+                    const block = findAnnotatedBlock(mark, highlightContainer);
+                    if (block) {
+                      block.setAttribute('data-annotation-block', 'true');
+                      if (annotation.id === activeAnnotationId) {
+                        block.setAttribute('data-annotation-active', 'true');
+                      }
+                    }
+
+                    const clickHandler = () => onAnnotationClick?.(annotation);
+                    mark.addEventListener('click', clickHandler);
+                    clickHandlers.push({ mark, handler: clickHandler });
+                  });
+                } catch {}
+              });
+            } catch {}
+            finally {
+              isApplyingHighlights = false;
+            }
+          })
+          .catch(() => {
+            isApplyingHighlights = false;
+          });
+      });
+    }
+
+    mutationObserver = new MutationObserver((mutations) => {
+      if (abortController.signal.aborted || isApplyingHighlights) return;
+
+      const hasRelevantMutation = mutations.some((mutation) => {
+        if (mutation.type === 'characterData') return true;
+
+        if (mutation.type === 'childList') {
+          return [...mutation.addedNodes, ...mutation.removedNodes].some((node) => {
+            if (!(node instanceof Element)) {
+              return node.nodeType === Node.TEXT_NODE;
+            }
+
+            return !node.matches('mark[data-annotation-id]')
+              && !node.closest('mark[data-annotation-id]');
+          });
+        }
+
+        return false;
+      });
+
+      if (hasRelevantMutation) {
+        applyHighlights();
+      }
+    });
+
+    mutationObserver.observe(highlightContainer, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+
+    applyHighlights();
+
+    return () => {
+      abortController.abort();
+      if (pendingFrame !== null) {
+        cancelAnimationFrame(pendingFrame);
+      }
+      mutationObserver?.disconnect();
+      removeAllMarks();
     };
   }, [containerRef, annotations, onAnnotationClick, activeAnnotationId]);
 
