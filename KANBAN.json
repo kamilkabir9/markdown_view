@@ -96,6 +96,580 @@
       "updated": "2026-03-29T14:59:26.320Z",
       "type": "feature",
       "body": "Add an option to include file path as relative or full path in copied output."
+    },
+    {
+      "id": "add-hideable-document-outline-panel-9d265c9d",
+      "title": "Add hideable document outline panel",
+      "column": "Backlog",
+      "created": "2026-04-08T19:36:06.316Z",
+      "updated": "2026-04-08T19:36:06.315Z",
+      "type": "feature",
+      "body": "Create a left-side panel that shows the document outline similar to MS Word. The panel should be hideable so users can toggle it on and off while editing or reading."
+    },
+    {
+      "id": "add-mermaid-graph-rendering-with-raw-tex-7cd2df30",
+      "title": "Add Mermaid graph rendering with raw-text comments only",
+      "column": "Done",
+      "created": "2026-04-08T19:36:06.317Z",
+      "updated": "2026-04-08T19:42:39.439Z",
+      "type": "feature",
+      "body": "Render Mermaid diagrams in markdown content. Ensure comments can only be attached to the raw Mermaid source text, not directly to the rendered graph output."
+    },
+    {
+      "id": "add-image-preview-feature-0f0af155",
+      "title": "Add image preview feature",
+      "column": "Backlog",
+      "created": "2026-04-08T19:36:06.360Z",
+      "updated": "2026-04-08T19:36:06.360Z",
+      "type": "feature",
+      "body": "Add image preview support so users can view images more clearly from the document experience."
+    },
+    {
+      "id": "enable-direct-document-editing-6a7d2520",
+      "title": "Enable direct document editing",
+      "column": "Backlog",
+      "created": "2026-04-08T19:36:06.360Z",
+      "updated": "2026-04-08T19:36:06.360Z",
+      "type": "feature",
+      "body": "Allow users to edit the document content directly within the application instead of only viewing it."
+    },
+    {
+      "id": "spa-api-spa-api-01-inventory-ssr-specifi-03753df1",
+      "title": "[SPA-API] SPA-API-01 Inventory SSR-specific code paths",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:41.116Z",
+      "updated": "2026-04-08T20:15:13.555Z",
+      "type": "chore",
+      "body": "Track all SSR-specific files, loaders, actions, and server-only utilities that must be migrated or removed. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-01.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.554Z"
+    },
+    {
+      "id": "spa-api-spa-api-02-map-ssr-data-flows-to-42de422c",
+      "title": "[SPA-API] SPA-API-02 Map SSR data flows to API contracts",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:41.139Z",
+      "updated": "2026-04-08T20:15:13.560Z",
+      "type": "chore",
+      "body": "Document all browser data currently provided through SSR and map each flow to an explicit API contract. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-02.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.559Z"
+    },
+    {
+      "id": "spa-api-spa-api-03-extract-file-services-fa07d0d6",
+      "title": "[SPA-API] SPA-API-03 Extract file services",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:41.150Z",
+      "updated": "2026-04-08T20:15:13.605Z",
+      "type": "feature",
+      "body": "Extract markdown file listing and file-read business logic into reusable server services. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-03.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.605Z"
+    },
+    {
+      "id": "spa-api-spa-api-04-extract-comment-servi-2c24760e",
+      "title": "[SPA-API] SPA-API-04 Extract comment services",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:41.154Z",
+      "updated": "2026-04-08T20:15:13.616Z",
+      "type": "feature",
+      "body": "Extract comment persistence and mutation logic into reusable server services. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-04.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.616Z"
+    },
+    {
+      "id": "spa-api-spa-api-05-add-path-validation-a-a3576396",
+      "title": "[SPA-API] SPA-API-05 Add path validation and API errors",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:41.158Z",
+      "updated": "2026-04-08T20:15:13.618Z",
+      "type": "feature",
+      "body": "Add shared server path validation plus normalized API error handling for file and comment routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-05.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.616Z"
+    },
+    {
+      "id": "spa-api-spa-api-06-implement-file-api-en-e532e4d2",
+      "title": "[SPA-API] SPA-API-06 Implement file API endpoints",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:41.189Z",
+      "updated": "2026-04-08T20:15:13.621Z",
+      "type": "feature",
+      "body": "Implement GET /api/files and GET /api/files/*path endpoints. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-06.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.620Z"
+    },
+    {
+      "id": "spa-api-spa-api-07-implement-comment-api-1fe7c0ea",
+      "title": "[SPA-API] SPA-API-07 Implement comment API endpoints",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:41.189Z",
+      "updated": "2026-04-08T20:15:13.622Z",
+      "type": "feature",
+      "body": "Implement supported comment list/create/update/delete API endpoints. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-07.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.620Z"
+    },
+    {
+      "id": "spa-api-spa-api-08-add-api-integration-c-ae9e6a44",
+      "title": "[SPA-API] SPA-API-08 Add API integration coverage",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:56.446Z",
+      "updated": "2026-04-08T20:15:13.629Z",
+      "type": "chore",
+      "body": "Add integration coverage for file and comment API routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-08.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.629Z"
+    },
+    {
+      "id": "spa-api-spa-api-09-replace-ssr-bootstrap-c21962a1",
+      "title": "[SPA-API] SPA-API-09 Replace SSR bootstrap with SPA entry",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:56.476Z",
+      "updated": "2026-04-08T20:15:13.645Z",
+      "type": "feature",
+      "body": "Replace SSR bootstrap with a browser-only SPA entry and client router setup. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-09.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.644Z"
+    },
+    {
+      "id": "spa-api-spa-api-10-add-frontend-api-clie-da286088",
+      "title": "[SPA-API] SPA-API-10 Add frontend API client",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:56.510Z",
+      "updated": "2026-04-08T20:15:13.647Z",
+      "type": "feature",
+      "body": "Add a thin frontend API client and shared request helpers. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-10.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.644Z"
+    },
+    {
+      "id": "spa-api-spa-api-11-migrate-file-index-ro-50ff94cd",
+      "title": "[SPA-API] SPA-API-11 Migrate file index route",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:56.517Z",
+      "updated": "2026-04-08T20:15:13.648Z",
+      "type": "feature",
+      "body": "Migrate the file index route from SSR loaders to client-side fetching. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-11.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.644Z"
+    },
+    {
+      "id": "spa-api-spa-api-12-migrate-markdown-read-9990eaef",
+      "title": "[SPA-API] SPA-API-12 Migrate markdown reader route",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:56.759Z",
+      "updated": "2026-04-08T20:15:13.646Z",
+      "type": "feature",
+      "body": "Migrate the markdown reader route from SSR loaders to client-side fetching. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-12.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:13.644Z"
+    },
+    {
+      "id": "spa-api-spa-api-13-migrate-comment-ui-fl-e1b7be9c",
+      "title": "[SPA-API] SPA-API-13 Migrate comment UI flows to API",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:56.832Z",
+      "updated": "2026-04-08T20:15:24.597Z",
+      "type": "feature",
+      "body": "Migrate comment read and write UI flows to use the API client. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-13.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.596Z"
+    },
+    {
+      "id": "spa-api-spa-api-15-preserve-url-behavior-d9eef7c2",
+      "title": "[SPA-API] SPA-API-15 Preserve URL behavior and route boundaries",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:56.832Z",
+      "updated": "2026-04-08T20:15:24.822Z",
+      "type": "feature",
+      "body": "Preserve current URL behavior and ensure client routing does not collide with /api/* routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-15.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.821Z"
+    },
+    {
+      "id": "spa-api-spa-api-14-add-spa-loading-and-e-4f0cc99d",
+      "title": "[SPA-API] SPA-API-14 Add SPA loading and error states",
+      "column": "Backlog",
+      "created": "2026-04-08T20:12:56.832Z",
+      "updated": "2026-04-08T20:15:24.623Z",
+      "type": "feature",
+      "body": "Add loading, empty, and error states for all migrated SPA routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-14.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.623Z"
+    },
+    {
+      "id": "spa-api-spa-api-16-update-build-and-star-fc970756",
+      "title": "[SPA-API] SPA-API-16 Update build and start scripts",
+      "column": "Backlog",
+      "created": "2026-04-08T20:13:11.001Z",
+      "updated": "2026-04-08T20:15:24.844Z",
+      "type": "feature",
+      "body": "Update Vite, build scripts, and start scripts for SPA assets plus API server runtime. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-16.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.842Z"
+    },
+    {
+      "id": "spa-api-spa-api-17-update-cli-startup-fl-ce940a16",
+      "title": "[SPA-API] SPA-API-17 Update CLI startup flow",
+      "column": "Backlog",
+      "created": "2026-04-08T20:13:11.020Z",
+      "updated": "2026-04-08T20:15:24.846Z",
+      "type": "feature",
+      "body": "Update the CLI startup flow to serve the built SPA and API against the selected content directory. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-17.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.842Z"
+    },
+    {
+      "id": "spa-api-spa-api-18-remove-ssr-runtime-in-eeb9a764",
+      "title": "[SPA-API] SPA-API-18 Remove SSR runtime infrastructure",
+      "column": "Backlog",
+      "created": "2026-04-08T20:13:11.087Z",
+      "updated": "2026-04-08T20:15:24.848Z",
+      "type": "chore",
+      "body": "Remove React Router SSR entrypoints, config, and no-longer-used runtime code. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-18.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.843Z"
+    },
+    {
+      "id": "spa-api-spa-api-19-remove-ssr-only-depen-37781a67",
+      "title": "[SPA-API] SPA-API-19 Remove SSR-only dependencies",
+      "column": "Backlog",
+      "created": "2026-04-08T20:13:11.093Z",
+      "updated": "2026-04-08T20:15:24.847Z",
+      "type": "chore",
+      "body": "Remove SSR-only dependencies from package.json after runtime parity is confirmed. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-19.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.842Z"
+    },
+    {
+      "id": "spa-api-spa-api-20-add-spa-deep-link-fal-d078e12b",
+      "title": "[SPA-API] SPA-API-20 Add SPA deep-link fallback",
+      "column": "Backlog",
+      "created": "2026-04-08T20:13:11.093Z",
+      "updated": "2026-04-08T20:15:24.850Z",
+      "type": "feature",
+      "body": "Add SPA fallback handling for deep links and verify refresh behavior on nested routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-20.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.843Z"
+    },
+    {
+      "id": "spa-api-spa-api-21-add-playwright-spa-co-054de8ec",
+      "title": "[SPA-API] SPA-API-21 Add Playwright SPA coverage",
+      "column": "Backlog",
+      "created": "2026-04-08T20:13:11.096Z",
+      "updated": "2026-04-08T20:15:24.851Z",
+      "type": "chore",
+      "body": "Add Playwright coverage for SPA navigation, nested-route refresh, and key comment flows. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-21.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.843Z"
+    },
+    {
+      "id": "spa-api-spa-api-22-update-docs-for-spa-a-9f453447",
+      "title": "[SPA-API] SPA-API-22 Update docs for SPA/API architecture",
+      "column": "Backlog",
+      "created": "2026-04-08T20:13:11.096Z",
+      "updated": "2026-04-08T20:15:24.852Z",
+      "type": "chore",
+      "body": "Update README.md and migration docs to reflect the SPA/API architecture and commands. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-22.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.844Z"
+    },
+    {
+      "id": "spa-api-spa-api-23-run-final-verificatio-1d3285e1",
+      "title": "[SPA-API] SPA-API-23 Run final verification and cleanup",
+      "column": "Backlog",
+      "created": "2026-04-08T20:13:11.099Z",
+      "updated": "2026-04-08T20:15:24.854Z",
+      "type": "chore",
+      "body": "Run final verification: typecheck, build, CLI validation, desktop/mobile checks, and dead-code cleanup. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-23.",
+      "deleted": true,
+      "deletedAt": "2026-04-08T20:15:24.844Z"
+    },
+    {
+      "id": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
+      "title": "[SPA-API] Phase 1 Baseline and isolation",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:13.233Z",
+      "updated": "2026-04-08T20:14:13.233Z",
+      "type": "feature",
+      "body": "Parent item for SPA/API migration phase 1. Covers SSR inventory, data-flow mapping, service extraction, and API contract definition."
+    },
+    {
+      "id": "spa-api-phase-2-create-api-layer-cd5ea4dd",
+      "title": "[SPA-API] Phase 2 Create API layer",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:13.246Z",
+      "updated": "2026-04-08T20:14:13.245Z",
+      "type": "feature",
+      "body": "Parent item for SPA/API migration phase 2. Covers API routes, shared validation, and API-level test coverage."
+    },
+    {
+      "id": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
+      "title": "[SPA-API] Phase 3 Convert frontend to SPA",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:13.318Z",
+      "updated": "2026-04-08T20:14:13.317Z",
+      "type": "feature",
+      "body": "Parent item for SPA/API migration phase 3. Covers SPA bootstrap, API client, route migration, and UI state handling."
+    },
+    {
+      "id": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
+      "title": "[SPA-API] Phase 4 Remove SSR infrastructure",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:13.318Z",
+      "updated": "2026-04-08T20:14:13.318Z",
+      "type": "feature",
+      "body": "Parent item for SPA/API migration phase 4. Covers build/runtime updates, CLI changes, SSR removal, and dependency cleanup."
+    },
+    {
+      "id": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
+      "title": "[SPA-API] Phase 5 Hardening and cleanup",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:13.320Z",
+      "updated": "2026-04-08T20:14:13.319Z",
+      "type": "feature",
+      "body": "Parent item for SPA/API migration phase 5. Covers deep-link fallback, end-to-end coverage, docs, and final verification."
+    },
+    {
+      "id": "spa-api-spa-api-01-inventory-ssr-specifi-84baa1c7",
+      "title": "[SPA-API] SPA-API-01 Inventory SSR-specific code paths",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:30.126Z",
+      "updated": "2026-04-08T20:14:30.125Z",
+      "type": "chore",
+      "parentId": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
+      "body": "Track all SSR-specific files, loaders, actions, and server-only utilities that must be migrated or removed. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-01."
+    },
+    {
+      "id": "spa-api-spa-api-02-map-ssr-data-flows-to-58d7946d",
+      "title": "[SPA-API] SPA-API-02 Map SSR data flows to API contracts",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:30.190Z",
+      "updated": "2026-04-08T20:14:30.189Z",
+      "type": "chore",
+      "parentId": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
+      "body": "Document all browser data currently provided through SSR and map each flow to an explicit API contract. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-02."
+    },
+    {
+      "id": "spa-api-spa-api-03-extract-file-services-32821c99",
+      "title": "[SPA-API] SPA-API-03 Extract file services",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:30.194Z",
+      "updated": "2026-04-08T20:14:30.193Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
+      "body": "Extract markdown file listing and file-read business logic into reusable server services. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-03."
+    },
+    {
+      "id": "spa-api-spa-api-04-extract-comment-servi-b0b22fec",
+      "title": "[SPA-API] SPA-API-04 Extract comment services",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:30.199Z",
+      "updated": "2026-04-08T20:14:30.198Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
+      "body": "Extract comment persistence and mutation logic into reusable server services. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-04."
+    },
+    {
+      "id": "spa-api-spa-api-06-implement-file-api-en-6ae2cd21",
+      "title": "[SPA-API] SPA-API-06 Implement file API endpoints",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:30.219Z",
+      "updated": "2026-04-08T20:14:30.218Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-2-create-api-layer-cd5ea4dd",
+      "body": "Implement GET /api/files and GET /api/files/*path endpoints. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-06."
+    },
+    {
+      "id": "spa-api-spa-api-05-add-path-validation-a-828a4bf0",
+      "title": "[SPA-API] SPA-API-05 Add path validation and API errors",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:30.219Z",
+      "updated": "2026-04-08T20:14:30.218Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-2-create-api-layer-cd5ea4dd",
+      "body": "Add shared server path validation plus normalized API error handling for file and comment routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-05."
+    },
+    {
+      "id": "spa-api-spa-api-08-add-api-integration-c-97549fbf",
+      "title": "[SPA-API] SPA-API-08 Add API integration coverage",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:30.219Z",
+      "updated": "2026-04-08T20:14:30.218Z",
+      "type": "chore",
+      "parentId": "spa-api-phase-2-create-api-layer-cd5ea4dd",
+      "body": "Add integration coverage for file and comment API routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-08."
+    },
+    {
+      "id": "spa-api-spa-api-07-implement-comment-api-e228d734",
+      "title": "[SPA-API] SPA-API-07 Implement comment API endpoints",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:30.219Z",
+      "updated": "2026-04-08T20:14:30.218Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-2-create-api-layer-cd5ea4dd",
+      "body": "Implement supported comment list/create/update/delete API endpoints. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-07."
+    },
+    {
+      "id": "spa-api-spa-api-09-replace-ssr-bootstrap-fa5454b3",
+      "title": "[SPA-API] SPA-API-09 Replace SSR bootstrap with SPA entry",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:44.971Z",
+      "updated": "2026-04-08T20:14:44.970Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
+      "body": "Replace SSR bootstrap with a browser-only SPA entry and client router setup. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-09."
+    },
+    {
+      "id": "spa-api-spa-api-10-add-frontend-api-clie-92dd7525",
+      "title": "[SPA-API] SPA-API-10 Add frontend API client",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:45.008Z",
+      "updated": "2026-04-08T20:14:45.007Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
+      "body": "Add a thin frontend API client and shared request helpers. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-10."
+    },
+    {
+      "id": "spa-api-spa-api-11-migrate-file-index-ro-30a10b78",
+      "title": "[SPA-API] SPA-API-11 Migrate file index route",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:45.044Z",
+      "updated": "2026-04-08T20:14:45.044Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
+      "body": "Migrate the file index route from SSR loaders to client-side fetching. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-11."
+    },
+    {
+      "id": "spa-api-spa-api-12-migrate-markdown-read-f8035db0",
+      "title": "[SPA-API] SPA-API-12 Migrate markdown reader route",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:45.048Z",
+      "updated": "2026-04-08T20:14:45.047Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
+      "body": "Migrate the markdown reader route from SSR loaders to client-side fetching. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-12."
+    },
+    {
+      "id": "spa-api-spa-api-14-add-spa-loading-and-e-a6394f72",
+      "title": "[SPA-API] SPA-API-14 Add SPA loading and error states",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:45.067Z",
+      "updated": "2026-04-08T20:14:45.066Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
+      "body": "Add loading, empty, and error states for all migrated SPA routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-14."
+    },
+    {
+      "id": "spa-api-spa-api-13-migrate-comment-ui-fl-cb0892b9",
+      "title": "[SPA-API] SPA-API-13 Migrate comment UI flows to API",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:45.067Z",
+      "updated": "2026-04-08T20:14:45.066Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
+      "body": "Migrate comment read and write UI flows to use the API client. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-13."
+    },
+    {
+      "id": "spa-api-spa-api-15-preserve-url-behavior-2e26f369",
+      "title": "[SPA-API] SPA-API-15 Preserve URL behavior and route boundaries",
+      "column": "Backlog",
+      "created": "2026-04-08T20:14:45.067Z",
+      "updated": "2026-04-08T20:14:45.066Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
+      "body": "Preserve current URL behavior and ensure client routing does not collide with /api/* routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-15."
+    },
+    {
+      "id": "spa-api-spa-api-16-update-build-and-star-40891b69",
+      "title": "[SPA-API] SPA-API-16 Update build and start scripts",
+      "column": "Backlog",
+      "created": "2026-04-08T20:15:01.911Z",
+      "updated": "2026-04-08T20:15:01.910Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
+      "body": "Update Vite, build scripts, and start scripts for SPA assets plus API server runtime. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-16."
+    },
+    {
+      "id": "spa-api-spa-api-17-update-cli-startup-fl-4b226136",
+      "title": "[SPA-API] SPA-API-17 Update CLI startup flow",
+      "column": "Backlog",
+      "created": "2026-04-08T20:15:01.943Z",
+      "updated": "2026-04-08T20:15:01.942Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
+      "body": "Update the CLI startup flow to serve the built SPA and API against the selected content directory. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-17."
+    },
+    {
+      "id": "spa-api-spa-api-18-remove-ssr-runtime-in-943b2915",
+      "title": "[SPA-API] SPA-API-18 Remove SSR runtime infrastructure",
+      "column": "Backlog",
+      "created": "2026-04-08T20:15:01.993Z",
+      "updated": "2026-04-08T20:15:01.993Z",
+      "type": "chore",
+      "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
+      "body": "Remove React Router SSR entrypoints, config, and no-longer-used runtime code. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-18."
+    },
+    {
+      "id": "spa-api-spa-api-19-remove-ssr-only-depen-abd86102",
+      "title": "[SPA-API] SPA-API-19 Remove SSR-only dependencies",
+      "column": "Backlog",
+      "created": "2026-04-08T20:15:02.001Z",
+      "updated": "2026-04-08T20:15:02.000Z",
+      "type": "chore",
+      "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
+      "body": "Remove SSR-only dependencies from package.json after runtime parity is confirmed. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-19."
+    },
+    {
+      "id": "spa-api-spa-api-21-add-playwright-spa-co-4313de05",
+      "title": "[SPA-API] SPA-API-21 Add Playwright SPA coverage",
+      "column": "Backlog",
+      "created": "2026-04-08T20:15:02.032Z",
+      "updated": "2026-04-08T20:15:02.032Z",
+      "type": "chore",
+      "parentId": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
+      "body": "Add Playwright coverage for SPA navigation, nested-route refresh, and key comment flows. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-21."
+    },
+    {
+      "id": "spa-api-spa-api-20-add-spa-deep-link-fal-ab502fef",
+      "title": "[SPA-API] SPA-API-20 Add SPA deep-link fallback",
+      "column": "Backlog",
+      "created": "2026-04-08T20:15:02.032Z",
+      "updated": "2026-04-08T20:15:02.031Z",
+      "type": "feature",
+      "parentId": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
+      "body": "Add SPA fallback handling for deep links and verify refresh behavior on nested routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-20."
+    },
+    {
+      "id": "spa-api-spa-api-22-update-docs-for-spa-a-5020a008",
+      "title": "[SPA-API] SPA-API-22 Update docs for SPA/API architecture",
+      "column": "Backlog",
+      "created": "2026-04-08T20:15:02.032Z",
+      "updated": "2026-04-08T20:15:02.032Z",
+      "type": "chore",
+      "parentId": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
+      "body": "Update README.md and migration docs to reflect the SPA/API architecture and commands. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-22."
+    },
+    {
+      "id": "spa-api-spa-api-23-run-final-verificatio-af203c9a",
+      "title": "[SPA-API] SPA-API-23 Run final verification and cleanup",
+      "column": "Backlog",
+      "created": "2026-04-08T20:15:02.033Z",
+      "updated": "2026-04-08T20:15:02.033Z",
+      "type": "chore",
+      "parentId": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
+      "body": "Run final verification: typecheck, build, CLI validation, desktop/mobile checks, and dead-code cleanup. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-23."
+    },
+    {
+      "id": "spa-api-spa-api-18a-remove-legacy-ssr-fa-6207d5cc",
+      "title": "[SPA-API] SPA-API-18A Remove legacy SSR fallback handlers",
+      "column": "Backlog",
+      "created": "2026-04-08T20:18:53.762Z",
+      "updated": "2026-04-08T20:18:53.761Z",
+      "type": "chore",
+      "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
+      "body": "Audit and remove legacy React Router SSR fallback behavior and transitional server-rendered route fallbacks. Verify production runtime no longer depends on SSR fallback handlers once SPA deep-link fallback is in place."
     }
   ]
 }

@@ -2,6 +2,14 @@
 
 A fast markdown viewer built with React Router v7 and Node.js, featuring SSR out of the box.
 
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
+
 ## Quick Start
 
 ```bash
