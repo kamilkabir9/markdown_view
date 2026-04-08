@@ -100,9 +100,9 @@
     {
       "id": "add-hideable-document-outline-panel-9d265c9d",
       "title": "Add hideable document outline panel",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T19:36:06.316Z",
-      "updated": "2026-04-08T19:36:06.315Z",
+      "updated": "2026-04-08T20:35:43.976Z",
       "type": "feature",
       "body": "Create a left-side panel that shows the document outline similar to MS Word. The panel should be hideable so users can toggle it on and off while editing or reading."
     },
