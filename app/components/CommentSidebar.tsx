@@ -11,8 +11,8 @@ interface CommentSidebarProps {
   rawContent: string;
   relativeFilePath: string;
   fullFilePath: string;
-  onUpdate: (id: string, text: string) => void;
-  onRemove: (id: string) => void;
+  onUpdate: (id: string, text: string) => Promise<void> | void;
+  onRemove: (id: string) => Promise<void> | void;
   onClose?: () => void;
   onAnnotationClick?: (annotation: Annotation) => void;
   activeAnnotationId?: string | null;

@@ -1,5 +1,5 @@
-import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
-import { useLoaderData, useNavigate, useRouteError, isRouteErrorResponse } from 'react-router';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
 import { Alert, AlertTitle, AlertDescription } from '~/components/ui/alert';
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { Button } from '~/components/ui/button';
@@ -7,41 +7,96 @@ import { LineAnnotatedMarkdown } from '~/components/LineAnnotatedMarkdown';
 import { AnnotationErrorBoundary } from '~/components/AnnotationErrorBoundary';
 import { AnnotationStoreProvider } from '~/contexts/AnnotationStore';
 import { useTheme } from '~/contexts/ThemeContext';
-import { getMarkdownContent } from '~/utils/files.server';
+import { fetchFile, getErrorMessage, type MarkdownFile } from '~/lib/api';
 import '~/styles/themes.css';
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => [
-  {
-    title: data?.sourcePath ? `${data.sourcePath} - Markdown Viewer` : 'File Not Found',
-  },
-];
-
-export async function loader({ params }: LoaderFunctionArgs) {
-  const path = params['*'] || '';
-  const result = await getMarkdownContent(path);
-
-  if (!result) {
-    throw new Response('Not Found', { status: 404 });
-  }
-
-  return result;
-}
-
 export default function MarkdownPage() {
-  const { content, path, sourcePath, absolutePath } = useLoaderData<typeof loader>();
+  const params = useParams();
   const { theme } = useTheme();
+  const [file, setFile] = useState<MarkdownFile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<{ title: string; description: string } | null>(null);
   const themeClass = `markdown-theme-${theme}`;
 
+  useEffect(() => {
+    const routePath = params['*'] || '';
+    const controller = new AbortController();
+
+    async function loadFile() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const nextFile = await fetchFile(routePath, controller.signal);
+        setFile(nextFile);
+        document.title = `${nextFile.sourcePath} - Markdown Viewer`;
+      } catch (requestError) {
+        if (controller.signal.aborted) return;
+
+        const status = requestError && typeof requestError === 'object' && 'status' in requestError
+          ? requestError.status
+          : undefined;
+
+        if (status === 404) {
+          document.title = 'File Not Found - Markdown Viewer';
+          setError({
+            title: '404 - File not found',
+            description: 'The markdown file you requested is no longer available at this path.',
+          });
+        } else {
+          document.title = 'Reader Error - Markdown Viewer';
+          setError({
+            title: 'Something went wrong',
+            description: getErrorMessage(requestError, 'An unexpected error interrupted the reader before this document could finish loading.'),
+          });
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadFile();
+
+    return () => controller.abort();
+  }, [params['*']]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-5">
+        <div className="app-shell-panel rounded-md p-8 sm:p-10">
+          <div className="max-w-xl space-y-4 text-left">
+            <h1 className="font-[var(--font-display)] text-4xl tracking-tight text-foreground sm:text-5xl">
+              Loading document...
+            </h1>
+            <p className="text-base leading-7 text-muted-foreground">
+              Fetching markdown content from the API.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !file) {
+    return (
+      <ErrorState
+        title={error?.title || 'Something went wrong'}
+        description={error?.description || 'An unexpected error interrupted the reader before this document could finish loading.'}
+      />
+    );
+  }
+
   return (
-    <AnnotationStoreProvider filePath={path}>
+    <AnnotationStoreProvider filePath={file.path}>
       <div className="space-y-5">
         <AnnotationErrorBoundary>
           <LineAnnotatedMarkdown
-            content={content}
+            content={file.content}
             proseClass=""
             themeClass={themeClass}
-            relativeFilePath={sourcePath}
-            fullFilePath={absolutePath}
+            relativeFilePath={file.sourcePath}
+            fullFilePath={file.absolutePath}
           />
         </AnnotationErrorBoundary>
       </div>
@@ -57,11 +112,11 @@ function ErrorState({ title, description }: { title: string; description: string
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Markdown Files</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/" />}>Markdown Files</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -100,27 +155,5 @@ function ErrorState({ title, description }: { title: string; description: string
         </div>
       </div>
     </div>
-  );
-}
-
-export function ErrorBoundary() {
-  const error = useRouteError();
-
-  if (isRouteErrorResponse(error) && error.status === 404) {
-    return (
-      <ErrorState
-        title="404 - File not found"
-        description="The markdown file you requested is no longer available at this path."
-      />
-    );
-  }
-
-  console.error('Route error:', error);
-
-  return (
-    <ErrorState
-      title="Something went wrong"
-      description="An unexpected error interrupted the reader before this document could finish loading."
-    />
   );
 }

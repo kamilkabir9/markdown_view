@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
-import { Link, useLoaderData } from 'react-router';
+import { Link } from 'react-router';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
 import {
@@ -11,17 +10,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
+import { fetchFiles, getErrorMessage, type FileInfo } from '~/lib/api';
 import { ChevronRightIcon, FileTextIcon, FolderIcon, SearchIcon, XIcon } from 'lucide-react';
 import { useAppChrome } from '~/contexts/AppChromeContext';
-import { getMarkdownFiles, type FileInfo } from '~/utils/files.server';
-
-export const meta: MetaFunction = () => [{ title: 'Markdown Viewer' }];
-
-export async function loader({}: LoaderFunctionArgs) {
-  const files = await getMarkdownFiles();
-  const contentRoot = process.env.MARKDOWN_VIEWER_CONTENT_ROOT || process.cwd();
-  return { files, contentRoot };
-}
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -148,16 +139,46 @@ function FileTreeNodeList({ nodes, search }: { nodes: FileTreeNode[]; search: st
 }
 
 export default function Index() {
-  const { files, contentRoot } = useLoaderData<typeof loader>();
+  const [files, setFiles] = useState<FileInfo[]>([]);
+  const [contentRoot, setContentRoot] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const { setActions, setBreadcrumbs } = useAppChrome();
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadFiles() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetchFiles(controller.signal);
+        setFiles(response.files);
+        setContentRoot(response.contentRoot);
+      } catch (requestError) {
+        if (controller.signal.aborted) return;
+        setError(getErrorMessage(requestError, 'The markdown library could not be loaded.'));
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadFiles();
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    document.title = 'Markdown Viewer';
+
     setBreadcrumbs(
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -186,6 +207,47 @@ export default function Index() {
   }, [files, search]);
 
   const treeNodes = useMemo(() => buildFileTree(filteredFiles), [filteredFiles]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-7">
+        <section className="app-shell-panel rounded-md p-6 sm:p-8">
+          <div className="max-w-3xl space-y-3">
+            <h1 className="font-[var(--font-display)] text-[clamp(2rem,5vw,3.3rem)] leading-[0.95] tracking-tight text-foreground">
+              Loading markdown library...
+            </h1>
+            <p className="text-base leading-8 text-muted-foreground">
+              Scanning the selected content folder for markdown files.
+            </p>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-7">
+        <section className="app-shell-panel rounded-md p-6 sm:p-8">
+          <div className="max-w-3xl space-y-5">
+            <div>
+              <h1 className="font-[var(--font-display)] text-[clamp(2rem,5vw,3.3rem)] leading-[0.95] tracking-tight text-foreground">
+                Markdown library unavailable.
+              </h1>
+              <p className="mt-4 max-w-2xl text-base leading-8 text-muted-foreground">
+                The app could not load the file index from the API.
+              </p>
+            </div>
+
+            <Alert variant="destructive" className="max-w-xl rounded-sm border-border/65 text-left shadow-none">
+              <AlertTitle>Library request failed</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   if (files.length === 0) {
     return (

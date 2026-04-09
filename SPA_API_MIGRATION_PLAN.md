@@ -285,29 +285,29 @@ Before release:
 
 Use this tag in commits, PRs, kanban items, and notes: `[SPA-API]`
 
-- [ ] `SPA-API-01` `[SPA-API]` Inventory current SSR-specific files, loaders, actions, and server-only utilities.
-- [ ] `SPA-API-02` `[SPA-API]` Document all browser data flows currently provided through SSR and map them to explicit API contracts.
-- [ ] `SPA-API-03` `[SPA-API]` Extract file-system business logic into reusable server services.
-- [ ] `SPA-API-04` `[SPA-API]` Extract comment persistence and mutation logic into reusable server services.
-- [ ] `SPA-API-05` `[SPA-API]` Add shared server path validation and normalized API error handling.
-- [ ] `SPA-API-06` `[SPA-API]` Implement `GET /api/files` and `GET /api/files/*path` endpoints.
-- [ ] `SPA-API-07` `[SPA-API]` Implement comment API endpoints for list, create, update, and delete flows actually supported by the product.
-- [ ] `SPA-API-08` `[SPA-API]` Add API-level integration coverage for file and comment routes.
-- [ ] `SPA-API-09` `[SPA-API]` Replace SSR bootstrap with a browser-only SPA entry and client router setup.
-- [ ] `SPA-API-10` `[SPA-API]` Add a thin frontend API client and shared request helpers.
-- [ ] `SPA-API-11` `[SPA-API]` Migrate the file index route from SSR loaders to client-side fetching.
-- [ ] `SPA-API-12` `[SPA-API]` Migrate the markdown reader route from SSR loaders to client-side fetching.
-- [ ] `SPA-API-13` `[SPA-API]` Migrate comment read/write UI flows to use the API client.
-- [ ] `SPA-API-14` `[SPA-API]` Add loading, empty, and error states for all migrated SPA routes.
-- [ ] `SPA-API-15` `[SPA-API]` Preserve current URL behavior and ensure client routing does not collide with `/api/*` routes.
-- [ ] `SPA-API-16` `[SPA-API]` Update Vite, build scripts, and start scripts for SPA assets plus API server runtime.
-- [ ] `SPA-API-17` `[SPA-API]` Update the CLI startup flow to serve the built SPA and API against the selected content directory.
-- [ ] `SPA-API-18` `[SPA-API]` Remove React Router SSR entrypoints, config, and no-longer-used runtime code.
-- [ ] `SPA-API-18A` `[SPA-API]` Audit and remove legacy React Router SSR fallback handlers and transitional server-rendered route fallbacks.
-- [ ] `SPA-API-19` `[SPA-API]` Remove SSR-only dependencies from `package.json` after runtime parity is confirmed.
-- [ ] `SPA-API-20` `[SPA-API]` Add SPA fallback handling for deep links and verify refresh behavior on nested routes.
+- [x] `SPA-API-01` `[SPA-API]` Inventory current SSR-specific files, loaders, actions, and server-only utilities.
+- [x] `SPA-API-02` `[SPA-API]` Document all browser data flows currently provided through SSR and map them to explicit API contracts.
+- [x] `SPA-API-03` `[SPA-API]` Extract file-system business logic into reusable server services.
+- [x] `SPA-API-04` `[SPA-API]` Extract comment persistence and mutation logic into reusable server services.
+- [x] `SPA-API-05` `[SPA-API]` Add shared server path validation and normalized API error handling.
+- [x] `SPA-API-06` `[SPA-API]` Implement `GET /api/files` and `GET /api/files/*path` endpoints.
+- [x] `SPA-API-07` `[SPA-API]` Implement comment API endpoints for list, create, update, and delete flows actually supported by the product.
+- [x] `SPA-API-08` `[SPA-API]` Add API-level integration coverage for file and comment routes.
+- [x] `SPA-API-09` `[SPA-API]` Replace SSR bootstrap with a browser-only SPA entry and client router setup.
+- [x] `SPA-API-10` `[SPA-API]` Add a thin frontend API client and shared request helpers.
+- [x] `SPA-API-11` `[SPA-API]` Migrate the file index route from SSR loaders to client-side fetching.
+- [x] `SPA-API-12` `[SPA-API]` Migrate the markdown reader route from SSR loaders to client-side fetching.
+- [x] `SPA-API-13` `[SPA-API]` Migrate comment read/write UI flows to use the API client.
+- [x] `SPA-API-14` `[SPA-API]` Add loading, empty, and error states for all migrated SPA routes.
+- [x] `SPA-API-15` `[SPA-API]` Preserve current URL behavior and ensure client routing does not collide with `/api/*` routes.
+- [x] `SPA-API-16` `[SPA-API]` Update Vite, build scripts, and start scripts for SPA assets plus API server runtime.
+- [x] `SPA-API-17` `[SPA-API]` Update the CLI startup flow to serve the built SPA and API against the selected content directory.
+- [x] `SPA-API-18` `[SPA-API]` Remove React Router SSR entrypoints, config, and no-longer-used runtime code.
+- [x] `SPA-API-18A` `[SPA-API]` Audit and remove legacy React Router SSR fallback handlers and transitional server-rendered route fallbacks.
+- [x] `SPA-API-19` `[SPA-API]` Remove SSR-only dependencies from `package.json` after runtime parity is confirmed.
+- [x] `SPA-API-20` `[SPA-API]` Add SPA fallback handling for deep links and verify refresh behavior on nested routes.
 - [ ] `SPA-API-21` `[SPA-API]` Add Playwright coverage for SPA navigation, nested-route refresh, and key comment flows.
-- [ ] `SPA-API-22` `[SPA-API]` Update `README.md` and migration docs to reflect the SPA/API architecture and commands.
+- [x] `SPA-API-22` `[SPA-API]` Update `README.md` and migration docs to reflect the SPA/API architecture and commands.
 - [ ] `SPA-API-23` `[SPA-API]` Run final verification: typecheck, build, CLI validation, desktop/mobile checks, and cleanup of dead code.
 
 ## Recommended Order Of Work

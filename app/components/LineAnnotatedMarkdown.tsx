@@ -9,9 +9,11 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { Link } from 'react-router';
 import Markdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { Button, buttonVariants } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
@@ -107,7 +109,7 @@ export function LineAnnotatedMarkdown({
   relativeFilePath,
   fullFilePath,
 }: LineAnnotatedMarkdownProps) {
-  const { annotations, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
+  const { annotations, isLoading, error, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null);
   const [pendingAnchor, setPendingAnchor] = useState<{
     exact: string;
@@ -272,9 +274,9 @@ export function LineAnnotatedMarkdown({
     if (!commentText.trim()) return;
 
     if (isGlobalComment) {
-      addAnnotation(null, commentText.trim(), true);
+      void addAnnotation(null, commentText.trim(), true);
     } else if (pendingAnchor) {
-      addAnnotation(pendingAnchor, commentText.trim());
+      void addAnnotation(pendingAnchor, commentText.trim());
     }
 
     if (typeof window !== 'undefined' && window.innerWidth < 1280) {
@@ -384,11 +386,11 @@ export function LineAnnotatedMarkdown({
       <Breadcrumb>
         <BreadcrumbList className="gap-2 text-sm">
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Markdown Files</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/" />}>Markdown Files</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -401,7 +403,7 @@ export function LineAnnotatedMarkdown({
     setActions(
       <>
         <ButtonTooltip label="Add note">
-          <Button variant="secondary" size="sm" className="rounded-sm px-3.5" onClick={() => openDialog(true)}>
+          <Button variant="secondary" size="sm" className="rounded-sm px-3.5" onClick={() => openDialog(true)} disabled={isLoading}>
             <PlusIcon className="h-4 w-4" />
             <span className="hidden sm:inline">Add note</span>
             <span className="sm:hidden">Note</span>
@@ -584,6 +586,13 @@ export function LineAnnotatedMarkdown({
     <TooltipProvider delay={180}>
       <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 px-4">
         <div className="mx-auto max-w-[1420px] space-y-5">
+          {error ? (
+            <Alert variant="destructive" className="rounded-sm border-border/65 shadow-none">
+              <AlertTitle>Comments unavailable</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+
           <div className={layoutClassName}>
             {outlineOpen && outline ? (
               <div className="hidden min-w-0 xl:sticky xl:top-28 xl:block">
@@ -742,7 +751,7 @@ export function LineAnnotatedMarkdown({
                 </Button>
               </ButtonTooltip>
               <ButtonTooltip label="Add comment">
-                <Button className="rounded-sm px-4" disabled={!commentText.trim()} onClick={handleSubmit}>
+                <Button className="rounded-sm px-4" disabled={!commentText.trim() || isLoading} onClick={handleSubmit}>
                   Add comment
                 </Button>
               </ButtonTooltip>

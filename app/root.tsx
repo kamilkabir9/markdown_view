@@ -1,13 +1,8 @@
 import {
   Link,
-  Links,
-  Meta,
   Outlet,
-  Scripts,
-  ScrollRestoration,
   useNavigation,
 } from 'react-router';
-import type { LinksFunction } from 'react-router';
 import { useState, useEffect } from 'react';
 import type { ComponentType } from 'react';
 import { SettingsIcon } from 'lucide-react';
@@ -30,8 +25,6 @@ import { ThemeProvider } from '~/contexts/ThemeContext';
 import packageJson from '../package.json';
 
 import './styles/tailwind.css';
-
-export const links: LinksFunction = () => [];
 
 const APP_VERSION = packageJson.version;
 
@@ -244,29 +237,12 @@ function AppShellInner() {
   );
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect x=%2212%22 y=%228%22 width=%2240%22 height=%2248%22 rx=%224%22 fill=%22%23171311%22/><line x1=%2220%22 y1=%2224%22 x2=%2244%22 y2=%2224%22 stroke=%22%23F4EFE7%22 stroke-width=%223%22/><line x1=%2220%22 y1=%2234%22 x2=%2244%22 y2=%2234%22 stroke=%22%23F4EFE7%22 stroke-width=%223%22/></svg>" />
-        <Meta />
-        <Links />
-      </head>
-      <body className="min-h-screen bg-background text-foreground antialiased">
-        <ThemeProvider>
-          <CopySettingsProvider>
-            <AppShell />
-          </CopySettingsProvider>
-        </ThemeProvider>
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
 export default function App() {
-  return <Outlet />;
+  return (
+    <ThemeProvider>
+      <CopySettingsProvider>
+        <AppShell />
+      </CopySettingsProvider>
+    </ThemeProvider>
+  );
 }
