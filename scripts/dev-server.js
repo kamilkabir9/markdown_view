@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
 import express from 'express';
+import { readFile } from 'node:fs/promises';
 import { createServer as createViteServer } from 'vite';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 import { createApiRouter } from '../server/api.js';
+import { getContentRoot } from '../server/content-root.js';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(scriptDir, '..');
@@ -25,6 +27,16 @@ async function main() {
   app.disable('x-powered-by');
   app.use(express.json({ limit: '1mb' }));
   app.use('/api', createApiRouter());
+  app.use('/content', express.static(getContentRoot()));
+  app.get(/^(?!\/(?:api|content|assets)\b).*\.md$/i, async (req, res, next) => {
+    try {
+      const indexHtml = await readFile(join(packageRoot, 'index.html'), 'utf8');
+      const transformed = await vite.transformIndexHtml(req.originalUrl, indexHtml);
+      res.status(200).set({ 'Content-Type': 'text/html' }).end(transformed);
+    } catch (error) {
+      next(error);
+    }
+  });
   app.use(vite.middlewares);
 
   app.listen(port, () => {

@@ -24,6 +24,11 @@ export interface MarkdownFile {
   modified: string;
 }
 
+export interface UploadedAsset {
+  markdownPath: string;
+  contentPath: string;
+}
+
 interface ApiRequestOptions extends RequestInit {
   signal?: AbortSignal;
 }
@@ -78,6 +83,48 @@ export async function fetchFiles(signal?: AbortSignal): Promise<{ files: FileInf
 
 export async function fetchFile(path: string, signal?: AbortSignal): Promise<MarkdownFile> {
   return requestJson(`/api/files/${encodeURIComponent(path).replace(/%2F/g, '/')}`, { signal });
+}
+
+export async function saveFile(path: string, content: string): Promise<MarkdownFile> {
+  return requestJson(`/api/files/${encodeURIComponent(path).replace(/%2F/g, '/')}`, {
+    method: 'PUT',
+    body: JSON.stringify({ content }),
+  });
+}
+
+export async function uploadImageAsset(documentPath: string, file: File): Promise<UploadedAsset> {
+  const data = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== 'string') {
+        reject(new Error('Failed to read the selected image.'));
+        return;
+      }
+
+      const base64Data = result.split(',')[1];
+      if (!base64Data) {
+        reject(new Error('Failed to extract image data.'));
+        return;
+      }
+
+      resolve(base64Data);
+    };
+
+    reader.onerror = () => reject(new Error('Failed to read the selected image.'));
+    reader.readAsDataURL(file);
+  });
+
+  return requestJson('/api/assets', {
+    method: 'POST',
+    body: JSON.stringify({
+      documentPath,
+      fileName: file.name,
+      contentType: file.type,
+      data,
+    }),
+  });
 }
 
 export async function fetchComments(filePath: string, signal?: AbortSignal): Promise<Annotation[]> {

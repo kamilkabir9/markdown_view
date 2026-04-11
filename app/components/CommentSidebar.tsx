@@ -1,16 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactElement } from 'react';
 import { Button } from '~/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { CheckIcon, CopyIcon, PencilIcon, XIcon, ClipboardIcon } from 'lucide-react';
 import type { Annotation } from '~/contexts/AnnotationStore';
 import { getCopyFormatFallbacks, useCopySettings } from '~/contexts/CopySettingsContext';
+import { resolveAnchorInMarkdown } from '~/lib/comment-anchors';
 
 interface CommentSidebarProps {
   annotations: Annotation[];
   rawContent: string;
   relativeFilePath: string;
   fullFilePath: string;
+  draftText: string;
+  onDraftTextChange: (value: string) => void;
+  onCreate: () => Promise<void> | void;
+  onCreateDocumentComment: () => Promise<void> | void;
+  isCreateDialogOpen: boolean;
+  onCreateDialogOpenChange: (open: boolean) => void;
+  isCreatingDocumentComment?: boolean;
+  onOpenDocumentCommentDialog?: () => void;
+  onClearSelection?: () => void;
+  pendingAnchorText?: string | null;
+  createDisabledReason?: string | null;
   onUpdate: (id: string, text: string) => Promise<void> | void;
   onRemove: (id: string) => Promise<void> | void;
   onClose?: () => void;
@@ -49,11 +62,33 @@ function ButtonTooltip({ label, children }: { label: string; children: ReactElem
   );
 }
 
+function getSelectedTextPreview(value: string, maxLength = 180): string {
+  const compact = value.replace(/\s+/g, ' ').trim();
+  if (compact.length <= maxLength) {
+    return compact;
+  }
+
+  const startLength = Math.max(60, Math.floor((maxLength - 5) * 0.55));
+  const endLength = Math.max(32, maxLength - startLength - 5);
+  return `${compact.slice(0, startLength)} ... ${compact.slice(-endLength)}`;
+}
+
 export function CommentSidebar({
   annotations,
   rawContent,
   relativeFilePath,
   fullFilePath,
+  draftText,
+  onDraftTextChange,
+  onCreate,
+  onCreateDocumentComment,
+  isCreateDialogOpen,
+  onCreateDialogOpenChange,
+  isCreatingDocumentComment = false,
+  onOpenDocumentCommentDialog,
+  onClearSelection,
+  pendingAnchorText,
+  createDisabledReason,
   onUpdate,
   onRemove,
   onClose,
@@ -105,22 +140,16 @@ export function CommentSidebar({
   }, [activeAnnotationId]);
 
   useEffect(() => {
-    if (filter === 'linked' && counts.linked === 0 && counts.all > 0) {
-      setFilter(counts.global > 0 ? 'global' : 'all');
-    }
-
-    if (filter === 'global' && counts.global === 0 && counts.all > 0) {
-      setFilter(counts.linked > 0 ? 'linked' : 'all');
-    }
-
     if (counts.all === 0 && filter !== 'all') {
       setFilter('all');
     }
   }, [counts, filter]);
 
   const findMarkdownContext = useCallback(
-    (exact: string): string => {
-      const index = rawContent.indexOf(exact);
+    (annotation: Annotation): string => {
+      const exact = annotation.anchor?.exact ?? '';
+      const resolved = resolveAnchorInMarkdown(rawContent, annotation.anchor);
+      const index = resolved?.start ?? rawContent.indexOf(exact);
       if (index === -1) return exact;
 
       let lineStart = rawContent.lastIndexOf('\n', index);
@@ -198,7 +227,7 @@ export function CommentSidebar({
         return;
       }
 
-      const context = findMarkdownContext(annotation.anchor.exact);
+      const context = findMarkdownContext(annotation);
       const copyText = `${filePrefix}\n\n// ${normalizedContextPrefix}:\n${context}\n\n// ${normalizedCommentPrefix}: ${annotation.text}`;
       copyToClipboard(copyText, annotation.id);
     },
@@ -218,7 +247,7 @@ export function CommentSidebar({
           return `// ${normalizedCommentPrefix}: ${annotation.text}`;
         }
 
-        const context = findMarkdownContext(annotation.anchor.exact);
+        const context = findMarkdownContext(annotation);
         return `// ${normalizedContextPrefix}:\n${context}\n\n// ${normalizedCommentPrefix}: ${annotation.text}`;
       })
       .join(`\n\n${normalizedDelimiter}\n\n`);
@@ -257,9 +286,27 @@ export function CommentSidebar({
     [saveEditing],
   );
 
+  const handleCreate = useCallback(async () => {
+    if (!draftText.trim()) {
+      return;
+    }
+
+    if (isCreatingDocumentComment) {
+      await onCreateDocumentComment();
+    } else {
+      if (!pendingAnchorText || createDisabledReason) {
+        return;
+      }
+      await onCreate();
+    }
+
+    onCreateDialogOpenChange(false);
+  }, [createDisabledReason, draftText, isCreatingDocumentComment, onCreate, onCreateDialogOpenChange, onCreateDocumentComment, pendingAnchorText]);
+
   return (
     <TooltipProvider delay={180}>
-      <Card className={`h-full rounded-md border border-border/65 bg-surface shadow-none ${className}`.trim()}>
+      <Dialog open={isCreateDialogOpen} onOpenChange={onCreateDialogOpenChange}>
+      <Card className={`h-full min-h-0 overflow-hidden rounded-md border border-border/65 bg-surface shadow-none ${className}`.trim()}>
       <CardHeader className="gap-3 border-b border-border/65 px-4 py-4">
         <div className="flex w-full items-start justify-between gap-3">
           <div>
@@ -304,7 +351,7 @@ export function CommentSidebar({
         </div>
       </CardHeader>
 
-      <CardContent className="flex flex-1 flex-col gap-4 p-4 pt-4">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 pt-4">
         <div className="grid grid-cols-3 gap-2 border-b border-border/65 pb-4">
           {[
             { key: 'all' as const, label: 'All', count: counts.all },
@@ -324,6 +371,12 @@ export function CommentSidebar({
             </ButtonTooltip>
           ))}
         </div>
+
+        {filter === 'global' ? (
+          <Button className="w-full rounded-sm" onClick={onOpenDocumentCommentDialog}>
+            Add comment
+          </Button>
+        ) : null}
 
         {counts.all === 0 ? (
           <div className="rounded-sm border border-dashed border-border/70 bg-background/72 p-5 text-sm">
@@ -431,10 +484,10 @@ export function CommentSidebar({
                             <p className="text-[0.67rem] tracking-[0.12em] text-muted-foreground uppercase">
                               Selected text
                             </p>
-                            <p className="mt-2 line-clamp-3 text-sm leading-6 text-foreground/90">
-                              "{annotation.anchor?.exact}"
-                            </p>
-                          </div>
+                             <p className="mt-2 text-sm leading-6 text-foreground/90">
+                               "{getSelectedTextPreview(annotation.anchor?.exact ?? '')}"
+                             </p>
+                           </div>
                         )}
 
                         {editingId === annotation.id ? (
@@ -475,6 +528,44 @@ export function CommentSidebar({
         )}
       </CardContent>
       </Card>
+      <DialogContent className="sm:max-w-[32rem]">
+        <DialogHeader>
+          <DialogTitle>Add comment</DialogTitle>
+          <DialogDescription>
+            {isCreatingDocumentComment
+              ? 'This comment will be saved as a document-level note.'
+              : pendingAnchorText
+                ? 'Your comment will be attached to the selected preview text.'
+                : 'Select text in preview before adding an inline comment.'}
+          </DialogDescription>
+        </DialogHeader>
+
+        {!isCreatingDocumentComment && pendingAnchorText ? (
+          <div className="rounded-sm border border-border/65 bg-surface px-3 py-3">
+            <p className="text-[0.67rem] tracking-[0.12em] text-muted-foreground uppercase">Selected text</p>
+            <p className="mt-2 text-sm leading-6 text-foreground/90">"{getSelectedTextPreview(pendingAnchorText, 260)}"</p>
+          </div>
+        ) : null}
+
+        <textarea
+          value={draftText}
+          onChange={(event) => onDraftTextChange(event.target.value)}
+          className="min-h-[8rem] w-full rounded-sm border border-border/70 bg-background px-3 py-2.5 text-sm leading-6 text-foreground outline-none transition focus:border-foreground/20 focus:ring-2 focus:ring-foreground/8"
+          rows={5}
+          placeholder="Add your comment"
+          autoFocus
+        />
+
+        <DialogFooter className="-mx-0 -mb-0 rounded-sm border-0 bg-transparent p-0 pt-2">
+          <Button variant="outline" onClick={() => onCreateDialogOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button disabled={!draftText.trim() || (!isCreatingDocumentComment && (!pendingAnchorText || Boolean(createDisabledReason)))} onClick={() => void handleCreate()}>
+            Save comment
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 }

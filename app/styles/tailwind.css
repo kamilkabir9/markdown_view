@@ -96,6 +96,19 @@ body {
   box-shadow: none;
 }
 
+.markdown-source-editor .cm-editor {
+  height: 100%;
+}
+
+.markdown-source-editor .cm-scroller {
+  overflow: auto;
+}
+
+.markdown-source-editor .cm-content,
+.markdown-source-editor .cm-gutter {
+  min-height: 100%;
+}
+
 [data-theme="dark"] .app-shell-panel {
   background: color-mix(in oklab, var(--surface) 92%, var(--background));
   box-shadow: none;

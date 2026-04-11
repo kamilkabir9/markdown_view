@@ -11,6 +11,8 @@ import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
+import { Toggle } from '~/components/ui/toggle';
+import { TooltipProvider } from '~/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -18,15 +20,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
-import { Separator } from '~/components/ui/separator';
 import { AppChromeProvider, useAppChrome } from '~/contexts/AppChromeContext';
 import { CopySettingsProvider, useCopySettings } from '~/contexts/CopySettingsContext';
 import { ThemeProvider } from '~/contexts/ThemeContext';
-import packageJson from '../package.json';
-
 import './styles/tailwind.css';
-
-const APP_VERSION = packageJson.version;
 
 function DevAgentation() {
   const [Agentation, setAgentation] = useState<ComponentType | null>(null);
@@ -89,7 +86,9 @@ function ScrollToTopButton() {
 function AppShell() {
   return (
     <AppChromeProvider>
-      <AppShellInner />
+      <TooltipProvider delay={180}>
+        <AppShellInner />
+      </TooltipProvider>
     </AppChromeProvider>
   );
 }
@@ -105,6 +104,8 @@ function AppShellInner() {
     setCommentPrefix,
     setCommentsDelimiter,
     setPathMode,
+    returnToPreviewAfterSave,
+    setReturnToPreviewAfterSave,
   } = useCopySettings();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -114,8 +115,8 @@ function AppShellInner() {
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground">
         Skip to content
       </a>
-      <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1420px] flex-col px-4 pb-10 pt-5 sm:px-6 lg:px-8">
-        <header className="sticky top-3 z-40 mb-5 space-y-3 rounded-md border border-border/65 bg-background/88 px-3 py-2.5 backdrop-blur-sm supports-[backdrop-filter]:bg-background/72 sm:px-4">
+      <div className="relative isolate mx-auto flex h-screen w-full max-w-[1420px] flex-col overflow-hidden px-4 pb-6 pt-5 sm:px-6 lg:px-8">
+        <header className="mb-5 space-y-3 rounded-md border border-border/65 bg-background px-3 py-2.5 sm:px-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <Link to="/" className="inline-flex items-center text-xs tracking-[0.18em] text-muted-foreground uppercase transition-colors hover:text-foreground">
@@ -142,16 +143,9 @@ function AppShellInner() {
           )}
         </header>
 
-        <main id="main-content" className="flex-1">
+        <main id="main-content" className="flex flex-1 min-h-0 flex-col">
           <Outlet />
         </main>
-        <Separator className="mb-4 mt-12 opacity-55" />
-        <footer className="px-1 py-2 text-xs tracking-[0.14em] text-muted uppercase">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p>Markdown Viewer</p>
-            <p>v{APP_VERSION}</p>
-          </div>
-        </footer>
       </div>
 
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
@@ -160,16 +154,36 @@ function AppShellInner() {
             <DialogTitle>Settings</DialogTitle>
             <DialogDescription>Configure reading theme and copy formatting.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-5 pt-1">
-            <div>
-              <p className="mb-2 text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">
-                Theme
+            <div className="space-y-5 pt-1">
+              <div>
+                <p className="mb-2 text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">
+                  Theme
               </p>
               <ThemeSwitcher className="w-full" />
-            </div>
+              </div>
 
-            <div className="space-y-3">
-              <p className="text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">
+              <div className="space-y-3">
+                <p className="text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">
+                  Editor
+                </p>
+                <div className="flex items-center justify-between gap-4 rounded-sm border border-border/70 bg-background px-3 py-2.5">
+                  <div>
+                    <Label htmlFor="return-to-preview-after-save">Return to preview after save</Label>
+                    <p className="text-xs text-muted-foreground">When off, source mode stays open after saving.</p>
+                  </div>
+                  <Toggle
+                    id="return-to-preview-after-save"
+                    variant="outline"
+                    pressed={returnToPreviewAfterSave}
+                    onClick={() => setReturnToPreviewAfterSave(!returnToPreviewAfterSave)}
+                  >
+                    {returnToPreviewAfterSave ? 'On' : 'Off'}
+                  </Toggle>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">
                 Copy format
               </p>
 

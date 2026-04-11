@@ -6,6 +6,8 @@ A browser-rendered markdown reader with a Node/Express API for file discovery, f
 graph TD;
     Browser[SPA frontend] -->|GET /api/files| API[Express API]
     Browser -->|GET /api/files/*| API
+    Browser -->|PUT /api/files/*| API
+    Browser -->|POST /api/assets| API
     Browser -->|GET/POST/PUT/DELETE /api/comments| API
     API --> Filesystem[Configured content root]
 ```
@@ -97,6 +99,8 @@ scripts/
 
 - `GET /api/files`
 - `GET /api/files/*path`
+- `PUT /api/files/*path`
+- `POST /api/assets`
 - `GET /api/comments?file=...`
 - `POST /api/comments`
 - `PUT /api/comments/:id`
@@ -117,6 +121,14 @@ Error responses use a stable JSON shape:
 - Existing browser `localStorage` comments are migrated into the server store the first time a file is opened after the upgrade.
 - Runtime comment data is stored under `.markdown-viewer/comments.json` inside the selected content root.
 
+## Editing
+
+- Document edit mode is powered by Lexical and saves markdown back to the original `.md` file on disk.
+- The current markdown-safe editor pass supports standard markdown blocks plus block-style markdown images.
+- Mermaid fences, markdown tables, raw HTML, and inline image syntax remain read-only until dedicated round-trip handling is added.
+- Inserted images are written under an `assets/` folder next to the current document and saved back as relative markdown image paths.
+- Local images are served from the selected content root through `/content/*` so reader and editor previews use the same asset path model.
+
 ## Development
 
 ```bash
@@ -136,7 +148,7 @@ npm run build
 2. Start the app.
 3. Visit `http://localhost:3000`.
 4. Browse the markdown library.
-5. Open a file to read it and add comments.
+5. Open a file to read it, edit markdown-safe documents, insert images, and add comments.
 
 ## License
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import express from 'express';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createApiRouter } from '../server/api.js';
@@ -12,6 +12,7 @@ async function startApiServer(contentRoot) {
   const app = express();
   app.use(express.json());
   app.use('/api', createApiRouter());
+  app.use('/content', express.static(contentRoot));
 
   return new Promise((resolve) => {
     const server = app.listen(0, '127.0.0.1', () => {
@@ -57,6 +58,67 @@ test('file and comment APIs work against the configured content root', async (t)
   assert.equal(fileBody.path, 'docs/readme');
   assert.match(fileBody.content, /Hello from the API test/);
 
+  const saveResponse = await fetch(`${baseUrl}/api/files/docs/readme`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: '# Test Document\n\nUpdated through save API.\n' }),
+  });
+  assert.equal(saveResponse.status, 200);
+  const saveBody = await saveResponse.json();
+  assert.match(saveBody.content, /Updated through save API/);
+
+  const imagePayload = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9sWwaP8AAAAASUVORK5CYII=', 'base64').toString('base64');
+  const assetResponse = await fetch(`${baseUrl}/api/assets`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      documentPath: 'docs/readme',
+      fileName: 'pixel.png',
+      contentType: 'image/png',
+      data: imagePayload,
+    }),
+  });
+  assert.equal(assetResponse.status, 201);
+  const assetBody = await assetResponse.json();
+  assert.match(assetBody.markdownPath, /^\.\/assets\/pixel-\d+\.png$/);
+  assert.match(assetBody.contentPath, /^\/content\/docs\/assets\/pixel-\d+\.png$/);
+
+  const storedAsset = await readFile(join(docsDir, assetBody.markdownPath.replace(/^\.\//, '')));
+  assert.ok(storedAsset.length > 0);
+
+  const servedAssetResponse = await fetch(`${baseUrl}${assetBody.contentPath}`);
+  assert.equal(servedAssetResponse.status, 200);
+
+  const markdownWithImage = `# Test Document\n\n![Pixel](${assetBody.markdownPath})\n`;
+  const saveWithImageResponse = await fetch(`${baseUrl}/api/files/docs/readme`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: markdownWithImage }),
+  });
+  assert.equal(saveWithImageResponse.status, 200);
+
+  const persistedMarkdown = await readFile(sampleFile, 'utf8');
+  assert.match(persistedMarkdown, new RegExp(`!\\[Pixel\\]\\(${assetBody.markdownPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`));
+
+  const invalidSaveResponse = await fetch(`${baseUrl}/api/files/docs/readme`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: null }),
+  });
+  assert.equal(invalidSaveResponse.status, 400);
+
+  const invalidAssetResponse = await fetch(`${baseUrl}/api/assets`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      documentPath: 'docs/readme',
+      fileName: 'bad.txt',
+      contentType: 'text/plain',
+      data: imagePayload,
+    }),
+  });
+  assert.equal(invalidAssetResponse.status, 400);
+
   const createResponse = await fetch(`${baseUrl}/api/comments`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -73,10 +135,35 @@ test('file and comment APIs work against the configured content root', async (t)
   const createBody = await createResponse.json();
   assert.equal(createBody.comment.text, 'First note');
 
+  const inlineCreateResponse = await fetch(`${baseUrl}/api/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      filePath: 'docs/readme',
+      annotation: {
+        text: 'Inline note',
+        isGlobal: false,
+        anchor: {
+          exact: 'Updated through save API.',
+          prefix: 'Document\n\n',
+          suffix: '\n',
+          rangeStart: 17,
+          rangeEnd: 41,
+          headingPath: ['Test Document'],
+          fallbackLine: 3,
+        },
+      },
+    }),
+  });
+  assert.equal(inlineCreateResponse.status, 201);
+  const inlineCreateBody = await inlineCreateResponse.json();
+  assert.equal(inlineCreateBody.comment.anchor.rangeStart, 17);
+  assert.deepEqual(inlineCreateBody.comment.anchor.headingPath, ['Test Document']);
+
   const listResponse = await fetch(`${baseUrl}/api/comments?file=docs/readme`);
   assert.equal(listResponse.status, 200);
   const listBody = await listResponse.json();
-  assert.equal(listBody.comments.length, 1);
+  assert.equal(listBody.comments.length, 2);
 
   const updateResponse = await fetch(`${baseUrl}/api/comments/${createBody.comment.id}`, {
     method: 'PUT',
@@ -91,6 +178,11 @@ test('file and comment APIs work against the configured content root', async (t)
     method: 'DELETE',
   });
   assert.equal(deleteResponse.status, 204);
+
+  const deleteInlineResponse = await fetch(`${baseUrl}/api/comments/${inlineCreateBody.comment.id}?file=docs/readme`, {
+    method: 'DELETE',
+  });
+  assert.equal(deleteInlineResponse.status, 204);
 
   const emptyListResponse = await fetch(`${baseUrl}/api/comments?file=docs/readme`);
   const emptyListBody = await emptyListResponse.json();

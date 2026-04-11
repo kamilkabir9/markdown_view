@@ -7,18 +7,11 @@ interface MermaidBlockProps {
   isDarkTheme: boolean;
 }
 
-const mermaidViewModeByCode = new Map<string, 'render' | 'raw'>();
-
 export function MermaidBlock({ code, isDarkTheme }: MermaidBlockProps) {
   const renderId = useId();
   const [svgMarkup, setSvgMarkup] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'render' | 'raw'>(() => mermaidViewModeByCode.get(code) ?? 'render');
-
-  const handleViewModeChange = (nextViewMode: 'render' | 'raw') => {
-    mermaidViewModeByCode.set(code, nextViewMode);
-    setViewMode(nextViewMode);
-  };
+  const [viewMode, setViewMode] = useState<'render' | 'raw'>('render');
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +55,7 @@ export function MermaidBlock({ code, isDarkTheme }: MermaidBlockProps) {
           size="xs"
           variant="ghost"
           className="pointer-events-auto rounded-sm border border-border/70 bg-surface/90"
-          onClick={() => handleViewModeChange(viewMode === 'raw' ? 'render' : 'raw')}
+          onClick={() => setViewMode((current) => (current === 'raw' ? 'render' : 'raw'))}
         >
           {viewMode === 'raw' ? 'Render' : 'Raw'}
         </Button>

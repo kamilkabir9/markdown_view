@@ -12,6 +12,10 @@ export interface Anchor {
   exact: string;
   prefix: string;
   suffix: string;
+  rangeStart?: number;
+  rangeEnd?: number;
+  headingPath?: string[];
+  fallbackLine?: number;
 }
 
 export interface Annotation {

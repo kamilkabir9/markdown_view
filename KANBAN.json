@@ -75,9 +75,11 @@
       "title": "Investigate how file comments/data are persisted",
       "column": "Backlog",
       "created": "2026-03-29T13:54:48.577Z",
-      "updated": "2026-03-29T13:54:48.577Z",
+      "updated": "2026-04-11T12:20:46.853Z",
       "type": "chore",
-      "body": "Document and verify where and how comment/data are persisted per file."
+      "body": "Document and verify where and how comment/data are persisted per file.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:20:46.852Z"
     },
     {
       "id": "settings-configurable-comments-delimiter-7e889e48",
@@ -129,9 +131,11 @@
       "title": "Enable direct document editing",
       "column": "Backlog",
       "created": "2026-04-08T19:36:06.360Z",
-      "updated": "2026-04-08T19:36:06.360Z",
+      "updated": "2026-04-11T12:19:55.952Z",
       "type": "feature",
-      "body": "Allow users to edit the document content directly within the application instead of only viewing it."
+      "body": "Allow users to edit the document content directly within the application instead of only viewing it.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.944Z"
     },
     {
       "id": "spa-api-spa-api-01-inventory-ssr-specifi-03753df1",
@@ -684,129 +688,323 @@
       "title": "[LEXICAL] Migrate viewer-only markdown flow to a Lexical editor",
       "column": "Backlog",
       "created": "2026-04-09T17:35:28.223Z",
-      "updated": "2026-04-09T17:35:28.221Z",
+      "updated": "2026-04-11T12:19:55.950Z",
       "type": "feature",
-      "body": "Replace the current view-only markdown experience with a Lexical-based editor that loads local .md files, preserves markdown-compatible content, saves changes back to disk, and supports images through a file-backed workflow."
+      "body": "Replace the current view-only markdown experience with a Lexical-based editor that loads local .md files, preserves markdown-compatible content, saves changes back to disk, and supports images through a file-backed workflow.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.943Z"
     },
     {
       "id": "lexical-lex-01-inventory-markdown-round--0769889a",
       "title": "[LEXICAL] LEX-01 Inventory markdown round-trip requirements",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-09T17:35:41.471Z",
-      "updated": "2026-04-09T17:35:41.470Z",
+      "updated": "2026-04-11T12:19:55.762Z",
       "type": "chore",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Document which existing markdown constructs must survive import/export without loss, including headings, lists, tables, code fences, links, images, Mermaid blocks, and annotation-adjacent behavior. Define what stays read-only or falls back to raw markdown when Lexical cannot round-trip safely."
+      "body": "Document which existing markdown constructs must survive import/export without loss, including headings, lists, tables, code fences, links, images, Mermaid blocks, and annotation-adjacent behavior. Define what stays read-only or falls back to raw markdown when Lexical cannot round-trip safely.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.761Z"
     },
     {
       "id": "lexical-lex-03-add-server-markdown-write-a7d7b4f4",
       "title": "[LEXICAL] LEX-03 Add server markdown write service",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:41.516Z",
-      "updated": "2026-04-09T17:35:41.515Z",
+      "updated": "2026-04-11T12:19:55.900Z",
       "type": "feature",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Extend the server file layer with a write service that saves markdown content back to disk under the configured content root."
+      "body": "Extend the server file layer with a write service that saves markdown content back to disk under the configured content root.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.898Z"
     },
     {
       "id": "lexical-lex-05-add-frontend-save-client--e1b9958b",
       "title": "[LEXICAL] LEX-05 Add frontend save client and dirty-state tracking",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:41.516Z",
-      "updated": "2026-04-09T17:35:41.515Z",
+      "updated": "2026-04-11T12:19:55.922Z",
       "type": "feature",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Add API client support for saving edited markdown and track dirty, saving, and error states in the editor UI."
+      "body": "Add API client support for saving edited markdown and track dirty, saving, and error states in the editor UI.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.919Z"
     },
     {
       "id": "lexical-lex-02-select-lexical-nodes-and--3999e36b",
       "title": "[LEXICAL] LEX-02 Select Lexical nodes and plugins for markdown-safe editing",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:41.517Z",
-      "updated": "2026-04-09T17:35:41.515Z",
+      "updated": "2026-04-11T12:19:55.904Z",
       "type": "chore",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Choose the minimal Lexical node and plugin set that maps cleanly to markdown output. Avoid enabling rich-text features that cannot be written back to .md files without lossy conversion."
+      "body": "Choose the minimal Lexical node and plugin set that maps cleanly to markdown output. Avoid enabling rich-text features that cannot be written back to .md files without lossy conversion.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.899Z"
     },
     {
       "id": "lexical-lex-04-implement-file-save-api-e-0c449cae",
       "title": "[LEXICAL] LEX-04 Implement file-save API endpoint",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:41.517Z",
-      "updated": "2026-04-09T17:35:41.515Z",
+      "updated": "2026-04-11T12:19:55.926Z",
       "type": "feature",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Add a write endpoint such as PUT /api/files/*path with path validation, normalized error responses, and safe handling for missing files and write failures."
+      "body": "Add a write endpoint such as PUT /api/files/*path with path validation, normalized error responses, and safe handling for missing files and write failures.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.919Z"
     },
     {
       "id": "lexical-lex-06-build-editor-shell-and-re-6d52189c",
       "title": "[LEXICAL] LEX-06 Build editor shell and read/edit mode toggle",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:41.517Z",
-      "updated": "2026-04-09T17:35:41.515Z",
+      "updated": "2026-04-11T12:19:55.924Z",
       "type": "feature",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Add a Lexical editor mode within the existing document route so users can switch between read and edit flows without losing navigation context."
+      "body": "Add a Lexical editor mode within the existing document route so users can switch between read and edit flows without losing navigation context.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.919Z"
     },
     {
       "id": "lexical-lex-07-implement-markdown-import-3987aa6d",
       "title": "[LEXICAL] LEX-07 Implement markdown import/export with Lexical",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:55.875Z",
-      "updated": "2026-04-09T17:35:55.874Z",
+      "updated": "2026-04-11T12:19:55.919Z",
       "type": "feature",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Load raw .md into Lexical on open and export edited content back to markdown on save. Verify stable round-tripping for the supported feature set."
+      "body": "Load raw .md into Lexical on open and export edited content back to markdown on save. Verify stable round-tripping for the supported feature set.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.918Z"
     },
     {
       "id": "lexical-lex-08-preserve-unsupported-bloc-8b400511",
       "title": "[LEXICAL] LEX-08 Preserve unsupported blocks safely",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:55.889Z",
-      "updated": "2026-04-09T17:35:55.888Z",
+      "updated": "2026-04-11T12:19:55.944Z",
       "type": "feature",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Handle Mermaid fences, unknown HTML, or unsupported markdown constructs without destructive edits. Prefer raw-block preservation, read-only rendering, or explicit fallback behavior."
+      "body": "Handle Mermaid fences, unknown HTML, or unsupported markdown constructs without destructive edits. Prefer raw-block preservation, read-only rendering, or explicit fallback behavior.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.942Z"
     },
     {
       "id": "lexical-lex-09-add-image-insertion-and-d-056ebf0d",
       "title": "[LEXICAL] LEX-09 Add image insertion and disk-backed asset flow",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:55.893Z",
-      "updated": "2026-04-09T17:35:55.893Z",
+      "updated": "2026-04-11T12:19:55.948Z",
       "type": "feature",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Support inserting images by copying or uploading files into a project-relative asset location and serializing them to relative markdown image paths."
+      "body": "Support inserting images by copying or uploading files into a project-relative asset location and serializing them to relative markdown image paths.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.943Z"
     },
     {
       "id": "lexical-lex-10-add-editor-ux-for-save-re-5707e1cb",
       "title": "[LEXICAL] LEX-10 Add editor UX for save, reload, and unsaved changes",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:55.984Z",
-      "updated": "2026-04-09T17:35:55.983Z",
+      "updated": "2026-04-11T12:19:55.946Z",
       "type": "feature",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Add save actions, keyboard shortcuts, feedback for save success or failure, and protection against losing unsaved changes during navigation or reload."
+      "body": "Add save actions, keyboard shortcuts, feedback for save success or failure, and protection against losing unsaved changes during navigation or reload.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.942Z"
     },
     {
       "id": "lexical-lex-11-add-automated-coverage-fo-f1d328a2",
       "title": "[LEXICAL] LEX-11 Add automated coverage for edit/save round-trips",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:55.995Z",
-      "updated": "2026-04-09T17:35:55.994Z",
+      "updated": "2026-04-11T12:19:55.949Z",
       "type": "chore",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Add tests for markdown import/export fidelity, save endpoint behavior, and key document-editing flows including image serialization."
+      "body": "Add tests for markdown import/export fidelity, save endpoint behavior, and key document-editing flows including image serialization.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.943Z"
     },
     {
       "id": "lexical-lex-12-update-docs-and-rollout-c-b6b124da",
       "title": "[LEXICAL] LEX-12 Update docs and rollout constraints",
-      "column": "Backlog",
+      "column": "Review",
       "created": "2026-04-09T17:35:55.995Z",
-      "updated": "2026-04-09T17:35:55.994Z",
+      "updated": "2026-04-11T12:19:55.947Z",
       "type": "chore",
       "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
-      "body": "Document the Lexical editor architecture, markdown feature limits, image asset conventions, and local-file save behavior in README and project notes."
+      "body": "Document the Lexical editor architecture, markdown feature limits, image asset conventions, and local-file save behavior in README and project notes.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.943Z"
+    },
+    {
+      "id": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "title": "Migrate markdown workspace to source-first editor with external comments and section index",
+      "column": "Done",
+      "created": "2026-04-11T12:16:46.872Z",
+      "updated": "2026-04-11T20:04:09.461Z",
+      "type": "feature",
+      "body": "Goal: Replace the current Lexical-based markdown workflow with a GitHub-style source-first experience.\n\nTags: editor, markdown, codemirror, preview, comments, anchors, outline, migration\n\nScope:\n- Raw markdown remains the only source of truth\n- Replace Lexical edit mode with CodeMirror 6\n- Replace Lexical viewer with react-markdown preview\n- Keep comments external to markdown files\n- Add robust hybrid comment anchors\n- Add heading/section summary index from markdown AST\n\nNon-goals:\n- LLM-generated summaries\n- Rich-text round-trip editing\n- atjson-based document storage\n\nVerification:\n- Saving preserves markdown exactly as typed in source mode\n- Preview renders supported markdown consistently\n- Comments persist outside markdown files and survive normal edits\n- Section index links align with rendered headings\n- Existing load/save flows continue to work"
+    },
+    {
+      "id": "replace-lexical-viewer-with-react-markdo-b1522820",
+      "title": "Replace Lexical viewer with react-markdown preview pipeline",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.283Z",
+      "updated": "2026-04-11T12:28:18.394Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: preview, markdown, react-markdown, rendering\n\nScope:\n- Replace Lexical viewer with markdown preview rendering\n- Use react-markdown with remark-gfm, rehype-highlight, and rehype-slug\n- Keep heading ids stable for anchor navigation and comments\n- Support existing code block rendering and markdown images\n\nSub-tasks:\n- Build MarkdownPreview component\n- Configure remark/rehype pipeline\n- Add safe handling for raw HTML decision if needed\n- Ensure preview layout works on desktop and mobile\n- Align preview theme with existing app styles\n\nVerification:\n- GFM lists, tables, task lists, links, headings, blockquotes, and code blocks render correctly\n- Heading anchors are deterministic\n- Preview does not mutate saved content\n- Build and typecheck pass"
+    },
+    {
+      "id": "replace-lexical-editor-with-codemirror-6-1d253162",
+      "title": "Replace Lexical editor with CodeMirror 6 source editor",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.284Z",
+      "updated": "2026-04-11T12:28:18.397Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: editor, codemirror, markdown, source-mode\n\nScope:\n- Introduce CodeMirror 6 editor component for raw markdown\n- Use @uiw/react-codemirror and @codemirror/lang-markdown\n- Preserve existing dirty state, save shortcut, save/cancel behavior, and navigation blocking\n- Keep markdown string as the only editable state\n\nSub-tasks:\n- Add CodeMirror dependencies\n- Build MarkdownSourceEditor component\n- Wire route state from Lexical editor to raw source editor\n- Preserve theme styling and mobile usability\n- Remove Lexical-only edit restrictions and notices that no longer apply\n\nVerification:\n- Open file, edit markdown, save, reload, and confirm text matches exactly\n- Cmd/Ctrl+S saves correctly\n- Cancel restores server version\n- Navigation blocker still protects unsaved changes"
+    },
+    {
+      "id": "implement-external-comment-workflow-for--03a550e2",
+      "title": "Implement external comment workflow for preview selections",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.418Z",
+      "updated": "2026-04-11T12:35:09.390Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: comments, annotations, preview, sidebar, api\n\nScope:\n- Keep comments outside markdown files\n- Reuse existing comment storage and sidebar concepts\n- Allow users to select preview text and create anchored comments\n- Highlight matching comment ranges in rendered preview\n\nSub-tasks:\n- Mount AnnotationStoreProvider in the markdown route\n- Integrate comment sidebar into page layout\n- Capture preview text selection for comment creation\n- Persist comments through the external API/store only\n- Highlight and select active comment anchors in preview\n\nVerification:\n- Creating a comment does not change markdown file content\n- New comments appear in sidebar and highlight the selected text\n- Reload restores comments from the external store\n- Deleting or resolving comments updates UI correctly"
+    },
+    {
+      "id": "build-markdown-section-parser-and-summar-902c3aed",
+      "title": "Build markdown section parser and summary index sidebar",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.418Z",
+      "updated": "2026-04-11T12:28:18.400Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: outline, summary, headings, ast, navigation\n\nScope:\n- Extract headings and section ranges directly from markdown AST\n- Build a navigable summary/index similar to a document outline\n- Use structural excerpts only, not LLM summaries\n\nLibraries:\n- unified\n- remark-parse\n- remark-gfm\n- unist-util-visit\n- mdast-util-to-string\n- github-slugger\n\nSection model:\n- slug\n- depth\n- title\n- startOffset\n- endOffset\n- excerpt\n- children\n\nSub-tasks:\n- Build markdown section extraction utility\n- Generate stable heading slugs shared with preview\n- Render nested summary/index sidebar\n- Scroll preview to selected section\n- Optionally sync source editor selection later\n\nVerification:\n- Heading tree matches the markdown structure\n- Clicking an index item scrolls to the correct heading\n- Excerpts come from the correct section body\n- Repeated heading names still get stable unique slugs"
+    },
+    {
+      "id": "upgrade-comment-anchoring-to-hybrid-sour-f0dc69ec",
+      "title": "Upgrade comment anchoring to hybrid source-aware recovery",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.419Z",
+      "updated": "2026-04-11T12:38:47.210Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: comments, anchors, resilience, recovery, source-text\n\nScope:\n- Move from quote-only anchors to a hybrid anchor snapshot inspired by with-md\n- Use dom-anchor-text-quote for selection capture and dom-anchor-text-position as an additional hint\n- Store enough metadata to recover anchors after normal markdown edits\n\nAnchor fields:\n- textQuote\n- prefix\n- suffix\n- rangeStart\n- rangeEnd\n- headingPath\n- fallbackLine\n\nSub-tasks:\n- Expand comment schema and types for new anchor fields\n- Capture heading path and fallback line during comment creation\n- Implement ordered recovery resolver for source text and preview\n- Handle duplicate quote disambiguation with context scoring\n- Mark comments detached when recovery fails instead of guessing silently\n\nVerification:\n- Comments survive small edits before and after the quoted text\n- Duplicate text passages resolve to the correct section using context\n- Comments on changed text become detached instead of attaching to the wrong content\n- Existing comments migrate or fail safely"
+    },
+    {
+      "id": "add-migration-dependencies-and-shared-ma-53a4a363",
+      "title": "Add migration dependencies and shared markdown utilities",
+      "column": "Done",
+      "created": "2026-04-11T12:17:31.339Z",
+      "updated": "2026-04-11T12:28:18.245Z",
+      "type": "chore",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: dependencies, utilities, setup\n\nScope:\n- Add CodeMirror and markdown preview dependencies\n- Add mdast section parsing dependencies\n- Consolidate shared markdown helpers used by preview, comments, and index\n\nSub-tasks:\n- Install and lock dependency versions\n- Create shared slug/heading utilities\n- Create shared markdown parsing helpers\n- Remove unused Lexical-specific dependencies only after migration completes\n\nVerification:\n- Dependency install is reproducible\n- Type imports resolve cleanly\n- No duplicate slug logic exists in multiple places"
+    },
+    {
+      "id": "retire-lexical-specific-code-paths-after-1ef3ce40",
+      "title": "Retire Lexical-specific code paths after migration",
+      "column": "Done",
+      "created": "2026-04-11T12:17:31.448Z",
+      "updated": "2026-04-11T17:51:41.297Z",
+      "type": "chore",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: cleanup, lexical, migration, debt\n\nScope:\n- Remove obsolete Lexical editor/viewer code once replacements are live\n- Delete markdown editability warnings that only existed for Lexical round-tripping\n- Keep only code needed for source-first markdown editing\n\nSub-tasks:\n- Remove unused components and helpers\n- Remove dead imports and route branches\n- Reassess package.json for removable Lexical packages\n- Update any tests or docs that reference Lexical\n\nVerification:\n- No route imports Lexical components anymore\n- Typecheck and build pass after cleanup\n- No dead code remains for the old editor path"
+    },
+    {
+      "id": "run-migration-verification-across-editin-72bd0b16",
+      "title": "Run migration verification across editing, comments, and summary flows",
+      "column": "Done",
+      "created": "2026-04-11T12:17:31.453Z",
+      "updated": "2026-04-11T17:51:41.363Z",
+      "type": "chore",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: verification, qa, regression, build\n\nScope:\n- Verify the full source-first workflow end to end\n- Cover save fidelity, comment persistence, and summary/index behavior\n\nTest matrix:\n- Plain markdown file with headings and code blocks\n- GFM file with tables and task lists\n- File with repeated phrases for anchor disambiguation\n- File with repeated heading names for slug uniqueness\n- Mobile and desktop layouts\n\nVerification:\n- npm run typecheck passes\n- npm run build passes\n- Saving preserves exact markdown text\n- Comments survive reload and routine edits without touching file content\n- Summary index navigates correctly in preview"
+    },
+    {
+      "id": "polish-markdown-view-page-layout-and-pos-38d96664",
+      "title": "Polish markdown view page layout and post-save behavior",
+      "column": "Backlog",
+      "created": "2026-04-11T20:04:09.480Z",
+      "updated": "2026-04-11T20:04:09.477Z",
+      "type": "feature",
+      "body": "Goal: Refine the markdown view page layout and immediate save feedback.\n\nTags: ui, layout, preview, outline, save-flow\n\nScope:\n- Replace the sticky top action bar behavior with a static header layout\n- Keep the document content below the header in its own scrollable view area\n- Simplify the Summary panel to show headings only\n- Keep the Summary panel on the right side\n- Show the latest raw markdown content immediately after save in source mode flow\n\nVerification:\n- Header stays fixed in normal document flow and does not overlay content\n- Main content area scrolls cleanly below the header\n- Summary shows heading titles only with correct navigation\n- Summary remains on the right side on supported layouts\n- After save, the visible source content reflects the saved markdown immediately without stale state"
+    },
+    {
+      "id": "make-markdown-view-header-static-with-co-870d56c9",
+      "title": "Make markdown view header static with content scrolling below",
+      "column": "Done",
+      "created": "2026-04-11T20:04:23.893Z",
+      "updated": "2026-04-11T20:17:10.947Z",
+      "type": "feature",
+      "parentId": "polish-markdown-view-page-layout-and-pos-38d96664",
+      "body": "Tags: ui, layout, header, scrolling\n\nScope:\n- Replace the sticky top bar on the markdown view page with a static header\n- Keep actions and breadcrumbs visible in the page header area\n- Move document scrolling into the content region below the header\n\nSub-tasks:\n- Audit current view-page layout containers and sticky behavior\n- Remove sticky positioning from the top bar\n- Ensure preview/editor region scrolls independently below the header\n- Preserve responsive layout on desktop and mobile\n\nVerification:\n- Header no longer sticks while scrolling document content\n- Content scroll starts below the header without overlap\n- Edit/view actions remain accessible and correctly positioned"
+    },
+    {
+      "id": "simplify-summary-panel-to-headings-only--dcacaa7d",
+      "title": "Simplify Summary panel to headings only on the left side",
+      "column": "Done",
+      "created": "2026-04-11T20:04:23.893Z",
+      "updated": "2026-04-11T20:21:12.648Z",
+      "type": "feature",
+      "parentId": "polish-markdown-view-page-layout-and-pos-38d96664",
+      "body": "Tags: ui, summary, outline, navigation\n\nScope:\n- Remove excerpt text from the Summary panel\n- Keep only heading labels in the outline\n- Move the Summary panel to the left side\n\nSub-tasks:\n- Update Summary item rendering to heading-only rows\n- Keep heading nesting/indentation behavior\n- Move the Summary panel to the left side in view and edit modes\n- Ensure small-screen layout still behaves sensibly\n\nVerification:\n- Summary renders heading titles only\n- Clicking a heading still navigates to the correct section\n- Summary remains on the left side for wide layouts",
+      "comments": [
+        {
+          "id": "comment-opencode-ab068ddf",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:19:46.568Z",
+          "body": "Ticket updated to reflect the current requirement: Summary belongs on the left side, not the right."
+        },
+        {
+          "id": "comment-opencode-d67712dd",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:21:12.648Z",
+          "body": "Implemented the updated requirement: Summary now renders on the left side on wide layouts and remains headings-only. The markdown content, Summary, and comments panels now each have their own scroll container under the app header. Verified with `npm run typecheck` and `npm run build`."
+        }
+      ]
+    },
+    {
+      "id": "show-saved-raw-markdown-immediately-afte-a30b1926",
+      "title": "Render direct markdown file routes inside the app shell",
+      "column": "Done",
+      "created": "2026-04-11T20:04:23.893Z",
+      "updated": "2026-04-11T20:14:36.667Z",
+      "type": "bug",
+      "parentId": "polish-markdown-view-page-layout-and-pos-38d96664",
+      "body": "Tags: bug, routing, markdown, app-shell, rendering\n\nScope:\n- Direct markdown file routes such as `/AGENTS.md` currently show raw markdown content by itself\n- These routes should instead render within the normal application shell/layout\n- The markdown content should remain readable, but it must stay inside the app experience with navigation and surrounding UI\n\nSub-tasks:\n- Identify why direct markdown file URLs bypass the app-shell experience\n- Route raw markdown file requests back through the normal document page\n- Ensure markdown content renders inside the app layout instead of standalone raw output\n- Verify normal in-app document viewing still behaves consistently\n\nVerification:\n- Visiting `/AGENTS.md` shows the document inside the app shell\n- Navigation, sidebars, and page layout are present\n- Markdown browsing through the app continues to work as before",
+      "comments": [
+        {
+          "id": "comment-opencode-2629e387",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:06:22.752Z",
+          "body": "Fixed as a bug in `app/routes/$.tsx`. Save now keeps the user in source mode and updates `draft` from the saved server response immediately, so the latest raw markdown stays visible after save. Verified with `npm run typecheck` and `npm run build`."
+        },
+        {
+          "id": "comment-opencode-3f974cee",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:09:37.991Z",
+          "body": "Ticket corrected: the real issue is that direct markdown file routes like `/AGENTS.md` should render raw markdown without the app chrome. The earlier change in `app/routes/$.tsx` fixed a separate save-flow UX issue but did not address this raw-route bug."
+        },
+        {
+          "id": "comment-opencode-a016eaa1",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:12:12.488Z",
+          "body": "Ticket corrected again: the actual bug is the opposite of the prior rewrite. Direct markdown routes like `/AGENTS.md` currently show raw content by itself, but they should render inside the normal app shell."
+        },
+        {
+          "id": "comment-opencode-6fefe6aa",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:14:36.666Z",
+          "body": "Fixed the actual routing bug in `scripts/dev-server.js` and `scripts/markdown-viewer.js`. Direct `.md` requests like `/AGENTS.md` are now sent through the SPA entrypoint before Vite/static file serving can return the raw file. Verified with live HTTP checks against both dev and production servers, plus `npm run typecheck` and `npm run build`."
+        }
+      ]
     }
   ]
 }

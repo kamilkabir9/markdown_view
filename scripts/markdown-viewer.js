@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import { createApiRouter } from '../server/api.js';
+import { getContentRoot } from '../server/content-root.js';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(scriptDir, '..');
@@ -153,6 +154,10 @@ async function main() {
   app.disable('x-powered-by');
   app.use(express.json({ limit: '1mb' }));
   app.use('/api', createApiRouter());
+  app.use('/content', express.static(getContentRoot()));
+  app.get(/^(?!\/(?:api|content|assets)\b).*\.md$/i, (_req, res) => {
+    res.sendFile(join(clientBuildDir, 'index.html'));
+  });
   app.use('/assets', express.static(join(clientBuildDir, 'assets'), {
     immutable: true,
     maxAge: '1y',

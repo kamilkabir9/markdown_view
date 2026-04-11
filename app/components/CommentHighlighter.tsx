@@ -4,7 +4,7 @@ import type { Annotation } from '~/contexts/AnnotationStore';
 const BLOCK_SELECTOR = 'p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6';
 
 interface CommentHighlighterProps {
-  containerRef: RefObject<HTMLDivElement | null>;
+  containerRef: RefObject<HTMLElement | null>;
   annotations: Annotation[];
   onAnnotationClick?: (annotation: Annotation) => void;
   activeAnnotationId?: string | null;

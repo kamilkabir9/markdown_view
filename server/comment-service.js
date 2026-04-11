@@ -47,10 +47,19 @@ async function writeStore(store) {
 }
 
 function isValidAnchor(anchor) {
+  const hasValidRange = (anchor.rangeStart === undefined || Number.isInteger(anchor.rangeStart))
+    && (anchor.rangeEnd === undefined || Number.isInteger(anchor.rangeEnd));
+  const hasValidHeadingPath = anchor.headingPath === undefined
+    || (Array.isArray(anchor.headingPath) && anchor.headingPath.every((segment) => typeof segment === 'string'));
+  const hasValidFallbackLine = anchor.fallbackLine === undefined || Number.isInteger(anchor.fallbackLine);
+
   return anchor && typeof anchor === 'object'
     && typeof anchor.exact === 'string'
     && typeof anchor.prefix === 'string'
-    && typeof anchor.suffix === 'string';
+    && typeof anchor.suffix === 'string'
+    && hasValidRange
+    && hasValidHeadingPath
+    && hasValidFallbackLine;
 }
 
 function normalizeAnnotation(input) {
@@ -72,7 +81,15 @@ function normalizeAnnotation(input) {
 
   return {
     id: typeof input?.id === 'string' && input.id ? input.id : crypto.randomUUID(),
-    anchor: isGlobal ? null : anchor,
+    anchor: isGlobal ? null : {
+      exact: anchor.exact,
+      prefix: anchor.prefix,
+      suffix: anchor.suffix,
+      rangeStart: typeof anchor.rangeStart === 'number' ? anchor.rangeStart : undefined,
+      rangeEnd: typeof anchor.rangeEnd === 'number' ? anchor.rangeEnd : undefined,
+      headingPath: Array.isArray(anchor.headingPath) ? anchor.headingPath : undefined,
+      fallbackLine: typeof anchor.fallbackLine === 'number' ? anchor.fallbackLine : undefined,
+    },
     text,
     createdAt: typeof input?.createdAt === 'string' && input.createdAt ? input.createdAt : new Date().toISOString(),
     isGlobal,

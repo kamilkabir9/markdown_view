@@ -1,7 +1,7 @@
 import express from 'express';
 import { toErrorResponse, ApiError } from './errors.js';
 import { listComments, createComment, deleteComment, importComments, updateComment } from './comment-service.js';
-import { listMarkdownFiles, requireMarkdownFile } from './file-service.js';
+import { listMarkdownFiles, requireMarkdownFile, saveMarkdownFile, storeMarkdownAsset } from './file-service.js';
 import { getContentRoot } from './content-root.js';
 
 function asyncRoute(handler) {
@@ -29,6 +29,22 @@ export function createApiRouter() {
   router.get('/files/*', asyncRoute(async (req, res) => {
     const file = await requireMarkdownFile(req.params[0] || '');
     res.json(file);
+  }));
+
+  router.put('/files/*', asyncRoute(async (req, res) => {
+    const file = await saveMarkdownFile(req.params[0] || '', req.body?.content);
+    res.json(file);
+  }));
+
+  router.post('/assets', asyncRoute(async (req, res) => {
+    const asset = await storeMarkdownAsset({
+      documentPath: req.body?.documentPath,
+      fileName: req.body?.fileName,
+      contentType: req.body?.contentType,
+      data: req.body?.data,
+    });
+
+    res.status(201).json(asset);
   }));
 
   router.get('/comments', asyncRoute(async (req, res) => {
