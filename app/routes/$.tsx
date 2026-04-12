@@ -27,6 +27,36 @@ interface SelectionActionPosition {
   left: number;
 }
 
+const RESUME_EDIT_AFTER_SAVE_PATH_KEY = 'resume-edit-after-save-path';
+
+function markResumeEditAfterSave(routePath: string): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    sessionStorage.setItem(RESUME_EDIT_AFTER_SAVE_PATH_KEY, routePath);
+  } catch {}
+}
+
+function clearResumeEditAfterSave(): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    sessionStorage.removeItem(RESUME_EDIT_AFTER_SAVE_PATH_KEY);
+  } catch {}
+}
+
+function consumeResumeEditAfterSave(routePath: string): boolean {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    const savedRoutePath = sessionStorage.getItem(RESUME_EDIT_AFTER_SAVE_PATH_KEY);
+    sessionStorage.removeItem(RESUME_EDIT_AFTER_SAVE_PATH_KEY);
+    return savedRoutePath === routePath;
+  } catch {
+    return false;
+  }
+}
+
 function buildBreadcrumbs(sourcePath: string | null) {
   const parts = sourcePath?.split('/').filter(Boolean) ?? [];
 
@@ -103,6 +133,7 @@ function MarkdownPageContent() {
   const { setActions, setBreadcrumbs } = useAppChrome();
   const { returnToPreviewAfterSave } = useCopySettings();
   const previewRef = useRef<HTMLElement | null>(null);
+  const returnToPreviewAfterSaveRef = useRef(returnToPreviewAfterSave);
   const [file, setFile] = useState<MarkdownFile | null>(null);
   const [draft, setDraft] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -122,6 +153,10 @@ function MarkdownPageContent() {
   const { annotations, isLoading: areCommentsLoading, error: commentsError, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
 
   useEffect(() => {
+    returnToPreviewAfterSaveRef.current = returnToPreviewAfterSave;
+  }, [returnToPreviewAfterSave]);
+
+  useEffect(() => {
     const controller = new AbortController();
 
     async function loadMarkdownFile() {
@@ -134,9 +169,10 @@ function MarkdownPageContent() {
         const response = await fetchFile(routePath, controller.signal);
         if (controller.signal.aborted) return;
 
+        const shouldResumeEditAfterSave = consumeResumeEditAfterSave(routePath);
         setFile(response);
         setDraft(response.content);
-        setIsEditing(false);
+        setIsEditing(shouldResumeEditAfterSave && !returnToPreviewAfterSaveRef.current);
       } catch (requestError) {
         if (controller.signal.aborted) return;
         setFile(null);
@@ -188,13 +224,21 @@ function MarkdownPageContent() {
       setFile(savedFile);
       setDraft(savedFile.content);
       setSaveStatus('saved');
-      setIsEditing(!returnToPreviewAfterSave);
+
+      const shouldReturnToPreview = returnToPreviewAfterSaveRef.current;
+      if (shouldReturnToPreview) {
+        clearResumeEditAfterSave();
+        setIsEditing(false);
+      } else {
+        markResumeEditAfterSave(routePath);
+        setIsEditing(true);
+      }
     } catch (requestError) {
       setSaveError(getErrorMessage(requestError, 'The markdown file could not be saved.'));
     } finally {
       setIsSaving(false);
     }
-  }, [draft, file, isDirty, isSaving, returnToPreviewAfterSave]);
+  }, [draft, file, isDirty, isSaving, routePath]);
 
   const clearPendingSelection = useCallback(() => {
     setPendingAnchor(null);
