@@ -67,27 +67,42 @@ test('file and comment APIs work against the configured content root', async (t)
   const saveBody = await saveResponse.json();
   assert.match(saveBody.content, /Updated through save API/);
 
-  const imagePayload = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9sWwaP8AAAAASUVORK5CYII=', 'base64').toString('base64');
-  const assetResponse = await fetch(`${baseUrl}/api/assets`, {
+  const imagePayload = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9sWwaP8AAAAASUVORK5CYII=', 'base64');
+  const assetFormData = new FormData();
+  assetFormData.append('image', new Blob([imagePayload], { type: 'image/png' }), 'pixel.png');
+  const assetResponse = await fetch(`${baseUrl}/api/files/docs/readme/images`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      documentPath: 'docs/readme',
-      fileName: 'pixel.png',
-      contentType: 'image/png',
-      data: imagePayload,
-    }),
+    body: assetFormData,
   });
   assert.equal(assetResponse.status, 201);
   const assetBody = await assetResponse.json();
-  assert.match(assetBody.markdownPath, /^\.\/assets\/pixel-\d+\.png$/);
-  assert.match(assetBody.contentPath, /^\/content\/docs\/assets\/pixel-\d+\.png$/);
+  assert.equal(assetBody.markdownPath, './pixel.png');
+  assert.equal(assetBody.contentPath, '/content/docs/pixel.png');
 
   const storedAsset = await readFile(join(docsDir, assetBody.markdownPath.replace(/^\.\//, '')));
   assert.ok(storedAsset.length > 0);
 
   const servedAssetResponse = await fetch(`${baseUrl}${assetBody.contentPath}`);
   assert.equal(servedAssetResponse.status, 200);
+
+  const duplicateAssetFormData = new FormData();
+  duplicateAssetFormData.append('image', new Blob([imagePayload], { type: 'image/png' }), 'pixel.png');
+  const duplicateAssetResponse = await fetch(`${baseUrl}/api/files/docs/readme/images`, {
+    method: 'POST',
+    body: duplicateAssetFormData,
+  });
+  assert.equal(duplicateAssetResponse.status, 201);
+  const duplicateAssetBody = await duplicateAssetResponse.json();
+  assert.equal(duplicateAssetBody.markdownPath, './pixel-1.png');
+  assert.equal(duplicateAssetBody.contentPath, '/content/docs/pixel-1.png');
+
+  const deleteAssetResponse = await fetch(`${baseUrl}/api/files/docs/readme/images?path=${encodeURIComponent(duplicateAssetBody.markdownPath)}`, {
+    method: 'DELETE',
+  });
+  assert.equal(deleteAssetResponse.status, 204);
+
+  const deletedAssetFetchResponse = await fetch(`${baseUrl}${duplicateAssetBody.contentPath}`);
+  assert.equal(deletedAssetFetchResponse.status, 404);
 
   const markdownWithImage = `# Test Document\n\n![Pixel](${assetBody.markdownPath})\n`;
   const saveWithImageResponse = await fetch(`${baseUrl}/api/files/docs/readme`, {
@@ -107,15 +122,12 @@ test('file and comment APIs work against the configured content root', async (t)
   });
   assert.equal(invalidSaveResponse.status, 400);
 
-  const invalidAssetResponse = await fetch(`${baseUrl}/api/assets`, {
+  const invalidAssetFormData = new FormData();
+  invalidAssetFormData.append('image', new Blob([imagePayload], { type: 'text/plain' }), 'bad.txt');
+
+  const invalidAssetResponse = await fetch(`${baseUrl}/api/files/docs/readme/images`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      documentPath: 'docs/readme',
-      fileName: 'bad.txt',
-      contentType: 'text/plain',
-      data: imagePayload,
-    }),
+    body: invalidAssetFormData,
   });
   assert.equal(invalidAssetResponse.status, 400);
 

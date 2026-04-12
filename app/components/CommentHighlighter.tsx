@@ -124,6 +124,33 @@ export function CommentHighlighter({
   useEffect(() => {
     if (typeof window === 'undefined' || !activeTooltip) return;
 
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && activeTooltip.squiggle.contains(target)) {
+        return;
+      }
+
+      setActiveTooltip(null);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveTooltip(null);
+      }
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeTooltip]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !activeTooltip) return;
+
     const container = containerRef.current;
     if (!container) {
       setActiveTooltip(null);
@@ -158,18 +185,19 @@ export function CommentHighlighter({
     let isApplyingHighlights = false;
     let pendingFrame: number | null = null;
     let mutationObserver: MutationObserver | null = null;
+    let pendingSingleClick: number | null = null;
     let handlers: Array<{
       element: HTMLElement;
-      click: () => void;
+      click: (event: MouseEvent) => void;
       keydown: (event: KeyboardEvent) => void;
-      mouseenter: () => void;
-      mouseleave: () => void;
-      focus: () => void;
-      blur: () => void;
     }> = [];
 
     function removeAllMarks() {
       setActiveTooltip(null);
+      if (pendingSingleClick !== null) {
+        window.clearTimeout(pendingSingleClick);
+        pendingSingleClick = null;
+      }
 
       const annotatedBlocks = highlightContainer.querySelectorAll('[data-annotation-block]');
       annotatedBlocks.forEach((block) => {
@@ -192,14 +220,10 @@ export function CommentHighlighter({
         parent.removeChild(mark);
       });
 
-      handlers.forEach(({ element, click, keydown, mouseenter, mouseleave, focus, blur }) => {
+      handlers.forEach(({ element, click, keydown }) => {
         try {
           element.removeEventListener('click', click);
           element.removeEventListener('keydown', keydown);
-          element.removeEventListener('mouseenter', mouseenter);
-          element.removeEventListener('mouseleave', mouseleave);
-          element.removeEventListener('focus', focus);
-          element.removeEventListener('blur', blur);
         } catch {}
       });
 
@@ -281,32 +305,51 @@ export function CommentHighlighter({
                     }
 
                     const tooltipLabel = buildTooltipLabel(number, annotation.text);
-                    const clickHandler = () => onAnnotationClick?.(annotation);
-                    const keydownHandler = (event: KeyboardEvent) => {
-                      if (event.key !== 'Enter' && event.key !== ' ') return;
-                      event.preventDefault();
-                      onAnnotationClick?.(annotation);
+                    const clickHandler = (event: MouseEvent) => {
+                      if (pendingSingleClick !== null) {
+                        window.clearTimeout(pendingSingleClick);
+                        pendingSingleClick = null;
+                      }
+
+                      if (event.detail >= 2) {
+                        onAnnotationClick?.(annotation);
+                        setActiveTooltip(measureTooltip(squiggle, tooltipLabel));
+                        return;
+                      }
+
+                      pendingSingleClick = window.setTimeout(() => {
+                        setActiveTooltip(null);
+                        onAnnotationClick?.(annotation);
+                        pendingSingleClick = null;
+                      }, 220);
                     };
-                    const showTooltip = () => setActiveTooltip(measureTooltip(squiggle, tooltipLabel));
-                    const hideTooltip = () => {
-                      setActiveTooltip((current) => (current?.squiggle === squiggle ? null : current));
+                    const keydownHandler = (event: KeyboardEvent) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setActiveTooltip(null);
+                        onAnnotationClick?.(annotation);
+                        return;
+                      }
+
+                      if (event.key === 'Escape') {
+                        setActiveTooltip((current) => (current?.squiggle === squiggle ? null : current));
+                        return;
+                      }
+
+                      if (event.key.toLowerCase() === 'd') {
+                        event.preventDefault();
+                        onAnnotationClick?.(annotation);
+                        setActiveTooltip(measureTooltip(squiggle, tooltipLabel));
+                      }
                     };
 
                     squiggle.addEventListener('click', clickHandler);
                     squiggle.addEventListener('keydown', keydownHandler);
-                    squiggle.addEventListener('mouseenter', showTooltip);
-                    squiggle.addEventListener('mouseleave', hideTooltip);
-                    squiggle.addEventListener('focus', showTooltip);
-                    squiggle.addEventListener('blur', hideTooltip);
 
                     handlers.push({
                       element: squiggle,
                       click: clickHandler,
                       keydown: keydownHandler,
-                      mouseenter: showTooltip,
-                      mouseleave: hideTooltip,
-                      focus: showTooltip,
-                      blur: hideTooltip,
                     });
                   } catch {}
                 });
@@ -365,6 +408,9 @@ export function CommentHighlighter({
 
     return () => {
       abortController.abort();
+      if (pendingSingleClick !== null) {
+        window.clearTimeout(pendingSingleClick);
+      }
       if (pendingFrame !== null) {
         cancelAnimationFrame(pendingFrame);
       }

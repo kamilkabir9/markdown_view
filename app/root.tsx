@@ -8,6 +8,7 @@ import type { ComponentType } from 'react';
 import { SettingsIcon } from 'lucide-react';
 import { ThemeSwitcher } from '~/components/ThemeSwitcher';
 import { Button } from '~/components/ui/button';
+import { Toaster } from '~/components/ui/sonner';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
@@ -246,6 +247,7 @@ function AppShellInner() {
       </Dialog>
 
       <ScrollToTopButton />
+      <Toaster richColors closeButton position="top-right" />
       <DevAgentation />
     </>
   );

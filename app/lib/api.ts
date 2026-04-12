@@ -39,12 +39,14 @@ interface ApiResponseError extends Error {
 }
 
 async function requestJson<T>(path: string, init: ApiRequestOptions = {}): Promise<T> {
+  const headers = new Headers(init.headers ?? {});
+  if (!(init.body instanceof FormData) && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
   const response = await fetch(path, {
     ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init.headers ?? {}),
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -93,37 +95,20 @@ export async function saveFile(path: string, content: string): Promise<MarkdownF
 }
 
 export async function uploadImageAsset(documentPath: string, file: File): Promise<UploadedAsset> {
-  const data = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
+  const formData = new FormData();
+  formData.append('image', file, file.name);
 
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result !== 'string') {
-        reject(new Error('Failed to read the selected image.'));
-        return;
-      }
-
-      const base64Data = result.split(',')[1];
-      if (!base64Data) {
-        reject(new Error('Failed to extract image data.'));
-        return;
-      }
-
-      resolve(base64Data);
-    };
-
-    reader.onerror = () => reject(new Error('Failed to read the selected image.'));
-    reader.readAsDataURL(file);
-  });
-
-  return requestJson('/api/assets', {
+  return requestJson(`/api/files/${encodeURIComponent(documentPath).replace(/%2F/g, '/')}/images`, {
     method: 'POST',
-    body: JSON.stringify({
-      documentPath,
-      fileName: file.name,
-      contentType: file.type,
-      data,
-    }),
+    body: formData,
+  });
+}
+
+export async function deleteImageAsset(documentPath: string, markdownPath: string): Promise<void> {
+  const params = new URLSearchParams({ path: markdownPath });
+
+  await requestJson<void>(`/api/files/${encodeURIComponent(documentPath).replace(/%2F/g, '/')}/images?${params.toString()}`, {
+    method: 'DELETE',
   });
 }
 

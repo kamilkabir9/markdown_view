@@ -1,17 +1,17 @@
 # AGENTS.md
-
+fgfgfgfgfgfbvvb
 > Project conventions and best practices for AI coding agents working on this codebase.
-> Last updated: 28-Mar-2026
-
+> Last updated: 28-Mar-2026 tttyyy
+vvv
 ---
 
 ## Project Overview
-
+ssss
 - **Framework**: React Router v7 with TypeScript
 - **UI Library**: shadcn/ui (file-based, in `app/components/ui/`)
 - **Styling**: Tailwind CSS v4
 - **React**: v19
-
+sss
 ---
 
 ## Code Quality & Principles

@@ -112,6 +112,19 @@ export function CommentSidebar({
     [annotations],
   );
 
+  const inlineNumberById = useMemo(() => {
+    const mapping = new Map<string, number>();
+    let inlineNumber = 1;
+
+    annotations.forEach((annotation) => {
+      if (annotation.isGlobal) return;
+      mapping.set(annotation.id, inlineNumber);
+      inlineNumber += 1;
+    });
+
+    return mapping;
+  }, [annotations]);
+
   const counts = useMemo(
     () => ({
       all: sortedAnnotations.length,
@@ -392,6 +405,7 @@ export function CommentSidebar({
               {filteredAnnotations.map((annotation, index) => {
                 const isActive = annotation.id === activeAnnotationId;
                 const showActions = hoveredId === annotation.id || editingId === annotation.id;
+                const inlineNumber = inlineNumberById.get(annotation.id);
 
                 return (
                   <div
@@ -416,7 +430,7 @@ export function CommentSidebar({
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3">
                             <div className={`flex h-10 w-10 items-center justify-center rounded-sm border text-sm font-semibold ${isActive ? 'border-foreground/16 bg-background text-foreground' : 'border-border/70 bg-surface text-muted-foreground'}`}>
-                              {String(index + 1).padStart(2, '0')}
+                              {annotation.isGlobal ? '—' : String(inlineNumber ?? index + 1).padStart(2, '0')}
                             </div>
                             <div>
                               <div className="flex flex-wrap items-center gap-2">

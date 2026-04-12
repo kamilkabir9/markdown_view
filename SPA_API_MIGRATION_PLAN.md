@@ -1,10 +1,18 @@
+
+![erik karits zi2PgDRNuMU unsplash](./erik-karits-zi2PgDRNuMU-unsplash.jpg)
 # SPA-API Migration Plan
 
 ## Goal
+![erik karits zi2PgDRNuMU unsplash](./erik-karits-zi2PgDRNuMU-unsplash-1.jpg)
 
+vvvgggg
 Replace the current React Router SSR application with a traditional SPA frontend that consumes a separate HTTP API, while preserving the markdown browsing, reading, and annotation experience.
 
 Tracking tag: `[SPA-API]`
+
+## Sample Image
+
+![Sample image](./samples/example-image.svg)
 
 ## Current State
 
@@ -12,6 +20,8 @@ Tracking tag: `[SPA-API]`
 - `react-router dev` and `react-router build` drive both rendering and server output.
 - The runtime server is Node/Express-based and also supports CLI-style local file serving.
 - File system access currently lives on the server side and is exposed through route loaders/actions rather than explicit REST endpoints.
+
+![junel mujar 51jzoz1dsro unsplash](./junel-mujar-51jzoz1dsro-unsplash.jpg)
 
 ## Target State
 

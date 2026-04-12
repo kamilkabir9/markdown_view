@@ -1,4 +1,6 @@
-# Markdown Viewer
+
+![erik karits zi2PgDRNuMU unsplash](./erik-karits-zi2PgDRNuMU-unsplash-2.jpg)
+# ssMarkdown Viewer
 
 A browser-rendered markdown reader with a Node/Express API for file discovery, file content, and comment persistence.
 
@@ -7,11 +9,12 @@ graph TD;
     Browser[SPA frontend] -->|GET /api/files| API[Express API]
     Browser -->|GET /api/files/*| API
     Browser -->|PUT /api/files/*| API
-    Browser -->|POST /api/assets| API
+    Browser -->|POST /api/files/*/images| API
+    Browser -->|DELETE /api/files/*/images| API
     Browser -->|GET/POST/PUT/DELETE /api/comments| API
     API --> Filesystem[Configured content root]
 ```
-
+erer
 ## Quick Start
 
 ```bash
@@ -100,7 +103,8 @@ scripts/
 - `GET /api/files`
 - `GET /api/files/*path`
 - `PUT /api/files/*path`
-- `POST /api/assets`
+- `POST /api/files/*path/images`
+- `DELETE /api/files/*path/images?path=./file.png`
 - `GET /api/comments?file=...`
 - `POST /api/comments`
 - `PUT /api/comments/:id`
@@ -126,10 +130,12 @@ Error responses use a stable JSON shape:
 - Document edit mode is powered by Lexical and saves markdown back to the original `.md` file on disk.
 - The current markdown-safe editor pass supports standard markdown blocks plus block-style markdown images.
 - Mermaid fences, markdown tables, raw HTML, and inline image syntax remain read-only until dedicated round-trip handling is added.
-- Inserted images are written under an `assets/` folder next to the current document and saved back as relative markdown image paths.
+- Inserted images are written alongside the current markdown file and saved back as relative markdown image paths.
 - Local images are served from the selected content root through `/content/*` so reader and editor previews use the same asset path model.
 
 ## Development
+
+![bernhard 5helRuJ9chA unsplash](./bernhard-5helRuJ9chA-unsplash-2.jpg)
 
 ```bash
 # Typecheck

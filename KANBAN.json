@@ -120,9 +120,9 @@
     {
       "id": "add-image-preview-feature-0f0af155",
       "title": "Add image preview feature",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T19:36:06.360Z",
-      "updated": "2026-04-08T19:36:06.360Z",
+      "updated": "2026-04-12T01:59:05.323Z",
       "type": "feature",
       "body": "Add image preview support so users can view images more clearly from the document experience."
     },
@@ -1005,6 +1005,60 @@
           "body": "Fixed the actual routing bug in `scripts/dev-server.js` and `scripts/markdown-viewer.js`. Direct `.md` requests like `/AGENTS.md` are now sent through the SPA entrypoint before Vite/static file serving can return the raw file. Verified with live HTTP checks against both dev and production servers, plus `npm run typecheck` and `npm run build`."
         }
       ]
+    },
+    {
+      "id": "add-right-side-preview-in-edit-mode-cab28a89",
+      "title": "Add right-side preview in edit mode",
+      "column": "Backlog",
+      "created": "2026-04-12T01:33:58.973Z",
+      "updated": "2026-04-12T01:33:58.971Z",
+      "type": "feature",
+      "body": "In edit mode, display a live markdown preview panel on the right side so users can edit and preview simultaneously."
+    },
+    {
+      "id": "replace-inline-highlight-with-numbered-c-e5a93899",
+      "title": "Replace inline highlight with numbered comment bubbles",
+      "column": "Backlog",
+      "created": "2026-04-12T01:33:58.988Z",
+      "updated": "2026-04-12T01:33:58.985Z",
+      "type": "feature",
+      "body": "Instead of highlighting selected text for doc comments, show numbered bubble markers tied to each comment."
+    },
+    {
+      "id": "show-comment-tooltip-on-bubble-hover-80ee45eb",
+      "title": "Show comment tooltip on bubble hover",
+      "column": "Backlog",
+      "created": "2026-04-12T01:34:04.333Z",
+      "updated": "2026-04-12T01:34:04.333Z",
+      "type": "feature",
+      "body": "On hover over a comment bubble marker, display the corresponding comment text in a tooltip/popover."
+    },
+    {
+      "id": "preserve-section-position-when-entering--ea1a14e0",
+      "title": "Preserve section position when entering edit mode",
+      "column": "Backlog",
+      "created": "2026-04-12T01:34:04.334Z",
+      "updated": "2026-04-12T01:34:04.333Z",
+      "type": "feature",
+      "body": "When switching from preview to edit mode, open the editor at the same document section/scroll position currently visible in preview."
+    },
+    {
+      "id": "add-ignore-paths-for-markdown-file-disco-f17a54cd",
+      "title": "Add ignore paths for markdown file discovery",
+      "column": "Backlog",
+      "created": "2026-04-12T01:42:24.894Z",
+      "updated": "2026-04-12T01:42:24.893Z",
+      "type": "feature",
+      "body": "Allow users to configure file and folder ignore paths so the server skips those locations when scanning for .md files."
+    },
+    {
+      "id": "fix-inline-comment-squiggle-click-double-ff616e8b",
+      "title": "Fix inline comment squiggle click/double-click interactions",
+      "column": "Backlog",
+      "created": "2026-04-12T11:40:57.930Z",
+      "updated": "2026-04-12T11:40:57.928Z",
+      "type": "bug",
+      "body": "Regression in comment highlights:\n- Single click on squiggly annotation does not consistently select/focus the linked comment.\n- Double click does not reliably open the inline comment popup.\n\nExpected behavior:\n- Single click selects/jumps to comment item in sidebar.\n- Double click opens popup with index + comment text.\n\nRepro:\n1) Open markdown preview with inline comments.\n2) Click squiggly highlighted text once.\n3) Double click same squiggle.\n\nNotes:\nLikely event sequencing conflict between single-click delay and DOM re-render/re-anchoring of squiggle nodes."
     }
   ]
 }
