@@ -13,7 +13,7 @@ export function MarkdownSourceEditor({ value, onChange, className }: MarkdownSou
   const { theme } = useTheme();
 
   return (
-    <div className={cn('markdown-source-editor app-shell-panel h-full overflow-hidden rounded-md', className)}>
+    <div className={cn('markdown-source-editor app-shell-panel h-full overflow-auto rounded-md', className)}>
       <CodeMirror
         value={value}
         height="100%"
