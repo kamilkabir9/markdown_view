@@ -98,9 +98,11 @@ body {
 
 .markdown-source-editor .cm-editor {
   height: 100%;
+  min-height: 0;
 }
 
 .markdown-source-editor .cm-scroller {
+  height: 100%;
   overflow: auto;
 }
 

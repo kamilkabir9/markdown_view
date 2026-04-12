@@ -1,18 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Link, useBlocker, useNavigate, useParams } from 'react-router';
+import { Group, Panel, Separator } from 'react-resizable-panels';
+import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { Button } from '~/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '~/components/ui/dialog';
 import { Toggle } from '~/components/ui/toggle';
 import { CommentHighlighter } from '~/components/CommentHighlighter';
 import { CommentSidebar } from '~/components/CommentSidebar';
 import { MarkdownOutline } from '~/components/MarkdownOutline';
 import { MarkdownPreview } from '~/components/MarkdownPreview';
-import { MarkdownSourceEditor } from '~/components/MarkdownSourceEditor';
+import { MarkdownSourceEditor, type MarkdownSourceEditorHandle } from '~/components/MarkdownSourceEditor';
 import { useAppChrome } from '~/contexts/AppChromeContext';
 import { useCopySettings } from '~/contexts/CopySettingsContext';
 import { AnnotationStoreProvider, useAnnotationStore, type Anchor, type Annotation } from '~/contexts/AnnotationStore';
-import { fetchFile, getErrorMessage, saveFile, type MarkdownFile } from '~/lib/api';
+import { deleteImageAsset, fetchFile, getErrorMessage, saveFile, uploadImageAsset, type MarkdownFile } from '~/lib/api';
 import { enrichAnchorFromMarkdown } from '~/lib/comment-anchors';
 import { extractMarkdownSections } from '~/lib/markdown-sections';
 import { cn } from '~/lib/utils';
@@ -133,6 +136,10 @@ function MarkdownPageContent() {
   const { setActions, setBreadcrumbs } = useAppChrome();
   const { returnToPreviewAfterSave } = useCopySettings();
   const previewRef = useRef<HTMLElement | null>(null);
+  const sourceEditorRef = useRef<MarkdownSourceEditorHandle | null>(null);
+  const wasEditingRef = useRef(false);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadedImageMarkdownPathsRef = useRef<string[]>([]);
   const returnToPreviewAfterSaveRef = useRef(returnToPreviewAfterSave);
   const [file, setFile] = useState<MarkdownFile | null>(null);
   const [draft, setDraft] = useState('');
@@ -144,13 +151,29 @@ function MarkdownPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle');
+  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const [isImageUploadDragging, setIsImageUploadDragging] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
   const [pendingAnchor, setPendingAnchor] = useState<PendingAnchor | null>(null);
   const [selectionActionPosition, setSelectionActionPosition] = useState<SelectionActionPosition | null>(null);
   const [isCreateCommentDialogOpen, setIsCreateCommentDialogOpen] = useState(false);
   const [isCreatingDocumentComment, setIsCreatingDocumentComment] = useState(false);
   const [commentDraft, setCommentDraft] = useState('');
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
+  const [isDesktopEditSplit, setIsDesktopEditSplit] = useState(false);
   const { annotations, isLoading: areCommentsLoading, error: commentsError, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(min-width: 1280px)');
+    const sync = () => setIsDesktopEditSplit(mediaQuery.matches);
+    sync();
+    mediaQuery.addEventListener('change', sync);
+
+    return () => mediaQuery.removeEventListener('change', sync);
+  }, []);
 
   useEffect(() => {
     returnToPreviewAfterSaveRef.current = returnToPreviewAfterSave;
@@ -172,6 +195,10 @@ function MarkdownPageContent() {
         const shouldResumeEditAfterSave = consumeResumeEditAfterSave(routePath);
         setFile(response);
         setDraft(response.content);
+        if (shouldResumeEditAfterSave && !returnToPreviewAfterSaveRef.current) {
+          setIsOutlineVisible(false);
+          setIsCommentsVisible(false);
+        }
         setIsEditing(shouldResumeEditAfterSave && !returnToPreviewAfterSaveRef.current);
       } catch (requestError) {
         if (controller.signal.aborted) return;
@@ -189,6 +216,38 @@ function MarkdownPageContent() {
     return () => controller.abort();
   }, [routePath]);
 
+  const refreshPreviewFile = useCallback(async () => {
+    try {
+      const response = await fetchFile(routePath);
+      setFile(response);
+      setDraft(response.content);
+      setError(null);
+    } catch (requestError) {
+      setSaveError(getErrorMessage(requestError, 'The markdown preview could not be refreshed.'));
+    }
+  }, [routePath]);
+
+  useEffect(() => {
+    if (isLoading) {
+      wasEditingRef.current = isEditing;
+      return;
+    }
+
+    if (wasEditingRef.current && !isEditing) {
+      void refreshPreviewFile();
+    }
+
+    wasEditingRef.current = isEditing;
+  }, [isEditing, isLoading, refreshPreviewFile]);
+
+  useEffect(() => {
+    if (isEditing) {
+      return;
+    }
+
+    previewRef.current?.scrollTo({ top: 0 });
+  }, [file?.modified, file?.path, isEditing]);
+
   const isDirty = file ? draft !== file.content : false;
   const outlineSections = useMemo(() => extractMarkdownSections(isEditing ? draft : file?.content ?? ''), [draft, file?.content, isEditing]);
   const shouldBlockNavigation = isEditing && isDirty && !isSaving;
@@ -203,16 +262,61 @@ function MarkdownPageContent() {
     setDraft(file.content);
     setSaveError(null);
     setSaveStatus('idle');
+    setIsOutlineVisible(false);
+    setIsCommentsVisible(false);
     setIsEditing(true);
   }, [file]);
 
-  const handleCancelEditing = useCallback(() => {
+  const cleanupUploadedDraftImages = useCallback(async () => {
+    if (!file) {
+      return { removedCount: 0, failedCount: 0 };
+    }
+
+    const uploadedPaths = [...new Set(uploadedImageMarkdownPathsRef.current)];
+    if (uploadedPaths.length === 0) {
+      return { removedCount: 0, failedCount: 0 };
+    }
+
+    const failedPaths: string[] = [];
+
+    for (const markdownPath of uploadedPaths) {
+      try {
+        await deleteImageAsset(file.path, markdownPath);
+      } catch {
+        failedPaths.push(markdownPath);
+      }
+    }
+
+    uploadedImageMarkdownPathsRef.current = failedPaths;
+
+    return {
+      removedCount: uploadedPaths.length - failedPaths.length,
+      failedCount: failedPaths.length,
+    };
+  }, [file]);
+
+  const handleCancelEditing = useCallback(async () => {
     if (!file) return;
+
+    const { removedCount, failedCount } = await cleanupUploadedDraftImages();
+
     setDraft(file.content);
     setSaveError(null);
     setSaveStatus('idle');
     setIsEditing(false);
-  }, [file]);
+    setIsImageDialogOpen(false);
+
+    if (removedCount > 0) {
+      const label = removedCount === 1 ? 'image' : 'images';
+      toast.info(`Removed ${removedCount} uploaded ${label} from this draft.`);
+    }
+
+    if (failedCount > 0) {
+      const label = failedCount === 1 ? 'image file' : 'image files';
+      setSaveError(`Some uploaded ${label} could not be cleaned up automatically.`);
+      toast.warning('Some uploaded images could not be removed automatically.');
+    }
+  }, [cleanupUploadedDraftImages, file]);
 
   const handleSave = useCallback(async () => {
     if (!file || !isDirty || isSaving) return;
@@ -224,6 +328,7 @@ function MarkdownPageContent() {
       setFile(savedFile);
       setDraft(savedFile.content);
       setSaveStatus('saved');
+      uploadedImageMarkdownPathsRef.current = [];
 
       const shouldReturnToPreview = returnToPreviewAfterSaveRef.current;
       if (shouldReturnToPreview) {
@@ -239,6 +344,94 @@ function MarkdownPageContent() {
       setIsSaving(false);
     }
   }, [draft, file, isDirty, isSaving, routePath]);
+
+  const handleImageDialogOpenChange = useCallback((open: boolean) => {
+    setIsImageDialogOpen(open);
+    if (!open) {
+      setImageUploadError(null);
+      setIsImageUploadDragging(false);
+    }
+  }, []);
+
+  const handleUndoInsertedImage = useCallback(async ({ markdownPath, insertion }: { markdownPath: string; insertion: string }) => {
+    if (!file) return;
+
+    setDraft((current) => {
+      const insertionIndex = current.indexOf(insertion);
+      if (insertionIndex < 0) {
+        return current;
+      }
+
+      return `${current.slice(0, insertionIndex)}${current.slice(insertionIndex + insertion.length)}`;
+    });
+
+    try {
+      await deleteImageAsset(file.path, markdownPath);
+      uploadedImageMarkdownPathsRef.current = uploadedImageMarkdownPathsRef.current.filter((path) => path !== markdownPath);
+      toast.info('Image insertion was undone.');
+    } catch (requestError) {
+      const message = getErrorMessage(requestError, 'The uploaded image file could not be deleted.');
+      toast.warning(`Image text was removed, but file cleanup failed: ${message}`);
+    }
+  }, [file]);
+
+  const handleImageUpload = useCallback(async (imageFile: File) => {
+    if (!file || !isEditing) {
+      return;
+    }
+
+    if (!imageFile.type.startsWith('image/')) {
+      const message = 'Select a valid image file (GIF, JPEG, PNG, SVG, or WebP).';
+      setImageUploadError(message);
+      toast.error(message);
+      return;
+    }
+
+    try {
+      setImageUploadError(null);
+      setIsUploadingImage(true);
+
+      const uploadedAsset = await uploadImageAsset(file.path, imageFile);
+      uploadedImageMarkdownPathsRef.current.push(uploadedAsset.markdownPath);
+      const baseAltText = imageFile.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
+      const markdown = `![${baseAltText || 'image'}](${uploadedAsset.markdownPath})`;
+      const insertion = `\n${markdown}\n`;
+      const inserted = sourceEditorRef.current?.insertText(insertion) ?? false;
+
+      if (!inserted) {
+        setDraft((current) => `${current}${current.endsWith('\n') ? '' : '\n'}${markdown}\n`);
+      }
+
+      toast.success('Image added to the markdown draft. Click Save to persist changes.', {
+        action: {
+          label: 'Undo insert',
+          onClick: () => {
+            void handleUndoInsertedImage({
+              markdownPath: uploadedAsset.markdownPath,
+              insertion,
+            });
+          },
+        },
+      });
+      setIsImageDialogOpen(false);
+      setIsImageUploadDragging(false);
+    } catch (requestError) {
+      const message = getErrorMessage(requestError, 'The image could not be uploaded.');
+      setImageUploadError(message);
+      toast.error(message);
+    } finally {
+      setIsUploadingImage(false);
+      if (imageInputRef.current) {
+        imageInputRef.current.value = '';
+      }
+    }
+  }, [file, handleUndoInsertedImage, isEditing]);
+
+  const handleImageInputChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
+    void handleImageUpload(selectedFile);
+  }, [handleImageUpload]);
 
   const clearPendingSelection = useCallback(() => {
     setPendingAnchor(null);
@@ -336,6 +529,20 @@ function MarkdownPageContent() {
   }, []);
 
   const handleOutlineNavigate = useCallback((slug: string) => {
+    if (isEditing) {
+      const flatSections = [...outlineSections];
+      for (let index = 0; index < flatSections.length; index += 1) {
+        flatSections.splice(index + 1, 0, ...flatSections[index].children);
+      }
+      const targetSection = flatSections.find((section) => section.slug === slug);
+      if (!targetSection) {
+        return;
+      }
+
+      sourceEditorRef.current?.scrollToOffset(targetSection.startOffset);
+      return;
+    }
+
     const container = previewRef.current;
     if (!container) {
       return;
@@ -349,7 +556,7 @@ function MarkdownPageContent() {
     const targetTop = target.offsetTop - 16;
     container.scrollTo({ top: Math.max(targetTop, 0), behavior: 'smooth' });
     window.history.replaceState(null, '', `#${slug}`);
-  }, []);
+  }, [isEditing, outlineSections]);
 
   useEffect(() => {
     if (!isEditing || !isDirty || saveStatus !== 'saved') {
@@ -429,7 +636,10 @@ function MarkdownPageContent() {
           {isEditing ? (
             <>
               {saveStatus === 'saved' && <span className="text-xs text-muted-foreground">Saved</span>}
-              <Button variant="outline" onClick={handleCancelEditing} disabled={isSaving}>
+              <Button variant="outline" onClick={() => handleImageDialogOpenChange(true)} disabled={isSaving || isUploadingImage}>
+                {isUploadingImage ? 'Uploading image...' : 'Add image'}
+              </Button>
+              <Button variant="outline" onClick={() => void handleCancelEditing()} disabled={isSaving || isUploadingImage}>
                 Cancel
               </Button>
               <Button onClick={() => void handleSave()} disabled={!isDirty || isSaving}>
@@ -452,7 +662,7 @@ function MarkdownPageContent() {
       setBreadcrumbs(null);
       setActions(null);
     };
-  }, [file, handleCancelEditing, handleSave, handleStartEditing, isCommentsVisible, isDirty, isEditing, isOutlineVisible, isSaving, saveStatus, setActions, setBreadcrumbs]);
+  }, [file, handleCancelEditing, handleImageDialogOpenChange, handleSave, handleStartEditing, isCommentsVisible, isDirty, isEditing, isOutlineVisible, isSaving, isUploadingImage, saveStatus, setActions, setBreadcrumbs]);
 
   useEffect(() => {
     if (isEditing) {
@@ -535,20 +745,18 @@ function MarkdownPageContent() {
         </Alert>
       )}
 
-      {isEditing && (
+      {isEditing && isDirty && (
         <Alert>
-          <AlertTitle>{isDirty ? 'Unsaved changes' : 'Edit mode active'}</AlertTitle>
+          <AlertTitle>Unsaved changes</AlertTitle>
           <AlertDescription>
-            {isDirty
-              ? 'This document has unsaved changes. Use Cmd/Ctrl+S or the Save button to write the raw markdown back to disk.'
-              : 'Source mode is active. Use Cmd/Ctrl+S after your next edit to save quickly.'}
+            This document has unsaved changes. Use Cmd/Ctrl+S or the Save button to write the raw markdown back to disk.
           </AlertDescription>
         </Alert>
       )}
 
       <div
         className={cn(
-          'grid min-h-0 flex-1 gap-5',
+          'grid h-full min-h-0 flex-1 gap-5',
           isOutlineVisible && isCommentsVisible && 'xl:grid-cols-[18rem_minmax(0,1fr)_22rem]',
           isOutlineVisible && !isCommentsVisible && 'xl:grid-cols-[18rem_minmax(0,1fr)]',
           !isOutlineVisible && isCommentsVisible && 'xl:grid-cols-[minmax(0,1fr)_22rem]',
@@ -557,15 +765,43 @@ function MarkdownPageContent() {
       >
         {isOutlineVisible ? <MarkdownOutline sections={outlineSections} onNavigate={handleOutlineNavigate} className="min-h-0" /> : null}
 
-        <div className="min-h-0">
+        <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
           {isEditing ? (
-            <MarkdownSourceEditor value={draft} onChange={setDraft} className="min-h-[32rem] xl:min-h-0" />
+            <div className="flex-1 min-h-[32rem] min-w-0 xl:min-h-0">
+              {isDesktopEditSplit ? (
+                <Group orientation="horizontal" className="h-full min-h-0 min-w-0" id="markdown-edit-split-panels">
+                  <Panel defaultSize={55} minSize={25} className="min-w-0">
+                    <div className="h-full min-h-0 min-w-0 pr-2">
+                      <MarkdownSourceEditor ref={sourceEditorRef} value={draft} onChange={setDraft} className="h-full min-h-0" />
+                    </div>
+                  </Panel>
+                  <Separator
+                    className="group flex w-3 shrink-0 cursor-col-resize items-stretch justify-center"
+                    aria-label="Resize editor and preview panels"
+                  >
+                    <span className="w-full rounded-sm border border-border/60 bg-surface transition-colors group-hover:border-primary/40 group-hover:bg-accent/50" />
+                  </Separator>
+                  <Panel defaultSize={45} minSize={25} className="min-w-0">
+                    <div className="h-full min-h-0 min-w-0 pl-2">
+                      <MarkdownPreview content={draft} documentSourcePath={file.sourcePath} className="h-full min-h-0 min-w-0" />
+                    </div>
+                  </Panel>
+                </Group>
+              ) : (
+                <div className="grid min-h-[32rem] min-w-0 gap-5">
+                  <MarkdownSourceEditor ref={sourceEditorRef} value={draft} onChange={setDraft} className="min-h-[32rem]" />
+                  <MarkdownPreview content={draft} documentSourcePath={file.sourcePath} className="min-h-[32rem]" />
+                </div>
+              )}
+            </div>
           ) : (
-            <div className="relative h-full min-h-[32rem] xl:min-h-0" onMouseUp={() => void capturePreviewSelection()} onKeyUp={() => void capturePreviewSelection()}>
+            <div className="relative flex h-full flex-1 min-h-[32rem] min-w-0 overflow-hidden xl:min-h-0" onMouseUp={() => void capturePreviewSelection()} onKeyUp={() => void capturePreviewSelection()}>
               <MarkdownPreview
+                key={`view:${file.path}:${file.modified}`}
                 ref={previewRef}
                 content={file.content}
                 documentSourcePath={file.sourcePath}
+                className="h-full min-h-0 min-w-0 flex-1"
               />
               {pendingAnchor && selectionActionPosition ? (
                 <div
@@ -623,6 +859,66 @@ function MarkdownPageContent() {
           />
         ) : null}
       </div>
+
+      <Dialog open={isImageDialogOpen} onOpenChange={handleImageDialogOpenChange}>
+        <DialogContent className="sm:max-w-[32rem]">
+          <DialogHeader>
+            <DialogTitle>Upload image</DialogTitle>
+            <DialogDescription>
+              Upload an image and insert a markdown link at the current cursor position.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/gif,image/jpeg,image/png,image/svg+xml,image/webp"
+              className="hidden"
+              onChange={handleImageInputChange}
+            />
+
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              onDragOver={(event) => {
+                event.preventDefault();
+                setIsImageUploadDragging(true);
+              }}
+              onDragLeave={() => setIsImageUploadDragging(false)}
+              onDrop={(event) => {
+                event.preventDefault();
+                setIsImageUploadDragging(false);
+                const droppedFile = event.dataTransfer.files?.[0];
+                if (!droppedFile) return;
+                void handleImageUpload(droppedFile);
+              }}
+              className={cn(
+                'flex w-full flex-col items-center justify-center gap-2 rounded-sm border border-dashed px-4 py-9 text-center text-sm transition-colors',
+                isImageUploadDragging
+                  ? 'border-primary/60 bg-primary/5 text-foreground'
+                  : 'border-border/70 text-muted-foreground hover:border-primary/40 hover:text-foreground',
+              )}
+              disabled={isUploadingImage}
+            >
+              <span className="font-medium text-foreground">Drop image here</span>
+              <span>or click to choose a file</span>
+              <span className="text-xs">GIF, JPEG, PNG, SVG, WebP</span>
+            </button>
+
+            {imageUploadError ? <p className="text-sm text-destructive">{imageUploadError}</p> : null}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleImageDialogOpenChange(false)} disabled={isUploadingImage}>
+              Cancel
+            </Button>
+            <Button onClick={() => imageInputRef.current?.click()} disabled={isUploadingImage}>
+              {isUploadingImage ? 'Uploading...' : 'Choose image'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
