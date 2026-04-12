@@ -285,52 +285,87 @@ body {
   background: transparent;
 }
 
-@keyframes annotation-shimmer {
-  0% {
-    background-position: 160% 0;
-  }
-
-  100% {
-    background-position: -60% 0;
-  }
+.annotation-floating-tooltip {
+  position: fixed;
+  z-index: 50;
+  max-width: min(20rem, calc(100vw - 1.5rem));
+  padding: 0.38rem 0.55rem;
+  border: 1px solid color-mix(in oklab, var(--border) 78%, var(--color-warning));
+  border-radius: 0.4rem;
+  background: color-mix(in oklab, var(--popover) 94%, var(--background));
+  color: var(--popover-foreground);
+  font-size: 0.69rem;
+  line-height: 1.45;
+  box-shadow: 0 0.35rem 1rem color-mix(in oklab, var(--foreground) 10%, transparent);
+  pointer-events: none;
 }
 
-.annotation-mark {
+.annotation-floating-tooltip--top {
+  transform: translate(-50%, calc(-100% - 0.7rem));
+}
+
+.annotation-floating-tooltip--bottom {
+  transform: translate(-50%, 0.7rem);
+}
+
+.annotation-squiggle {
   position: relative;
-  border-radius: 0.1rem;
-  padding: 0.03rem 0.16rem;
-  background: color-mix(in oklab, var(--color-warning) 8%, transparent);
-  box-shadow: inset 0 -0.08rem 0 color-mix(in oklab, var(--color-warning) 26%, transparent);
+  display: inline;
+  margin: 0 -0.08em -0.14em;
+  padding: 0.02em 0.08em 0.14em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  cursor: pointer;
+  border-radius: 0.24rem;
+  transition: background-color 160ms ease;
 }
 
-.annotation-mark--active {
-  background-color: color-mix(in oklab, var(--color-warning) 12%, transparent);
-  animation: none;
+.annotation-squiggle__content {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: color-mix(in oklab, var(--color-warning) 56%, var(--foreground));
+  text-underline-offset: 0.13em;
+  transition: text-decoration-color 160ms ease;
 }
 
-.annotation-mark:hover {
+.annotation-squiggle:hover,
+.annotation-squiggle:focus-visible {
   background: color-mix(in oklab, var(--color-warning) 11%, transparent);
 }
 
-[data-theme="dark"] .annotation-mark {
-  color: inherit;
-  background: color-mix(in oklab, white 3%, transparent);
-  box-shadow: inset 0 -0.08rem 0 color-mix(in oklab, var(--color-warning) 16%, transparent);
+.annotation-squiggle:hover .annotation-squiggle__content,
+.annotation-squiggle:focus-visible .annotation-squiggle__content {
+  text-decoration-color: color-mix(in oklab, var(--color-warning) 72%, var(--foreground));
 }
 
-[data-theme="dark"] .annotation-mark--active {
-  background-color: color-mix(in oklab, var(--color-warning) 5%, transparent);
-  box-shadow: inset 0 -0.08rem 0 color-mix(in oklab, var(--color-warning) 20%, transparent);
+.annotation-squiggle:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--color-warning) 58%, transparent);
+  outline-offset: 1px;
 }
 
-[data-theme="dark"] .annotation-mark:hover {
-  background: color-mix(in oklab, var(--color-warning) 6%, transparent);
+.annotation-squiggle--active {
+  background: color-mix(in oklab, var(--color-warning) 14%, transparent);
 }
 
-[data-theme="dark"] .markdown-article :where(code).annotation-mark,
-[data-theme="dark"] .markdown-article :where(.annotation-mark code) {
-  background: color-mix(in oklab, white 8%, var(--markdown-code-bg));
-  border-color: color-mix(in oklab, var(--markdown-border) 72%, transparent);
+.annotation-squiggle--active .annotation-squiggle__content {
+  text-decoration-color: color-mix(in oklab, var(--color-warning) 78%, var(--foreground));
+}
+
+[data-theme="dark"] .annotation-squiggle__content {
+  text-decoration-color: color-mix(in oklab, var(--color-warning) 62%, white 16%);
+}
+
+[data-theme="dark"] .annotation-squiggle:hover,
+[data-theme="dark"] .annotation-squiggle:focus-visible,
+[data-theme="dark"] .annotation-squiggle--active {
+  background: color-mix(in oklab, var(--color-warning) 16%, transparent);
+}
+
+[data-theme="dark"] .annotation-squiggle:hover .annotation-squiggle__content,
+[data-theme="dark"] .annotation-squiggle:focus-visible .annotation-squiggle__content,
+[data-theme="dark"] .annotation-squiggle--active .annotation-squiggle__content {
+  text-decoration-color: color-mix(in oklab, var(--color-warning) 75%, white 22%);
 }
 
 .markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-block] {
@@ -379,9 +414,12 @@ body {
     scroll-behavior: auto;
   }
 
-  .annotation-mark--active {
-    animation: none;
-    background-image: none;
+  .annotation-squiggle {
+    transition: none;
+  }
+
+  .annotation-squiggle__content {
+    transition: none;
   }
 }
 
