@@ -26,7 +26,7 @@ export function CommentsList({
   onUpdate,
 }: CommentsListProps) {
   return (
-    <div className="max-h-[min(65vh,42rem)] overflow-y-auto pr-1 scrollbar-hide">
+    <div className="scrollbar-on-active max-h-[min(65vh,42rem)] overflow-y-auto pr-1">
       <div className="space-y-3 pb-1">
         {annotations.map((annotation, index) => (
           <CommentCard

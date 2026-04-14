@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { toErrorResponse, ApiError } from './errors.js';
-import { listComments, createComment, deleteComment, importComments, updateComment } from './comment-service.js';
+import { listComments, createComment, deleteComment, importComments, rebaseCommentsForFile, updateComment } from './comment-service.js';
 import { deleteMarkdownAsset, listMarkdownFiles, requireMarkdownFile, saveMarkdownFile, storeMarkdownAsset } from './file-service.js';
 import { getContentRoot } from './content-root.js';
 
@@ -95,6 +95,7 @@ export function createApiRouter() {
 
   router.put('/files/*', asyncRoute(async (req, res) => {
     const file = await saveMarkdownFile(getRouteFilePath(req), req.body?.content);
+    await rebaseCommentsForFile(file.path, file.content);
     res.json(file);
   }));
 

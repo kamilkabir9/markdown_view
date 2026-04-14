@@ -17,7 +17,7 @@ export function MarkdownOutline({ sections, onNavigate, className }: MarkdownOut
 
   return (
     <aside className={cn('flex min-h-0 flex-col space-y-3', className)}>
-      <div className="app-shell-panel min-h-0 flex-1 overflow-y-auto rounded-md p-3">
+      <div className="app-shell-panel scrollbar-on-active min-h-0 flex-1 overflow-y-auto rounded-md p-3">
         <h2 className="mb-3 text-[0.7rem] tracking-[0.18em] text-muted-foreground uppercase">Summary</h2>
         {items.length === 0 ? (
           <p className="text-sm text-muted-foreground">No headings found in this file yet.</p>

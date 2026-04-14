@@ -107,6 +107,26 @@ function findAnnotatedBlock(mark: HTMLElement, container: HTMLElement): HTMLElem
   return findAnnotationBlock(mark, container);
 }
 
+function scrollActiveAnnotationIntoView(container: HTMLElement, annotationId: string | null | undefined): void {
+  if (!annotationId) {
+    return;
+  }
+
+  const activeBlock = container.querySelector<HTMLElement>('[data-annotation-active="true"]');
+  const activeSquiggle = container.querySelector<HTMLElement>(`${SQUIGGLE_SELECTOR}[data-annotation-id="${CSS.escape(annotationId)}"]`);
+  const target = activeBlock ?? activeSquiggle;
+
+  if (!target) {
+    return;
+  }
+
+  target.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+    inline: 'nearest',
+  });
+}
+
 export function CommentHighlighter({
   containerRef,
   annotations,
@@ -335,6 +355,8 @@ export function CommentHighlighter({
               });
             } catch {}
           });
+
+        scrollActiveAnnotationIntoView(highlightContainer, activeAnnotationId);
       } catch {}
     }
 
@@ -353,6 +375,25 @@ export function CommentHighlighter({
       removeAllMarks();
     };
   }, [containerRef, annotations, onAnnotationClick, activeAnnotationId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !activeAnnotationId) {
+      return;
+    }
+
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      scrollActiveAnnotationIntoView(container, activeAnnotationId);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [activeAnnotationId, containerRef]);
 
   if (!activeTooltip) {
     return null;

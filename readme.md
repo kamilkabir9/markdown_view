@@ -125,6 +125,42 @@ Error responses use a stable JSON shape:
 - Existing browser `localStorage` comments are migrated into the server store the first time a file is opened after the upgrade.
 - Runtime comment data is stored under `.markdown-viewer/comments.json` inside the selected content root.
 
+### Comment Flow
+
+```mermaid
+flowchart TD
+    A["User selects text in preview"] --> B["MarkdownViewerPane triggers capturePreviewSelection() on mouseup / keyup"]
+    B --> C{"Selection valid?"}
+    C -->|No| D["Reject selection<br/>Must stay inside one annotation block<br/>Show inline error"]
+    C -->|Yes| E["usePreviewCommenting uses dom-anchor-text-quote.fromRange()<br/>Build anchor: exact, prefix, suffix"]
+    E --> F["Show floating 'Add comment' action near selection"]
+    F --> G["User opens dialog and enters comment text"]
+    G --> H["handleCreateComment() enriches anchor from markdown<br/>Adds rangeStart, rangeEnd, fallbackLine, headingPath, sectionSlug, blockType"]
+    H --> I["AnnotationStore.addAnnotation()<br/>Insert optimistic annotation into client state"]
+    I --> J["POST /api/comments<br/>Body: filePath + annotation"]
+    J --> K["server/api.js -> createComment()"]
+    K --> L["server/comment-service.js normalizes annotation<br/>Loads current markdown file<br/>Resolves / rebases anchor against markdown"]
+    L --> M["Create atjson InlineComment annotation"]
+    M --> N["Write file-scoped comment document to<br/>.markdown-viewer/comments.json"]
+    N --> O["API returns saved comment DTO"]
+    O --> P["AnnotationStore replaces optimistic comment with saved server comment"]
+    P --> Q["MarkdownViewerPane passes inline annotations to CommentHighlighter"]
+    Q --> R["CommentHighlighter resolves anchor back into a DOM Range with dom-anchor-text-quote.toRange()"]
+    R --> S["Selected text is wrapped with squiggle markup in preview"]
+    P --> T["CommentSidebar renders comment card list"]
+    S --> U["User sees highlighted text and can click it"]
+    T --> U
+
+    V["On later file loads"] --> W["AnnotationStore fetches GET /api/comments?file=..."]
+    W --> X["listComments() loads .markdown-viewer/comments.json"]
+    X --> Y["rebaseCommentDocument() re-resolves anchors against latest markdown"]
+    Y --> Z["Updated comments returned to client"]
+    Z --> Q
+    Z --> T
+```
+
+Inline comment data is anchored twice on purpose: once in the browser when the user selects preview text, and again on the server against raw markdown before persistence. That gives the app enough context to re-find comments after the markdown shifts and to show them both as preview highlights and sidebar entries.
+
 ## Editing
 
 - Document edit mode is powered by Lexical and saves markdown back to the original `.md` file on disk.

@@ -96,6 +96,43 @@ body {
   box-shadow: none;
 }
 
+.scrollbar-on-active {
+  scrollbar-width: none;
+}
+
+.scrollbar-on-active::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.scrollbar-on-active:hover,
+.scrollbar-on-active:focus,
+.scrollbar-on-active:focus-within {
+  scrollbar-width: thin;
+}
+
+.scrollbar-on-active:hover::-webkit-scrollbar,
+.scrollbar-on-active:focus::-webkit-scrollbar,
+.scrollbar-on-active:focus-within::-webkit-scrollbar {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.scrollbar-on-active:hover::-webkit-scrollbar-thumb,
+.scrollbar-on-active:focus::-webkit-scrollbar-thumb,
+.scrollbar-on-active:focus-within::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 22%, transparent);
+  background-clip: padding-box;
+}
+
+.scrollbar-on-active:hover::-webkit-scrollbar-track,
+.scrollbar-on-active:focus::-webkit-scrollbar-track,
+.scrollbar-on-active:focus-within::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .markdown-source-editor .cm-editor {
   height: 100%;
   min-height: 0;
@@ -104,6 +141,34 @@ body {
 .markdown-source-editor .cm-scroller {
   height: 100%;
   overflow: auto;
+  scrollbar-width: none;
+}
+
+.markdown-source-editor .cm-scroller:hover,
+.markdown-source-editor .cm-scroller:focus,
+.markdown-source-editor .cm-scroller:focus-within {
+  scrollbar-width: thin;
+}
+
+.markdown-source-editor .cm-scroller::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.markdown-source-editor .cm-scroller:hover::-webkit-scrollbar,
+.markdown-source-editor .cm-scroller:focus::-webkit-scrollbar,
+.markdown-source-editor .cm-scroller:focus-within::-webkit-scrollbar {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.markdown-source-editor .cm-scroller:hover::-webkit-scrollbar-thumb,
+.markdown-source-editor .cm-scroller:focus::-webkit-scrollbar-thumb,
+.markdown-source-editor .cm-scroller:focus-within::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 22%, transparent);
+  background-clip: padding-box;
 }
 
 .markdown-source-editor .cm-content,

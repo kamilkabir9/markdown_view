@@ -242,7 +242,7 @@ export function CommentSidebar({
             </div>
           </CardHeader>
 
-          <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 pt-4">
+          <CardContent className="scrollbar-on-active flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 pt-4">
             <div className="grid grid-cols-3 gap-2 border-b border-border/65 pb-4">
               {[
                 { key: 'all' as const, label: 'All', count: counts.all },

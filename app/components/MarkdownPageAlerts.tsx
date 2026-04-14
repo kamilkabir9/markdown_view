@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 
 interface MarkdownPageAlertsProps {
   saveError: string | null;
+  commentActionError: string | null;
   commentsError: string | null;
   isEditing: boolean;
   isDirty: boolean;
@@ -9,6 +10,7 @@ interface MarkdownPageAlertsProps {
 
 export function MarkdownPageAlerts({
   saveError,
+  commentActionError,
   commentsError,
   isEditing,
   isDirty,
@@ -19,6 +21,13 @@ export function MarkdownPageAlerts({
         <Alert variant="destructive">
           <AlertTitle>Save failed</AlertTitle>
           <AlertDescription>{saveError}</AlertDescription>
+        </Alert>
+      )}
+
+      {commentActionError && (
+        <Alert variant="destructive">
+          <AlertTitle>Comment action failed</AlertTitle>
+          <AlertDescription>{commentActionError}</AlertDescription>
         </Alert>
       )}
 

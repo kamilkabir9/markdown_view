@@ -1,15 +1,9 @@
-import type { Anchor } from '~/contexts/AnnotationStore';
-import { findBlockAtIndex, findHeadingPathAtIndex, findSectionByHeadingPath } from '../../shared/markdown-analysis.js';
+import { findBlockAtIndex, findHeadingPathAtIndex, findSectionByHeadingPath } from '../shared/markdown-analysis.js';
 
-export interface AnchorMatch {
-  start: number;
-  end: number;
-}
-
-function findAllIndices(haystack: string, needle: string): number[] {
+function findAllIndices(haystack, needle) {
   if (!needle) return [];
 
-  const indices: number[] = [];
+  const indices = [];
   let index = 0;
 
   while (index < haystack.length) {
@@ -22,12 +16,12 @@ function findAllIndices(haystack: string, needle: string): number[] {
   return indices;
 }
 
-function lineNumberAtIndex(markdown: string, index: number): number {
+export function lineNumberAtIndex(markdown, index) {
   if (index <= 0) return 1;
   return markdown.slice(0, Math.min(index, markdown.length)).split('\n').length;
 }
 
-function scoreCandidate(markdown: string, anchor: Anchor, candidateStart: number): number {
+function scoreCandidate(markdown, anchor, candidateStart) {
   let score = 0;
   const prefix = anchor.prefix ?? '';
   const suffix = anchor.suffix ?? '';
@@ -69,7 +63,7 @@ function scoreCandidate(markdown: string, anchor: Anchor, candidateStart: number
   return score;
 }
 
-export function resolveAnchorInMarkdown(markdown: string, anchor: Anchor | null): AnchorMatch | null {
+export function resolveAnchorInMarkdown(markdown, anchor) {
   if (!anchor?.exact) return null;
 
   if (typeof anchor.rangeStart === 'number' && typeof anchor.rangeEnd === 'number') {
@@ -98,7 +92,7 @@ export function resolveAnchorInMarkdown(markdown: string, anchor: Anchor | null)
   return { start: bestStart, end: bestStart + anchor.exact.length };
 }
 
-export function enrichAnchorFromMarkdown(markdown: string, anchor: Anchor): Anchor {
+export function enrichAnchorFromMarkdown(markdown, anchor) {
   const match = resolveAnchorInMarkdown(markdown, anchor);
   if (!match) return anchor;
 

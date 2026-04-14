@@ -11,6 +11,7 @@ import { CommentSidebar } from '~/components/CommentSidebar';
 import { MarkdownOutline } from '~/components/MarkdownOutline';
 import { MarkdownSourceEditorHandle } from '~/components/MarkdownSourceEditor';
 import { MarkdownViewerPane } from '~/components/MarkdownViewerPane';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { useAppChrome } from '~/contexts/AppChromeContext';
 import { useCopySettings } from '~/contexts/CopySettingsContext';
 import { AnnotationStoreProvider, useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore';
@@ -73,6 +74,7 @@ function MarkdownPageContent() {
   const [isOutlineVisible, setIsOutlineVisible] = useState(true);
   const [isCommentsVisible, setIsCommentsVisible] = useState(true);
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
+  const [commentActionError, setCommentActionError] = useState<string | null>(null);
   const isDesktopEditSplit = useDesktopEditSplit();
   const { annotations, isLoading: areCommentsLoading, error: commentsError, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
   const handleEnterEditingLayout = useCallback(() => {
@@ -117,7 +119,7 @@ function MarkdownPageContent() {
     fileContent: file?.content ?? null,
     isEditing,
     addAnnotation,
-    onError: setSaveError,
+    onError: setCommentActionError,
   });
   const {
     imageInputRef,
@@ -153,6 +155,12 @@ function MarkdownPageContent() {
   const handleAnnotationClick = useCallback((annotation: Annotation) => {
     setActiveAnnotationId(annotation.id);
   }, []);
+
+  useEffect(() => {
+    if (pendingAnchor || isCreateCommentDialogOpen) {
+      setCommentActionError(null);
+    }
+  }, [isCreateCommentDialogOpen, pendingAnchor]);
 
   const handleCancelEditing = useCallback(async () => {
     if (!file) return;
@@ -292,72 +300,133 @@ function MarkdownPageContent() {
     <div className="flex min-h-0 flex-1 flex-col gap-5">
       <MarkdownPageAlerts
         saveError={saveError}
+        commentActionError={commentActionError}
         commentsError={commentsError}
         isEditing={isEditing}
         isDirty={isDirty}
       />
 
-      <div
-        className={cn(
-          'grid min-h-0 flex-1 gap-5',
-          isOutlineVisible && isCommentsVisible && 'xl:grid-cols-[18rem_minmax(0,1fr)_22rem]',
-          isOutlineVisible && !isCommentsVisible && 'xl:grid-cols-[18rem_minmax(0,1fr)]',
-          !isOutlineVisible && isCommentsVisible && 'xl:grid-cols-[minmax(0,1fr)_22rem]',
-          !isOutlineVisible && !isCommentsVisible && 'xl:grid-cols-[minmax(0,1fr)]',
-        )}
-      >
-        {isOutlineVisible ? <MarkdownOutline sections={outlineSections} onNavigate={handleOutlineNavigate} className="min-h-0" /> : null}
-
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          {isEditing ? (
-            <MarkdownEditorPane
-              draft={draft}
-              documentSourcePath={file.sourcePath}
-              isDesktopSplit={isDesktopEditSplit}
-              sourceEditorRef={sourceEditorRef}
-              onDraftChange={setDraft}
-            />
-          ) : (
-            <MarkdownViewerPane
-              previewKey={`view:${file.path}:${file.modified}`}
-              content={file.content}
-              documentSourcePath={file.sourcePath}
-              previewRef={previewRef}
-              pendingAnchorQuote={pendingAnchor?.quote ?? null}
-              selectionActionPosition={selectionActionPosition}
-              annotations={annotations}
-              activeAnnotationId={activeAnnotationId}
-              onCaptureSelection={capturePreviewSelection}
-              onOpenCreateComment={() => handleCreateDialogOpenChange(true)}
-              onAnnotationClick={handleAnnotationClick}
-            />
+      {isEditing || !isDesktopEditSplit ? (
+        <div
+          className={cn(
+            'grid min-h-0 flex-1 gap-5',
+            isOutlineVisible && isCommentsVisible && 'xl:grid-cols-[18rem_minmax(0,1fr)_22rem]',
+            isOutlineVisible && !isCommentsVisible && 'xl:grid-cols-[18rem_minmax(0,1fr)]',
+            !isOutlineVisible && isCommentsVisible && 'xl:grid-cols-[minmax(0,1fr)_22rem]',
+            !isOutlineVisible && !isCommentsVisible && 'xl:grid-cols-[minmax(0,1fr)]',
           )}
-        </div>
+        >
+          {isOutlineVisible ? <MarkdownOutline sections={outlineSections} onNavigate={handleOutlineNavigate} className="min-h-0" /> : null}
 
-        {isCommentsVisible ? (
-          <CommentSidebar
-            annotations={annotations}
-            rawContent={file.content}
-            relativeFilePath={file.sourcePath}
-            fullFilePath={file.absolutePath}
-            draftText={commentDraft}
-            onDraftTextChange={setCommentDraft}
-            onCreate={handleCreateComment}
-            onCreateDocumentComment={handleCreateDocumentComment}
-            isCreateDialogOpen={isCreateCommentDialogOpen}
-            onCreateDialogOpenChange={handleCreateDialogOpenChange}
-            isCreatingDocumentComment={isCreatingDocumentComment}
-            pendingAnchorText={pendingAnchor?.quote ?? null}
-            createDisabledReason={isEditing ? 'Inline comments can be added from preview mode only.' : null}
-            onUpdate={updateAnnotationText}
-            onRemove={removeAnnotation}
-            onAnnotationClick={handleAnnotationClick}
-            activeAnnotationId={activeAnnotationId}
-            onOpenDocumentCommentDialog={handleOpenDocumentCommentDialog}
-            className={areCommentsLoading ? 'min-h-0 opacity-70' : 'min-h-0'}
-          />
-        ) : null}
-      </div>
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            {isEditing ? (
+              <MarkdownEditorPane
+                draft={draft}
+                documentSourcePath={file.sourcePath}
+                isDesktopSplit={isDesktopEditSplit}
+                sourceEditorRef={sourceEditorRef}
+                onDraftChange={setDraft}
+              />
+            ) : (
+              <MarkdownViewerPane
+                previewKey={`view:${file.path}:${file.modified}`}
+                content={file.content}
+                documentSourcePath={file.sourcePath}
+                previewRef={previewRef}
+                pendingAnchorQuote={pendingAnchor?.quote ?? null}
+                selectionActionPosition={selectionActionPosition}
+                annotations={annotations}
+                activeAnnotationId={activeAnnotationId}
+                onCaptureSelection={capturePreviewSelection}
+                onOpenCreateComment={() => handleCreateDialogOpenChange(true)}
+                onAnnotationClick={handleAnnotationClick}
+              />
+            )}
+          </div>
+
+          {isCommentsVisible ? (
+            <CommentSidebar
+              annotations={annotations}
+              rawContent={file.content}
+              relativeFilePath={file.sourcePath}
+              fullFilePath={file.absolutePath}
+              draftText={commentDraft}
+              onDraftTextChange={setCommentDraft}
+              onCreate={handleCreateComment}
+              onCreateDocumentComment={handleCreateDocumentComment}
+              isCreateDialogOpen={isCreateCommentDialogOpen}
+              onCreateDialogOpenChange={handleCreateDialogOpenChange}
+              isCreatingDocumentComment={isCreatingDocumentComment}
+              pendingAnchorText={pendingAnchor?.quote ?? null}
+              createDisabledReason={isEditing ? 'Inline comments can be added from preview mode only.' : null}
+              onUpdate={updateAnnotationText}
+              onRemove={removeAnnotation}
+              onAnnotationClick={handleAnnotationClick}
+              activeAnnotationId={activeAnnotationId}
+              onOpenDocumentCommentDialog={handleOpenDocumentCommentDialog}
+              className={areCommentsLoading ? 'min-h-0 opacity-70' : 'min-h-0'}
+            />
+          ) : null}
+        </div>
+      ) : (
+        <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1" id="markdown-view-panels">
+          {isOutlineVisible ? (
+            <>
+              <ResizablePanel defaultSize={20} minSize={15} className="min-w-0 pr-2.5">
+                <MarkdownOutline sections={outlineSections} onNavigate={handleOutlineNavigate} className="min-h-0" />
+              </ResizablePanel>
+              <ResizableHandle className="w-3 cursor-col-resize bg-transparent" withHandle aria-label="Resize outline and preview panels" />
+            </>
+          ) : null}
+
+          <ResizablePanel defaultSize={isOutlineVisible && isCommentsVisible ? 55 : isCommentsVisible || isOutlineVisible ? 75 : 100} minSize={30} className="min-w-0 px-0">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+              <MarkdownViewerPane
+                previewKey={`view:${file.path}:${file.modified}`}
+                content={file.content}
+                documentSourcePath={file.sourcePath}
+                previewRef={previewRef}
+                pendingAnchorQuote={pendingAnchor?.quote ?? null}
+                selectionActionPosition={selectionActionPosition}
+                annotations={annotations}
+                activeAnnotationId={activeAnnotationId}
+                onCaptureSelection={capturePreviewSelection}
+                onOpenCreateComment={() => handleCreateDialogOpenChange(true)}
+                onAnnotationClick={handleAnnotationClick}
+              />
+            </div>
+          </ResizablePanel>
+
+          {isCommentsVisible ? (
+            <>
+              <ResizableHandle className="w-3 cursor-col-resize bg-transparent" withHandle aria-label="Resize preview and comments panels" />
+              <ResizablePanel defaultSize={isOutlineVisible ? 25 : 30} minSize={20} className="min-w-0 pl-2.5">
+                <CommentSidebar
+                  annotations={annotations}
+                  rawContent={file.content}
+                  relativeFilePath={file.sourcePath}
+                  fullFilePath={file.absolutePath}
+                  draftText={commentDraft}
+                  onDraftTextChange={setCommentDraft}
+                  onCreate={handleCreateComment}
+                  onCreateDocumentComment={handleCreateDocumentComment}
+                  isCreateDialogOpen={isCreateCommentDialogOpen}
+                  onCreateDialogOpenChange={handleCreateDialogOpenChange}
+                  isCreatingDocumentComment={isCreatingDocumentComment}
+                  pendingAnchorText={pendingAnchor?.quote ?? null}
+                  createDisabledReason={null}
+                  onUpdate={updateAnnotationText}
+                  onRemove={removeAnnotation}
+                  onAnnotationClick={handleAnnotationClick}
+                  activeAnnotationId={activeAnnotationId}
+                  onOpenDocumentCommentDialog={handleOpenDocumentCommentDialog}
+                  className={areCommentsLoading ? 'min-h-0 opacity-70' : 'min-h-0'}
+                />
+              </ResizablePanel>
+            </>
+          ) : null}
+        </ResizablePanelGroup>
+      )}
 
       <ImageUploadDialog
         open={isImageDialogOpen}

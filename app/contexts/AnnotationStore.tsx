@@ -16,6 +16,8 @@ export interface Anchor {
   rangeEnd?: number;
   headingPath?: string[];
   fallbackLine?: number;
+  sectionSlug?: string;
+  blockType?: string;
 }
 
 export interface Annotation {
