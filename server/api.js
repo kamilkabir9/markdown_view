@@ -56,6 +56,30 @@ function withUpload(middleware, handler) {
   };
 }
 
+function getRouteFilePath(req) {
+  return req.params[0] || '';
+}
+
+function getOptionalString(value) {
+  return typeof value === 'string' ? value : '';
+}
+
+function requireQueryString(req, key, code, message) {
+  const value = getOptionalString(req.query[key]);
+  if (!value) {
+    throw new ApiError(400, code, message);
+  }
+  return value;
+}
+
+function requireBodyString(req, key, code, message) {
+  const value = getOptionalString(req.body?.[key]);
+  if (!value) {
+    throw new ApiError(400, code, message);
+  }
+  return value;
+}
+
 export function createApiRouter() {
   const router = express.Router();
 
@@ -65,12 +89,12 @@ export function createApiRouter() {
   }));
 
   router.get('/files/*', asyncRoute(async (req, res) => {
-    const file = await requireMarkdownFile(req.params[0] || '');
+    const file = await requireMarkdownFile(getRouteFilePath(req));
     res.json(file);
   }));
 
   router.put('/files/*', asyncRoute(async (req, res) => {
-    const file = await saveMarkdownFile(req.params[0] || '', req.body?.content);
+    const file = await saveMarkdownFile(getRouteFilePath(req), req.body?.content);
     res.json(file);
   }));
 
@@ -82,7 +106,7 @@ export function createApiRouter() {
     }
 
     const asset = await storeMarkdownAsset({
-      documentPath: req.params[0] || '',
+      documentPath: getRouteFilePath(req),
       fileName: uploadedFile.originalname,
       contentType: uploadedFile.mimetype,
       buffer: uploadedFile.buffer,
@@ -92,10 +116,10 @@ export function createApiRouter() {
   }));
 
   router.delete('/files/*/images', asyncRoute(async (req, res) => {
-    const markdownPath = typeof req.query.path === 'string' ? req.query.path : '';
+    const markdownPath = getOptionalString(req.query.path);
 
     await deleteMarkdownAsset({
-      documentPath: req.params[0] || '',
+      documentPath: getRouteFilePath(req),
       markdownPath,
     });
 
@@ -103,31 +127,22 @@ export function createApiRouter() {
   }));
 
   router.get('/comments', asyncRoute(async (req, res) => {
-    const filePath = typeof req.query.file === 'string' ? req.query.file : '';
-    if (!filePath) {
-      throw new ApiError(400, 'missing_file_path', 'The `file` query parameter is required.');
-    }
+    const filePath = requireQueryString(req, 'file', 'missing_file_path', 'The `file` query parameter is required.');
 
     const comments = await listComments(filePath);
     res.json({ comments });
   }));
 
   router.post('/comments', asyncRoute(async (req, res) => {
-    const filePath = typeof req.body?.filePath === 'string' ? req.body.filePath : '';
+    const filePath = requireBodyString(req, 'filePath', 'missing_file_path', 'The `filePath` field is required.');
     const annotation = req.body?.annotation;
-    if (!filePath) {
-      throw new ApiError(400, 'missing_file_path', 'The `filePath` field is required.');
-    }
 
     const comment = await createComment({ filePath, annotation });
     res.status(201).json({ comment });
   }));
 
   router.post('/comments/import', asyncRoute(async (req, res) => {
-    const filePath = typeof req.body?.filePath === 'string' ? req.body.filePath : '';
-    if (!filePath) {
-      throw new ApiError(400, 'missing_file_path', 'The `filePath` field is required.');
-    }
+    const filePath = requireBodyString(req, 'filePath', 'missing_file_path', 'The `filePath` field is required.');
 
     const comments = await importComments({
       filePath,
@@ -138,21 +153,15 @@ export function createApiRouter() {
   }));
 
   router.put('/comments/:id', asyncRoute(async (req, res) => {
-    const filePath = typeof req.body?.filePath === 'string' ? req.body.filePath : '';
-    const text = typeof req.body?.text === 'string' ? req.body.text : '';
-    if (!filePath) {
-      throw new ApiError(400, 'missing_file_path', 'The `filePath` field is required.');
-    }
+    const filePath = requireBodyString(req, 'filePath', 'missing_file_path', 'The `filePath` field is required.');
+    const text = getOptionalString(req.body?.text);
 
     const comment = await updateComment({ filePath, id: req.params.id, text });
     res.json({ comment });
   }));
 
   router.delete('/comments/:id', asyncRoute(async (req, res) => {
-    const filePath = typeof req.query.file === 'string' ? req.query.file : '';
-    if (!filePath) {
-      throw new ApiError(400, 'missing_file_path', 'The `file` query parameter is required.');
-    }
+    const filePath = requireQueryString(req, 'file', 'missing_file_path', 'The `file` query parameter is required.');
 
     await deleteComment({ filePath, id: req.params.id });
     res.status(204).send();

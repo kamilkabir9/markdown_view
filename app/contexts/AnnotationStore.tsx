@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import {
   createComment,
   deleteComment,
@@ -37,6 +37,11 @@ interface AnnotationStoreContextType {
 
 const AnnotationStoreContext = createContext<AnnotationStoreContextType | null>(null);
 
+type AnnotationMutationSnapshot = {
+  previous: Annotation[];
+  next: Annotation[];
+};
+
 function getLegacyStorageKey(filePath: string): string {
   return `annotations:${filePath}`;
 }
@@ -65,6 +70,11 @@ export function AnnotationStoreProvider({ children, filePath }: { children: Reac
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const annotationsRef = useRef<Annotation[]>([]);
+
+  useEffect(() => {
+    annotationsRef.current = annotations;
+  }, [annotations]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -104,6 +114,28 @@ export function AnnotationStoreProvider({ children, filePath }: { children: Reac
     return () => controller.abort();
   }, [filePath]);
 
+  const runOptimisticAnnotationMutation = useCallback(async <TResult,>(
+    buildNextAnnotations: (previous: Annotation[]) => AnnotationMutationSnapshot,
+    commit: (snapshot: AnnotationMutationSnapshot) => Promise<TResult>,
+    applyCommittedResult: (result: TResult, snapshot: AnnotationMutationSnapshot) => void,
+    fallbackMessage: string,
+  ) => {
+    const snapshot = buildNextAnnotations(annotationsRef.current);
+
+    setError(null);
+    setAnnotations(snapshot.next);
+    annotationsRef.current = snapshot.next;
+
+    try {
+      const result = await commit(snapshot);
+      applyCommittedResult(result, snapshot);
+    } catch (requestError) {
+      setAnnotations(snapshot.previous);
+      annotationsRef.current = snapshot.previous;
+      setError(getErrorMessage(requestError, fallbackMessage));
+    }
+  }, []);
+
   const addAnnotation = useCallback(async (anchor: Anchor | null, text: string, isGlobal = false) => {
     const optimisticAnnotation: Annotation = {
       id: crypto.randomUUID(),
@@ -113,63 +145,50 @@ export function AnnotationStoreProvider({ children, filePath }: { children: Reac
       isGlobal,
     };
 
-    setError(null);
-    setAnnotations((prev) => [...prev, optimisticAnnotation]);
-
-    try {
-      const savedAnnotation = await createComment(filePath, optimisticAnnotation);
-      setAnnotations((prev) => prev.map((annotation) => (
-        annotation.id === optimisticAnnotation.id ? savedAnnotation : annotation
-      )));
-    } catch (requestError) {
-      setAnnotations((prev) => prev.filter((annotation) => annotation.id !== optimisticAnnotation.id));
-      setError(getErrorMessage(requestError, 'Comment could not be saved.'));
-    }
-  }, [filePath]);
+    await runOptimisticAnnotationMutation(
+      (previous) => ({
+        previous,
+        next: [...previous, optimisticAnnotation],
+      }),
+      () => createComment(filePath, optimisticAnnotation),
+      (savedAnnotation) => {
+        setAnnotations((current) => current.map((annotation) => (
+          annotation.id === optimisticAnnotation.id ? savedAnnotation : annotation
+        )));
+      },
+      'Comment could not be saved.',
+    );
+  }, [filePath, runOptimisticAnnotationMutation]);
 
   const removeAnnotation = useCallback(async (id: string) => {
-    let removedAnnotation: Annotation | null = null;
-
-    setError(null);
-    setAnnotations((prev) => {
-      removedAnnotation = prev.find((annotation) => annotation.id === id) ?? null;
-      return prev.filter((annotation) => annotation.id !== id);
-    });
-
-    try {
-      await deleteComment(filePath, id);
-    } catch (requestError) {
-      if (removedAnnotation) {
-        setAnnotations((prev) => [...prev, removedAnnotation as Annotation]);
-      }
-      setError(getErrorMessage(requestError, 'Comment could not be removed.'));
-    }
-  }, [filePath]);
+    await runOptimisticAnnotationMutation(
+      (previous) => ({
+        previous,
+        next: previous.filter((annotation) => annotation.id !== id),
+      }),
+      () => deleteComment(filePath, id),
+      () => {},
+      'Comment could not be removed.',
+    );
+  }, [filePath, runOptimisticAnnotationMutation]);
 
   const updateAnnotationText = useCallback(async (id: string, text: string) => {
-    let previousText = '';
-
-    setError(null);
-    setAnnotations((prev) => prev.map((annotation) => {
-      if (annotation.id === id) {
-        previousText = annotation.text;
-        return { ...annotation, text };
-      }
-      return annotation;
-    }));
-
-    try {
-      const savedAnnotation = await updateComment(filePath, id, text);
-      setAnnotations((prev) => prev.map((annotation) => (
-        annotation.id === id ? savedAnnotation : annotation
-      )));
-    } catch (requestError) {
-      setAnnotations((prev) => prev.map((annotation) => (
-        annotation.id === id ? { ...annotation, text: previousText } : annotation
-      )));
-      setError(getErrorMessage(requestError, 'Comment could not be updated.'));
-    }
-  }, [filePath]);
+    await runOptimisticAnnotationMutation(
+      (previous) => ({
+        previous,
+        next: previous.map((annotation) => (
+          annotation.id === id ? { ...annotation, text } : annotation
+        )),
+      }),
+      () => updateComment(filePath, id, text),
+      (savedAnnotation) => {
+        setAnnotations((current) => current.map((annotation) => (
+          annotation.id === id ? savedAnnotation : annotation
+        )));
+      },
+      'Comment could not be updated.',
+    );
+  }, [filePath, runOptimisticAnnotationMutation]);
 
   return (
     <AnnotationStoreContext.Provider

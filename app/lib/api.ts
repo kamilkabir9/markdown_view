@@ -38,6 +38,10 @@ interface ApiResponseError extends Error {
   code?: string;
 }
 
+function buildFileApiPath(path: string): string {
+  return `/api/files/${encodeURIComponent(path).replace(/%2F/g, '/')}`;
+}
+
 async function requestJson<T>(path: string, init: ApiRequestOptions = {}): Promise<T> {
   const headers = new Headers(init.headers ?? {});
   if (!(init.body instanceof FormData) && !headers.has('Content-Type')) {
@@ -84,11 +88,11 @@ export async function fetchFiles(signal?: AbortSignal): Promise<{ files: FileInf
 }
 
 export async function fetchFile(path: string, signal?: AbortSignal): Promise<MarkdownFile> {
-  return requestJson(`/api/files/${encodeURIComponent(path).replace(/%2F/g, '/')}`, { signal });
+  return requestJson(buildFileApiPath(path), { signal });
 }
 
 export async function saveFile(path: string, content: string): Promise<MarkdownFile> {
-  return requestJson(`/api/files/${encodeURIComponent(path).replace(/%2F/g, '/')}`, {
+  return requestJson(buildFileApiPath(path), {
     method: 'PUT',
     body: JSON.stringify({ content }),
   });
@@ -98,7 +102,7 @@ export async function uploadImageAsset(documentPath: string, file: File): Promis
   const formData = new FormData();
   formData.append('image', file, file.name);
 
-  return requestJson(`/api/files/${encodeURIComponent(documentPath).replace(/%2F/g, '/')}/images`, {
+  return requestJson(`${buildFileApiPath(documentPath)}/images`, {
     method: 'POST',
     body: formData,
   });
@@ -107,7 +111,7 @@ export async function uploadImageAsset(documentPath: string, file: File): Promis
 export async function deleteImageAsset(documentPath: string, markdownPath: string): Promise<void> {
   const params = new URLSearchParams({ path: markdownPath });
 
-  await requestJson<void>(`/api/files/${encodeURIComponent(documentPath).replace(/%2F/g, '/')}/images?${params.toString()}`, {
+  await requestJson<void>(`${buildFileApiPath(documentPath)}/images?${params.toString()}`, {
     method: 'DELETE',
   });
 }

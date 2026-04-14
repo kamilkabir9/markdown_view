@@ -370,11 +370,11 @@ body {
   text-decoration-color: color-mix(in oklab, var(--color-warning) 75%, white 22%);
 }
 
-.markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-block] {
+.markdown-article :where(p, li, blockquote, pre, td, th, h1, h2, h3, h4, h5, h6)[data-annotation-block] {
   position: relative;
 }
 
-.markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-block]::before {
+.markdown-article :where(p, li, blockquote, pre, td, th, h1, h2, h3, h4, h5, h6)[data-annotation-block]::before {
   content: "";
   position: absolute;
   left: -1.1rem;
@@ -386,17 +386,17 @@ body {
   opacity: 0.6;
 }
 
-.markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-active]::before {
+.markdown-article :where(p, li, blockquote, pre, td, th, h1, h2, h3, h4, h5, h6)[data-annotation-active]::before {
   width: 0.14rem;
   background: color-mix(in oklab, var(--color-warning) 52%, white 5%);
   box-shadow: none;
 }
 
-[data-theme="dark"] .markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-block]::before {
+[data-theme="dark"] .markdown-article :where(p, li, blockquote, pre, td, th, h1, h2, h3, h4, h5, h6)[data-annotation-block]::before {
   background: color-mix(in oklab, var(--color-warning) 34%, transparent);
 }
 
-[data-theme="dark"] .markdown-article :where(p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6)[data-annotation-active]::before {
+[data-theme="dark"] .markdown-article :where(p, li, blockquote, pre, td, th, h1, h2, h3, h4, h5, h6)[data-annotation-active]::before {
   background: color-mix(in oklab, var(--color-warning) 54%, white 5%);
   box-shadow: 0 0 0.4rem color-mix(in oklab, var(--color-warning) 10%, transparent);
 }

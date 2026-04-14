@@ -1,142 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '~/components/ui/breadcrumb';
+import { FileTree } from '~/components/FileTree';
 import { fetchFiles, getErrorMessage, type FileInfo } from '~/lib/api';
-import { ChevronRightIcon, FileTextIcon, FolderIcon, SearchIcon, XIcon } from 'lucide-react';
+import { buildMarkdownBreadcrumbs } from '~/lib/breadcrumbs';
+import { buildFileTree } from '~/lib/file-tree';
+import { SearchIcon, XIcon } from 'lucide-react';
 import { useAppChrome } from '~/contexts/AppChromeContext';
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-interface FileTreeLeafNode {
-  kind: 'file';
-  name: string;
-  file: FileInfo;
-}
-
-interface FileTreeDirectoryNode {
-  kind: 'directory';
-  name: string;
-  children: FileTreeNode[];
-}
-
-type FileTreeNode = FileTreeLeafNode | FileTreeDirectoryNode;
-
-interface MutableDirectoryNode {
-  name: string;
-  directories: Map<string, MutableDirectoryNode>;
-  files: FileTreeLeafNode[];
-}
-
-function createMutableDirectory(name: string): MutableDirectoryNode {
-  return {
-    name,
-    directories: new Map<string, MutableDirectoryNode>(),
-    files: [],
-  };
-}
-
-function toFileTreeNodes(directory: MutableDirectoryNode): FileTreeNode[] {
-  const childDirectories = Array.from(directory.directories.values())
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((childDirectory) => ({
-      kind: 'directory' as const,
-      name: childDirectory.name,
-      children: toFileTreeNodes(childDirectory),
-    }));
-
-  const childFiles = [...directory.files].sort((a, b) => a.name.localeCompare(b.name));
-
-  return [...childDirectories, ...childFiles];
-}
-
-function buildFileTree(files: FileInfo[]): FileTreeNode[] {
-  const root = createMutableDirectory('');
-
-  for (const file of files) {
-    const segments = file.relativePath.split('/').filter(Boolean);
-    if (segments.length === 0) continue;
-
-    let currentDirectory = root;
-
-    for (const segment of segments.slice(0, -1)) {
-      let nextDirectory = currentDirectory.directories.get(segment);
-      if (!nextDirectory) {
-        nextDirectory = createMutableDirectory(segment);
-        currentDirectory.directories.set(segment, nextDirectory);
-      }
-      currentDirectory = nextDirectory;
-    }
-
-    const filename = segments[segments.length - 1] || file.relativePath;
-    currentDirectory.files.push({
-      kind: 'file',
-      name: filename,
-      file,
-    });
-  }
-
-  return toFileTreeNodes(root);
-}
-
-function FileTreeNodeList({ nodes, search }: { nodes: FileTreeNode[]; search: string }) {
-  return (
-    <ul className="space-y-1">
-      {nodes.map((node) => {
-        if (node.kind === 'directory') {
-          return (
-            <li key={`dir:${node.name}:${node.children.length}`}>
-              <Collapsible defaultOpen={search.trim().length > 0} className="group/collapsible">
-                <CollapsibleTrigger
-                  className="group flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-surface-secondary/35"
-                  aria-label={`Toggle ${node.name} directory`}
-                >
-                  <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90" />
-                  <FolderIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <span className="truncate">{node.name}</span>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pl-5">
-                  <div className="ml-1 border-l border-border/55 pl-2">
-                    <FileTreeNodeList nodes={node.children} search={search} />
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </li>
-          );
-        }
-
-        return (
-          <li key={node.file.path}>
-            <Link
-              to={`/${node.file.relativePath}`}
-              className="flex items-center justify-between gap-3 rounded-sm px-2 py-1.5 text-sm transition-colors duration-150 hover:bg-surface-secondary/35"
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                <FileTextIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="truncate text-foreground">{node.name}</span>
-              </span>
-              <span className="hidden text-xs tracking-[0.12em] text-muted-foreground uppercase md:inline">
-                {formatFileSize(node.file.size)}
-              </span>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
 
 export default function Index() {
   const [files, setFiles] = useState<FileInfo[]>([]);
@@ -174,19 +43,7 @@ export default function Index() {
   useEffect(() => {
     document.title = 'Markdown Viewer';
 
-    setBreadcrumbs(
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Markdown Files</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>,
-    );
+    setBreadcrumbs(buildMarkdownBreadcrumbs(null));
     setActions(null);
 
     return () => {
@@ -332,7 +189,7 @@ export default function Index() {
             </AlertDescription>
           </Alert>
         ) : (
-          <FileTreeNodeList nodes={treeNodes} search={search} />
+          <FileTree nodes={treeNodes} search={search} />
         )}
       </section>
     </div>

@@ -1,9 +1,10 @@
-import { StrictMode } from 'react';
+import { StrictMode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import Root from './root';
-import IndexRoute from './routes/_index';
-import MarkdownPage from './routes/$';
+
+const IndexRoute = lazy(() => import('./routes/_index'));
+const MarkdownPage = lazy(() => import('./routes/$'));
 
 const router = createBrowserRouter([
   {
@@ -12,11 +13,19 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <IndexRoute />,
+        element: (
+          <Suspense fallback={null}>
+            <IndexRoute />
+          </Suspense>
+        ),
       },
       {
         path: '*',
-        element: <MarkdownPage />,
+        element: (
+          <Suspense fallback={null}>
+            <MarkdownPage />
+          </Suspense>
+        ),
       },
     ],
   },
