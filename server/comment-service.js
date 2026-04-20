@@ -4,9 +4,6 @@ import { getContentRoot } from './content-root.js';
 import { ApiError } from './errors.js';
 import { requireMarkdownFile, resolveCommentFileKey } from './file-service.js';
 import { enrichAnchorFromMarkdown, resolveAnchorInMarkdown } from './comment-anchors.js';
-import { DocumentComment, InlineComment, MarkdownCommentDocument } from './comment-document.js';
-
-const STORE_VERSION = 2;
 
 function getStorePath() {
   return join(getContentRoot(), '.markdown-viewer', 'comments.json');
@@ -17,29 +14,7 @@ async function ensureStoreDir() {
 }
 
 function createEmptyStore() {
-  return {
-    version: STORE_VERSION,
-    files: {},
-  };
-}
-
-function createEmptyCommentDocument(content = '') {
-  return new MarkdownCommentDocument({
-    content,
-    annotations: [],
-  });
-}
-
-function isPlainObject(value) {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isAtJsonCommentDocumentJSON(value) {
-  return isPlainObject(value)
-    && typeof value.content === 'string'
-    && typeof value.contentType === 'string'
-    && Array.isArray(value.annotations)
-    && Array.isArray(value.schema);
+  return { files: {} };
 }
 
 async function readStore() {
@@ -51,25 +26,21 @@ async function readStore() {
       return createEmptyStore();
     }
 
-    return {
-      version: Number.isInteger(parsed.version) ? parsed.version : 1,
-      files: parsed.files,
-    };
-  } catch (error) {
-    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
-      return createEmptyStore();
+    const files = {};
+    for (const [key, value] of Object.entries(parsed.files)) {
+      files[key] = Array.isArray(value) ? value : [];
     }
 
+    return { files };
+  } catch (error) {
+    if (error?.code === 'ENOENT') return createEmptyStore();
     throw new ApiError(500, 'comments_store_unreadable', 'The comment store could not be read.');
   }
 }
 
 async function writeStore(store) {
   await ensureStoreDir();
-  await writeFile(getStorePath(), JSON.stringify({
-    version: STORE_VERSION,
-    files: store.files,
-  }, null, 2), 'utf8');
+  await writeFile(getStorePath(), JSON.stringify({ files: store.files }, null, 2), 'utf8');
 }
 
 function isValidAnchor(anchor) {
@@ -128,273 +99,117 @@ function normalizeAnnotation(input) {
   };
 }
 
-function isInlineCommentAnnotation(annotation) {
-  return annotation instanceof InlineComment;
-}
-
-function isDocumentCommentAnnotation(annotation) {
-  return annotation instanceof DocumentComment;
-}
-
-function toInlineAnchor(annotation) {
-  return {
-    exact: annotation.attributes.exact,
-    prefix: annotation.attributes.prefix,
-    suffix: annotation.attributes.suffix,
-    rangeStart: annotation.attributes.unresolved ? undefined : annotation.start,
-    rangeEnd: annotation.attributes.unresolved ? undefined : annotation.end,
-    headingPath: Array.isArray(annotation.attributes.headingPath) ? annotation.attributes.headingPath : undefined,
-    fallbackLine: Number.isInteger(annotation.attributes.fallbackLine) ? annotation.attributes.fallbackLine : undefined,
-    sectionSlug: typeof annotation.attributes.sectionSlug === 'string' ? annotation.attributes.sectionSlug : undefined,
-    blockType: typeof annotation.attributes.blockType === 'string' ? annotation.attributes.blockType : undefined,
-  };
-}
-
-function rebaseInlineCommentAnnotation(annotation, markdown) {
-  const previousStart = annotation.start;
-  const previousEnd = annotation.end;
-  const previousHeadingPath = Array.isArray(annotation.attributes.headingPath) ? annotation.attributes.headingPath : undefined;
-  const previousFallbackLine = Number.isInteger(annotation.attributes.fallbackLine) ? annotation.attributes.fallbackLine : undefined;
-  const previousSectionSlug = typeof annotation.attributes.sectionSlug === 'string' ? annotation.attributes.sectionSlug : undefined;
-  const previousBlockType = typeof annotation.attributes.blockType === 'string' ? annotation.attributes.blockType : undefined;
-  const previousUnresolved = Boolean(annotation.attributes.unresolved);
-  const anchor = toInlineAnchor(annotation);
-  const match = resolveAnchorInMarkdown(markdown, anchor);
-
-  if (match) {
-    const enriched = enrichAnchorFromMarkdown(markdown, {
-      ...anchor,
-      rangeStart: match.start,
-      rangeEnd: match.end,
-    });
-    annotation.start = enriched.rangeStart;
-    annotation.end = enriched.rangeEnd;
-    annotation.attributes.headingPath = enriched.headingPath;
-    annotation.attributes.fallbackLine = enriched.fallbackLine;
-    annotation.attributes.sectionSlug = enriched.sectionSlug;
-    annotation.attributes.blockType = enriched.blockType;
-    annotation.attributes.unresolved = false;
-
-    return previousStart !== annotation.start
-      || previousEnd !== annotation.end
-      || previousUnresolved
-      || previousFallbackLine !== annotation.attributes.fallbackLine
-      || previousSectionSlug !== annotation.attributes.sectionSlug
-      || previousBlockType !== annotation.attributes.blockType
-      || JSON.stringify(previousHeadingPath ?? []) !== JSON.stringify(annotation.attributes.headingPath ?? []);
-  }
-
-  annotation.start = 0;
-  annotation.end = 0;
-  annotation.attributes.unresolved = true;
-
-  return previousStart !== 0
-    || previousEnd !== 0
-    || !previousUnresolved;
-}
-
-function rebaseCommentDocument(document, markdown) {
-  let didChange = document.content !== markdown;
-
-  document.annotations.forEach((annotation) => {
-    if (isInlineCommentAnnotation(annotation)) {
-      didChange = rebaseInlineCommentAnnotation(annotation, markdown) || didChange;
-    }
-  });
-
-  document.content = markdown;
-
-  return didChange;
-}
-
-function createStoredAnnotation(annotation, markdown) {
-  if (annotation.isGlobal) {
-    return new DocumentComment({
-      id: annotation.id,
-      start: 0,
-      end: 0,
-      attributes: {
-        text: annotation.text,
-        createdAt: annotation.createdAt,
-      },
-    });
-  }
+function resolveAndEnrichAnchor(annotation, markdown) {
+  if (!annotation.anchor) return annotation;
 
   const match = resolveAnchorInMarkdown(markdown, annotation.anchor);
-  const enriched = match
-    ? enrichAnchorFromMarkdown(markdown, {
-      ...annotation.anchor,
-      rangeStart: match.start,
-      rangeEnd: match.end,
-    })
-    : annotation.anchor;
-  const hasResolvedRange = Boolean(match);
+  if (!match) return annotation;
 
-  return new InlineComment({
-    id: annotation.id,
-    start: hasResolvedRange ? enriched.rangeStart : 0,
-    end: hasResolvedRange ? enriched.rangeEnd : 0,
-    attributes: {
-      text: annotation.text,
-      createdAt: annotation.createdAt,
+  const enriched = enrichAnchorFromMarkdown(markdown, {
+    ...annotation.anchor,
+    rangeStart: match.start,
+    rangeEnd: match.end,
+  });
+
+  return {
+    ...annotation,
+    anchor: {
       exact: enriched.exact,
       prefix: enriched.prefix,
       suffix: enriched.suffix,
+      rangeStart: enriched.rangeStart,
+      rangeEnd: enriched.rangeEnd,
       headingPath: enriched.headingPath,
       fallbackLine: enriched.fallbackLine,
       sectionSlug: enriched.sectionSlug,
       blockType: enriched.blockType,
-      unresolved: !hasResolvedRange,
     },
+  };
+}
+
+function rebaseAnnotation(annotation, markdown) {
+  if (!annotation.anchor) return { annotation, didChange: false };
+
+  const match = resolveAnchorInMarkdown(markdown, annotation.anchor);
+
+  if (match) {
+    const next = resolveAndEnrichAnchor(annotation, markdown);
+    const didChange = annotation.anchor.rangeStart !== next.anchor.rangeStart
+      || annotation.anchor.rangeEnd !== next.anchor.rangeEnd
+      || annotation.anchor.sectionSlug !== next.anchor.sectionSlug
+      || annotation.anchor.blockType !== next.anchor.blockType
+      || annotation.anchor.fallbackLine !== next.anchor.fallbackLine
+      || JSON.stringify(annotation.anchor.headingPath ?? []) !== JSON.stringify(next.anchor.headingPath ?? [])
+      || !Number.isFinite(annotation.anchor.rangeStart);
+    return { annotation: next, didChange };
+  }
+
+  // Text not found — drop range offsets to signal unresolved state.
+  const wasUnresolved = !Number.isFinite(annotation.anchor.rangeStart);
+  const { rangeStart: _rs, rangeEnd: _re, ...anchorWithoutRange } = annotation.anchor;
+  const next = { ...annotation, anchor: anchorWithoutRange };
+  return { annotation: next, didChange: !wasUnresolved };
+}
+
+function rebaseAnnotations(annotations, markdown) {
+  let didChange = false;
+  const rebased = annotations.map((annotation) => {
+    const { annotation: next, didChange: changed } = rebaseAnnotation(annotation, markdown);
+    if (changed) didChange = true;
+    return next;
   });
+  return { annotations: rebased, didChange };
 }
 
-function commentDtoFromAnnotation(annotation) {
-  if (isDocumentCommentAnnotation(annotation)) {
-    return {
-      id: annotation.id,
-      anchor: null,
-      text: annotation.attributes.text,
-      createdAt: annotation.attributes.createdAt,
-      isGlobal: true,
-    };
-  }
-
-  if (!isInlineCommentAnnotation(annotation)) {
-    return null;
-  }
-
-  const anchor = {
-    exact: annotation.attributes.exact,
-    prefix: annotation.attributes.prefix,
-    suffix: annotation.attributes.suffix,
-  };
-
-  if (Array.isArray(annotation.attributes.headingPath)) {
-    anchor.headingPath = annotation.attributes.headingPath;
-  }
-
-  if (Number.isInteger(annotation.attributes.fallbackLine)) {
-    anchor.fallbackLine = annotation.attributes.fallbackLine;
-  }
-
-  if (typeof annotation.attributes.sectionSlug === 'string') {
-    anchor.sectionSlug = annotation.attributes.sectionSlug;
-  }
-
-  if (typeof annotation.attributes.blockType === 'string') {
-    anchor.blockType = annotation.attributes.blockType;
-  }
-
-  if (!annotation.attributes.unresolved) {
-    anchor.rangeStart = annotation.start;
-    anchor.rangeEnd = annotation.end;
-  }
-
-  return {
-    id: annotation.id,
-    anchor,
-    text: annotation.attributes.text,
-    createdAt: annotation.attributes.createdAt,
-    isGlobal: false,
-  };
-}
-
-function buildDocumentFromAnnotations(annotations, markdown) {
-  const document = createEmptyCommentDocument(markdown);
-  const normalized = Array.isArray(annotations) ? annotations.map(normalizeAnnotation) : [];
-
-  if (normalized.length > 0) {
-    document.addAnnotations(...normalized.map((annotation) => createStoredAnnotation(annotation, markdown)));
-  }
-
-  return document;
-}
-
-function loadCommentDocument(store, canonicalFilePath, markdown) {
-  const existing = store.files[canonicalFilePath];
-
-  if (existing === undefined) {
-    return {
-      document: createEmptyCommentDocument(markdown),
-      didChange: store.version !== STORE_VERSION,
-    };
-  }
-
-  if (isAtJsonCommentDocumentJSON(existing)) {
-    return {
-      document: new MarkdownCommentDocument(existing),
-      didChange: store.version !== STORE_VERSION,
-    };
-  }
-
-  if (Array.isArray(existing)) {
-    const document = buildDocumentFromAnnotations(existing, markdown);
-    store.files[canonicalFilePath] = document.toJSON();
-    return { document, didChange: true };
-  }
-
-  const document = createEmptyCommentDocument(markdown);
-  store.files[canonicalFilePath] = document.toJSON();
-  return { document, didChange: true };
-}
-
-function saveCommentDocument(store, canonicalFilePath, document) {
-  store.files[canonicalFilePath] = document.toJSON();
-}
-
-function findCommentAnnotationById(document, id) {
-  return document.annotations.find((annotation) => annotation.id === id && (
-    isInlineCommentAnnotation(annotation) || isDocumentCommentAnnotation(annotation)
-  )) ?? null;
+function getFileAnnotations(store, canonicalFilePath) {
+  return Array.isArray(store.files[canonicalFilePath]) ? store.files[canonicalFilePath] : [];
 }
 
 export async function listComments(filePath) {
   const currentFile = await requireMarkdownFile(filePath);
   const canonicalFilePath = currentFile.path;
   const store = await readStore();
-  const { document, didChange: didLoadChange } = loadCommentDocument(store, canonicalFilePath, currentFile.content);
-  const didRebase = rebaseCommentDocument(document, currentFile.content);
 
-  if (didLoadChange || didRebase) {
-    saveCommentDocument(store, canonicalFilePath, document);
+  const annotations = getFileAnnotations(store, canonicalFilePath);
+  const { annotations: rebased, didChange: didRebase } = rebaseAnnotations(annotations, currentFile.content);
+
+  if (didRebase) {
+    store.files[canonicalFilePath] = rebased;
     await writeStore(store);
   }
 
-  return document.annotations
-    .map(commentDtoFromAnnotation)
-    .filter(Boolean);
+  return rebased;
 }
 
 export async function createComment({ filePath, annotation }) {
   const currentFile = await requireMarkdownFile(filePath);
   const canonicalFilePath = currentFile.path;
   const store = await readStore();
-  const { document } = loadCommentDocument(store, canonicalFilePath, currentFile.content);
-  rebaseCommentDocument(document, currentFile.content);
 
-  const nextAnnotation = normalizeAnnotation(annotation);
-  document.addAnnotations(createStoredAnnotation(nextAnnotation, currentFile.content));
-  const savedAnnotation = findCommentAnnotationById(document, nextAnnotation.id);
+  const annotations = getFileAnnotations(store, canonicalFilePath);
+  const { annotations: rebased } = rebaseAnnotations(annotations, currentFile.content);
 
-  saveCommentDocument(store, canonicalFilePath, document);
+  const normalized = normalizeAnnotation(annotation);
+  const enriched = resolveAndEnrichAnchor(normalized, currentFile.content);
+
+  store.files[canonicalFilePath] = [...rebased, enriched];
   await writeStore(store);
 
-  return commentDtoFromAnnotation(savedAnnotation);
+  return enriched;
 }
 
 export async function importComments({ filePath, annotations }) {
   const currentFile = await requireMarkdownFile(filePath);
   const canonicalFilePath = currentFile.path;
   const store = await readStore();
-  const document = buildDocumentFromAnnotations(annotations, currentFile.content);
 
-  saveCommentDocument(store, canonicalFilePath, document);
+  const normalized = Array.isArray(annotations) ? annotations.map(normalizeAnnotation) : [];
+  const enriched = normalized.map((annotation) => resolveAndEnrichAnchor(annotation, currentFile.content));
+
+  store.files[canonicalFilePath] = enriched;
   await writeStore(store);
 
-  return document.annotations
-    .map(commentDtoFromAnnotation)
-    .filter(Boolean);
+  return enriched;
 }
 
 export async function updateComment({ filePath, id, text }) {
@@ -407,35 +222,35 @@ export async function updateComment({ filePath, id, text }) {
     throw new ApiError(400, 'invalid_comment_text', 'Comment text is required.');
   }
 
-  const { document } = loadCommentDocument(store, canonicalFilePath, currentFile.content);
-  rebaseCommentDocument(document, currentFile.content);
-  const comment = findCommentAnnotationById(document, id);
+  const annotations = getFileAnnotations(store, canonicalFilePath);
+  const { annotations: rebased } = rebaseAnnotations(annotations, currentFile.content);
 
-  if (!comment) {
+  const index = rebased.findIndex((a) => a.id === id);
+  if (index === -1) {
     throw new ApiError(404, 'comment_not_found', 'The requested comment was not found.');
   }
 
-  comment.attributes.text = nextText;
-  saveCommentDocument(store, canonicalFilePath, document);
+  rebased[index] = { ...rebased[index], text: nextText };
+  store.files[canonicalFilePath] = rebased;
   await writeStore(store);
 
-  return commentDtoFromAnnotation(comment);
+  return rebased[index];
 }
 
 export async function deleteComment({ filePath, id }) {
   const currentFile = await requireMarkdownFile(filePath);
   const canonicalFilePath = currentFile.path;
   const store = await readStore();
-  const { document } = loadCommentDocument(store, canonicalFilePath, currentFile.content);
-  rebaseCommentDocument(document, currentFile.content);
-  const comment = findCommentAnnotationById(document, id);
 
-  if (!comment) {
+  const annotations = getFileAnnotations(store, canonicalFilePath);
+  const { annotations: rebased } = rebaseAnnotations(annotations, currentFile.content);
+
+  const index = rebased.findIndex((a) => a.id === id);
+  if (index === -1) {
     throw new ApiError(404, 'comment_not_found', 'The requested comment was not found.');
   }
 
-  document.removeAnnotation(comment);
-  saveCommentDocument(store, canonicalFilePath, document);
+  store.files[canonicalFilePath] = rebased.filter((_, i) => i !== index);
   await writeStore(store);
 }
 
@@ -445,17 +260,13 @@ export async function rebaseCommentsForFile(filePath, markdownContent) {
     : await requireMarkdownFile(filePath);
   const store = await readStore();
 
-  if (!(currentFile.path in store.files)) {
-    return;
-  }
+  if (!(currentFile.path in store.files)) return;
 
-  const { document, didChange: didLoadChange } = loadCommentDocument(store, currentFile.path, currentFile.content);
-  const didRebase = rebaseCommentDocument(document, currentFile.content);
+  const annotations = getFileAnnotations(store, currentFile.path);
+  const { annotations: rebased, didChange: didRebase } = rebaseAnnotations(annotations, currentFile.content);
 
-  if (!didLoadChange && !didRebase) {
-    return;
-  }
+  if (!didRebase) return;
 
-  saveCommentDocument(store, currentFile.path, document);
+  store.files[currentFile.path] = rebased;
   await writeStore(store);
 }

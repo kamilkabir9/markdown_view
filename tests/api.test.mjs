@@ -103,7 +103,7 @@ async function createComment(baseUrl, body) {
   };
 }
 
-test('file, asset, and atjson-backed comment APIs preserve the existing DTOs', async (t) => {
+test('file, asset, and comment APIs preserve the existing DTOs', async (t) => {
   const originalMarkdown = '# Test Document\n\nUpdated through save API.\n';
   const { contentRoot, baseUrl } = await createFixture(t, {
     'docs/readme.md': '# Test Document\n\nHello from the API test.\n',
@@ -213,16 +213,9 @@ test('file, asset, and atjson-backed comment APIs preserve the existing DTOs', a
   assert.equal(updateBody.comment.text, 'Updated note');
 
   const store = await readCommentStore(contentRoot);
-  assert.equal(store.version, 2);
-  assert.equal(store.files['docs/readme'].contentType, 'application/vnd.markdown-viewer.comments+json');
-  assert.deepEqual(store.files['docs/readme'].schema, [
-    '-markdown-viewer-inline-comment',
-    '-markdown-viewer-document-comment',
-  ]);
-  assert.equal(store.files['docs/readme'].content, originalMarkdown);
-  assert.equal(store.files['docs/readme'].annotations.length, 2);
-  assert.ok(store.files['docs/readme'].annotations.some((annotation) => annotation.id === createGlobalBody.comment.id));
-  assert.ok(store.files['docs/readme'].annotations.some((annotation) => annotation.id === createInlineBody.comment.id));
+  assert.equal(store.files['docs/readme'].length, 2);
+  assert.ok(store.files['docs/readme'].some((annotation) => annotation.id === createGlobalBody.comment.id));
+  assert.ok(store.files['docs/readme'].some((annotation) => annotation.id === createInlineBody.comment.id));
 
   const deleteResponse = await fetch(`${baseUrl}/api/comments/${createGlobalBody.comment.id}?file=docs/readme`, {
     method: 'DELETE',
@@ -266,7 +259,7 @@ test('file, asset, and atjson-backed comment APIs preserve the existing DTOs', a
   assert.equal(emptyListBody.comments.length, 0);
 });
 
-test('listing comments upgrades the legacy v1 array store to v2 atjson documents', async (t) => {
+test('listing comments reads a plain JSON array store', async (t) => {
   const markdown = '# Test Document\n\nLegacy target text.\n';
   const { contentRoot, baseUrl } = await createFixture(t, {
     'docs/readme.md': markdown,
@@ -278,7 +271,6 @@ test('listing comments upgrades the legacy v1 array store to v2 atjson documents
 
   await mkdir(join(contentRoot, '.markdown-viewer'), { recursive: true });
   await writeFile(getStorePath(contentRoot), JSON.stringify({
-    version: 1,
     files: {
       'docs/readme': [
         {
@@ -307,16 +299,13 @@ test('listing comments upgrades the legacy v1 array store to v2 atjson documents
   assert.equal(body.comments.find((comment) => comment.id === 'legacy-inline').anchor.rangeStart, legacyInlineAnchor.rangeStart);
 
   const store = await readCommentStore(contentRoot);
-  assert.equal(store.version, 2);
-  assert.equal(store.files['docs/readme'].contentType, 'application/vnd.markdown-viewer.comments+json');
-  assert.equal(store.files['docs/readme'].content, markdown);
   assert.deepEqual(
-    store.files['docs/readme'].annotations.map((annotation) => annotation.id).sort(),
+    store.files['docs/readme'].map((annotation) => annotation.id).sort(),
     ['legacy-global', 'legacy-inline'],
   );
 });
 
-test('saving a markdown file rebases inline comment offsets in the atjson sidecar', async (t) => {
+test('saving a markdown file rebases inline comment offsets in the comment store', async (t) => {
   const originalMarkdown = '# Section\n\nTarget text here.\n';
   const { contentRoot, baseUrl } = await createFixture(t, {
     'docs/readme.md': originalMarkdown,
@@ -354,12 +343,11 @@ test('saving a markdown file rebases inline comment offsets in the atjson sideca
   assert.equal(rebasedComment.anchor.blockType, 'paragraph');
 
   const store = await readCommentStore(contentRoot);
-  const storedInline = store.files['docs/readme'].annotations.find((annotation) => annotation.id === createBody.comment.id);
-  assert.equal(storedInline.start, expectedStart);
-  assert.equal(storedInline.end, expectedStart + 'Target text here.'.length);
-  assert.equal(storedInline.attributes['-markdown-viewer-sectionSlug'], 'section');
-  assert.equal(storedInline.attributes['-markdown-viewer-blockType'], 'paragraph');
-  assert.equal(store.files['docs/readme'].content, rebasedMarkdown);
+  const storedInline = store.files['docs/readme'].find((annotation) => annotation.id === createBody.comment.id);
+  assert.equal(storedInline.anchor.rangeStart, expectedStart);
+  assert.equal(storedInline.anchor.rangeEnd, expectedStart + 'Target text here.'.length);
+  assert.equal(storedInline.anchor.sectionSlug, 'section');
+  assert.equal(storedInline.anchor.blockType, 'paragraph');
 });
 
 test('duplicate inline quotes still resolve to the intended heading after rebasing', async (t) => {
@@ -444,10 +432,9 @@ test('removed quote text keeps comments unresolved but still editable and deleta
   assert.equal(updateBody.comment.text, 'Still useful');
 
   const store = await readCommentStore(contentRoot);
-  const storedInline = store.files['docs/readme'].annotations.find((annotation) => annotation.id === createBody.comment.id);
-  assert.equal(storedInline.start, 0);
-  assert.equal(storedInline.end, 0);
-  assert.equal(storedInline.attributes['-markdown-viewer-unresolved'], true);
+  const storedInline = store.files['docs/readme'].find((annotation) => annotation.id === createBody.comment.id);
+  assert.equal('rangeStart' in storedInline.anchor, false);
+  assert.equal('rangeEnd' in storedInline.anchor, false);
 
   const deleteResponse = await fetch(`${baseUrl}/api/comments/${createBody.comment.id}?file=docs/readme`, {
     method: 'DELETE',

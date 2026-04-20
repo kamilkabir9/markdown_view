@@ -24,3 +24,8 @@ yarn-error.log*
 screenshots/**
 scratchpad.txt
 .markdown-viewer/
+*.gif
+/.claude/worktrees
+*.md
+*.md
+*.md
