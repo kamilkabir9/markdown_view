@@ -16,6 +16,7 @@ interface MarkdownSourceEditorProps {
 export interface MarkdownSourceEditorHandle {
   insertText: (text: string) => boolean;
   scrollToOffset: (offset: number) => boolean;
+  getScrollDOM: () => HTMLElement | null;
 }
 
 const flashLineEffect = StateEffect.define<number>();
@@ -125,6 +126,9 @@ export const MarkdownSourceEditor = forwardRef<MarkdownSourceEditorHandle, Markd
 
       view.focus();
       return true;
+    },
+    getScrollDOM() {
+      return editorRef.current?.view?.scrollDOM ?? null;
     },
   }), []);
 

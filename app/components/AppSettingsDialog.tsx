@@ -2,7 +2,7 @@ import { ThemeSwitcher } from '~/components/ThemeSwitcher';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
-import { Toggle } from '~/components/ui/toggle';
+import { Switch } from '~/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,8 @@ export function AppSettingsDialog({ open, onOpenChange }: AppSettingsDialogProps
     setPathMode,
     returnToPreviewAfterSave,
     setReturnToPreviewAfterSave,
+    syncScroll,
+    setSyncScroll,
   } = useCopySettings();
 
   return (
@@ -52,18 +54,26 @@ export function AppSettingsDialog({ open, onOpenChange }: AppSettingsDialogProps
               Editor
             </p>
             <div className="flex items-center justify-between gap-4 rounded-sm border border-border/70 bg-background px-3 py-2.5">
-              <div>
-                <Label htmlFor="return-to-preview-after-save">Return to preview after save</Label>
-                <p className="text-xs text-muted-foreground">When off, source mode stays open after saving.</p>
-              </div>
-              <Toggle
+              <Label htmlFor="return-to-preview-after-save" className="flex flex-col gap-0.5 font-normal">
+                Return to preview after save
+                <span className="text-xs text-muted-foreground font-normal">When off, source mode stays open after saving.</span>
+              </Label>
+              <Switch
                 id="return-to-preview-after-save"
-                variant="outline"
-                pressed={returnToPreviewAfterSave}
-                onClick={() => setReturnToPreviewAfterSave(!returnToPreviewAfterSave)}
-              >
-                {returnToPreviewAfterSave ? 'On' : 'Off'}
-              </Toggle>
+                checked={returnToPreviewAfterSave}
+                onCheckedChange={setReturnToPreviewAfterSave}
+              />
+            </div>
+            <div className="flex items-center justify-between gap-4 rounded-sm border border-border/70 bg-background px-3 py-2.5">
+              <Label htmlFor="sync-scroll" className="flex flex-col gap-0.5 font-normal">
+                Sync scroll in split view
+                <span className="text-xs text-muted-foreground font-normal">Keep editor and preview scroll positions in sync.</span>
+              </Label>
+              <Switch
+                id="sync-scroll"
+                checked={syncScroll}
+                onCheckedChange={setSyncScroll}
+              />
             </div>
           </div>
 

@@ -6,11 +6,13 @@ interface CopySettingsContextValue {
   commentsDelimiter: string;
   pathMode: CopyPathMode;
   returnToPreviewAfterSave: boolean;
+  syncScroll: boolean;
   setContextPrefix: (value: string) => void;
   setCommentPrefix: (value: string) => void;
   setCommentsDelimiter: (value: string) => void;
   setPathMode: (value: CopyPathMode) => void;
   setReturnToPreviewAfterSave: (value: boolean) => void;
+  setSyncScroll: (value: boolean) => void;
 }
 
 export type CopyPathMode = 'relative' | 'full';
@@ -25,6 +27,8 @@ const COMMENT_PREFIX_KEY = 'copy-comment-prefix';
 const COMMENTS_DELIMITER_KEY = 'copy-comments-delimiter';
 const PATH_MODE_KEY = 'copy-path-mode';
 const RETURN_TO_PREVIEW_AFTER_SAVE_KEY = 'return-to-preview-after-save';
+const SYNC_SCROLL_KEY = 'editor-sync-scroll';
+const DEFAULT_SYNC_SCROLL = true;
 
 const CopySettingsContext = createContext<CopySettingsContextValue | undefined>(undefined);
 
@@ -66,12 +70,24 @@ function getInitialReturnToPreviewAfterSave(): boolean {
   }
 }
 
+function getInitialSyncScroll(): boolean {
+  if (typeof window === 'undefined') return DEFAULT_SYNC_SCROLL;
+
+  try {
+    const stored = localStorage.getItem(SYNC_SCROLL_KEY);
+    return stored === null ? DEFAULT_SYNC_SCROLL : stored === 'true';
+  } catch {
+    return DEFAULT_SYNC_SCROLL;
+  }
+}
+
 export function CopySettingsProvider({ children }: { children: ReactNode }): ReactElement {
   const [contextPrefix, setContextPrefix] = useState<string>(() => getInitialPrefix(CONTEXT_PREFIX_KEY, DEFAULT_CONTEXT_PREFIX));
   const [commentPrefix, setCommentPrefix] = useState<string>(() => getInitialPrefix(COMMENT_PREFIX_KEY, DEFAULT_COMMENT_PREFIX));
   const [commentsDelimiter, setCommentsDelimiter] = useState<string>(() => getInitialPrefix(COMMENTS_DELIMITER_KEY, DEFAULT_COMMENTS_DELIMITER));
   const [pathMode, setPathMode] = useState<CopyPathMode>(getInitialPathMode);
   const [returnToPreviewAfterSave, setReturnToPreviewAfterSave] = useState<boolean>(getInitialReturnToPreviewAfterSave);
+  const [syncScroll, setSyncScroll] = useState<boolean>(getInitialSyncScroll);
 
   useEffect(() => {
     try {
@@ -80,8 +96,9 @@ export function CopySettingsProvider({ children }: { children: ReactNode }): Rea
       localStorage.setItem(COMMENTS_DELIMITER_KEY, normalizePrefix(commentsDelimiter, DEFAULT_COMMENTS_DELIMITER));
       localStorage.setItem(PATH_MODE_KEY, pathMode);
       localStorage.setItem(RETURN_TO_PREVIEW_AFTER_SAVE_KEY, String(returnToPreviewAfterSave));
+      localStorage.setItem(SYNC_SCROLL_KEY, String(syncScroll));
     } catch {}
-  }, [commentPrefix, commentsDelimiter, contextPrefix, pathMode, returnToPreviewAfterSave]);
+  }, [commentPrefix, commentsDelimiter, contextPrefix, pathMode, returnToPreviewAfterSave, syncScroll]);
 
   const value: CopySettingsContextValue = {
     contextPrefix,
@@ -89,11 +106,13 @@ export function CopySettingsProvider({ children }: { children: ReactNode }): Rea
     commentsDelimiter,
     pathMode,
     returnToPreviewAfterSave,
+    syncScroll,
     setContextPrefix,
     setCommentPrefix,
     setCommentsDelimiter,
     setPathMode,
     setReturnToPreviewAfterSave,
+    setSyncScroll,
   };
 
   return <CopySettingsContext.Provider value={value}>{children}</CopySettingsContext.Provider>;
