@@ -3,14 +3,14 @@
 import { existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
+import { createApiRouter } from '../server/api.js';
+import { getContentRoot } from '../server/content-root.js';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(scriptDir, '..');
-const serverBuild = resolve(packageRoot, 'build/server/index.js');
-const clientBuildDir = resolve(packageRoot, 'build/client');
+const clientBuildDir = resolve(packageRoot, 'dist');
 const publicDir = resolve(packageRoot, 'public');
 const args = process.argv.slice(2);
 
@@ -109,8 +109,8 @@ function openBrowser(url) {
   opener.unref();
 }
 
-if (!existsSync(serverBuild)) {
-  console.error('Missing build output at build/server/index.js. Run `npm run build` first.');
+if (!existsSync(join(clientBuildDir, 'index.html'))) {
+  console.error('Missing build output at dist/index.html. Run `npm run build` first.');
   process.exit(1);
 }
 
@@ -147,30 +147,30 @@ async function main() {
   process.env.PORT = String(selectedPort);
   process.env.MARKDOWN_VIEWER_CONTENT_ROOT = workingDir;
 
-  const [{ default: express }, { createRequestHandler }] = await Promise.all([
-    import('express'),
-    import('@react-router/express'),
-  ]);
-
-  const build = await import(pathToFileURL(serverBuild).href);
+  const { default: express } = await import('express');
   const app = express();
   const host = process.env.HOST;
 
   app.disable('x-powered-by');
+  app.use(express.json({ limit: '1mb' }));
+  app.use('/api', createApiRouter());
+  app.use('/content', express.static(getContentRoot()));
+  app.get(/^(?!\/(?:api|content|assets)\b).*\.md$/i, (_req, res) => {
+    res.sendFile(join(clientBuildDir, 'index.html'));
+  });
   app.use('/assets', express.static(join(clientBuildDir, 'assets'), {
     immutable: true,
     maxAge: '1y',
   }));
-  app.use(express.static(clientBuildDir));
+  app.use(express.static(clientBuildDir, { index: false }));
 
   if (existsSync(publicDir)) {
     app.use(express.static(publicDir, { maxAge: '1h' }));
   }
 
-  app.all('*', createRequestHandler({
-    build,
-    mode: process.env.NODE_ENV,
-  }));
+  app.get('*', (_req, res) => {
+    res.sendFile(join(clientBuildDir, 'index.html'));
+  });
 
   const server = host
     ? app.listen(selectedPort, host, () => {

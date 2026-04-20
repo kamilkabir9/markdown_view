@@ -1,74 +1,35 @@
-import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
-import { useLoaderData, useNavigate, useRouteError, isRouteErrorResponse } from 'react-router';
-import { Alert, AlertTitle, AlertDescription } from '~/components/ui/alert';
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { toast } from 'sonner';
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { Button } from '~/components/ui/button';
-import { LineAnnotatedMarkdown } from '~/components/LineAnnotatedMarkdown';
-import { AnnotationErrorBoundary } from '~/components/AnnotationErrorBoundary';
-import { AnnotationStoreProvider } from '~/contexts/AnnotationStore';
-import { useTheme } from '~/contexts/ThemeContext';
-import { getMarkdownContent } from '~/utils/files.server';
-import '~/styles/themes.css';
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => [
-  {
-    title: data?.sourcePath ? `${data.sourcePath} - Markdown Viewer` : 'File Not Found',
-  },
-];
-
-export async function loader({ params }: LoaderFunctionArgs) {
-  const path = params['*'] || '';
-  const result = await getMarkdownContent(path);
-
-  if (!result) {
-    throw new Response('Not Found', { status: 404 });
-  }
-
-  return result;
-}
-
-export default function MarkdownPage() {
-  const { content, path, sourcePath, absolutePath } = useLoaderData<typeof loader>();
-  const { theme } = useTheme();
-  const themeClass = `markdown-theme-${theme}`;
-
-  return (
-    <AnnotationStoreProvider filePath={path}>
-      <div className="space-y-5">
-        <AnnotationErrorBoundary>
-          <LineAnnotatedMarkdown
-            content={content}
-            proseClass=""
-            themeClass={themeClass}
-            relativeFilePath={sourcePath}
-            fullFilePath={absolutePath}
-          />
-        </AnnotationErrorBoundary>
-      </div>
-    </AnnotationStoreProvider>
-  );
-}
+import { ImageUploadDialog } from '~/components/ImageUploadDialog';
+import { MarkdownEditorPane } from '~/components/MarkdownEditorPane';
+import { MarkdownPageActions } from '~/components/MarkdownPageActions';
+import { MarkdownPageAlerts } from '~/components/MarkdownPageAlerts';
+import { CommentSidebar } from '~/components/CommentSidebar';
+import { MarkdownOutline } from '~/components/MarkdownOutline';
+import { MarkdownSourceEditorHandle } from '~/components/MarkdownSourceEditor';
+import { MarkdownViewerPane } from '~/components/MarkdownViewerPane';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
+import { useAppChrome } from '~/contexts/AppChromeContext';
+import { useCopySettings } from '~/contexts/CopySettingsContext';
+import { AnnotationStoreProvider, useAnnotationStore, type Annotation } from '~/contexts/AnnotationStore';
+import { useDesktopEditSplit } from '~/hooks/useDesktopEditSplit';
+import { useImageUpload } from '~/hooks/useImageUpload';
+import { useMarkdownDocument } from '~/hooks/useMarkdownDocument';
+import { usePreviewCommenting } from '~/hooks/usePreviewCommenting';
+import { useUnsavedChangesProtection } from '~/hooks/useUnsavedChangesProtection';
+import { buildMarkdownBreadcrumbs } from '~/lib/breadcrumbs';
+import { extractMarkdownSections } from '~/lib/markdown-sections';
+import { cn } from '~/lib/utils';
 
 function ErrorState({ title, description }: { title: string; description: string }) {
   const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Markdown Files</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Error</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      {buildMarkdownBreadcrumbs(null)}
 
       <div className="app-shell-panel rounded-md p-8 sm:p-10">
         <div className="max-w-xl space-y-5 text-left">
@@ -103,24 +64,392 @@ function ErrorState({ title, description }: { title: string; description: string
   );
 }
 
-export function ErrorBoundary() {
-  const error = useRouteError();
+function MarkdownPageContent() {
+  const params = useParams();
+  const routePath = params['*'] || '';
+  const { setActions, setBreadcrumbs } = useAppChrome();
+  const { returnToPreviewAfterSave } = useCopySettings();
+  const previewRef = useRef<HTMLElement | null>(null);
+  const sourceEditorRef = useRef<MarkdownSourceEditorHandle | null>(null);
+  const [isOutlineVisible, setIsOutlineVisible] = useState(true);
+  const [isCommentsVisible, setIsCommentsVisible] = useState(true);
+  const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
+  const [commentActionError, setCommentActionError] = useState<string | null>(null);
+  const isDesktopEditSplit = useDesktopEditSplit();
+  const { annotations, isLoading: areCommentsLoading, error: commentsError, addAnnotation, updateAnnotationText, removeAnnotation } = useAnnotationStore();
+  const handleEnterEditingLayout = useCallback(() => {
+    setIsOutlineVisible(false);
+    setIsCommentsVisible(false);
+  }, []);
+  const {
+    file,
+    draft,
+    setDraft,
+    setFile,
+    isLoading,
+    isEditing,
+    isSaving,
+    error,
+    saveError,
+    setSaveError,
+    saveStatus,
+    isDirty,
+    handleStartEditing,
+    handleCancelEditing: handleCancelEditingBase,
+    handleSave: handleSaveBase,
+  } = useMarkdownDocument({
+    routePath,
+    returnToPreviewAfterSave,
+    onEnterEditingLayout: handleEnterEditingLayout,
+  });
+  const {
+    pendingAnchor,
+    selectionActionPosition,
+    isCreateCommentDialogOpen,
+    isCreatingDocumentComment,
+    commentDraft,
+    setCommentDraft,
+    capturePreviewSelection,
+    handleCreateComment,
+    handleCreateDocumentComment,
+    handleCreateDialogOpenChange,
+    handleOpenDocumentCommentDialog,
+  } = usePreviewCommenting({
+    previewRef,
+    fileContent: file?.content ?? null,
+    isEditing,
+    addAnnotation,
+    onError: setCommentActionError,
+  });
+  const {
+    imageInputRef,
+    isImageDialogOpen,
+    isImageUploadDragging,
+    isUploadingImage,
+    imageUploadError,
+    handleImageDialogOpenChange,
+    handleImageInputChange,
+    handleImageUpload,
+    setIsImageUploadDragging,
+    cleanupUploadedDraftImages,
+    clearUploadedDraftImages,
+  } = useImageUpload({
+    documentPath: file?.path ?? null,
+    isEditing,
+    setDraft,
+    sourceEditorRef,
+    onSaveError: setSaveError,
+  });
 
-  if (isRouteErrorResponse(error) && error.status === 404) {
+  useEffect(() => {
+    if (isEditing) {
+      return;
+    }
+
+    previewRef.current?.scrollTo({ top: 0 });
+  }, [file?.modified, file?.path, isEditing]);
+
+  const outlineSections = useMemo(() => extractMarkdownSections(isEditing ? draft : file?.content ?? ''), [draft, file?.content, isEditing]);
+  const breadcrumbs = useMemo(() => buildMarkdownBreadcrumbs(file?.sourcePath ?? null), [file?.sourcePath]);
+
+  const handleAnnotationClick = useCallback((annotation: Annotation) => {
+    setActiveAnnotationId(annotation.id);
+  }, []);
+
+  useEffect(() => {
+    if (pendingAnchor || isCreateCommentDialogOpen) {
+      setCommentActionError(null);
+    }
+  }, [isCreateCommentDialogOpen, pendingAnchor]);
+
+  const handleCancelEditing = useCallback(async () => {
+    if (!file) return;
+
+    const { removedCount, failedCount } = await cleanupUploadedDraftImages();
+
+    const didCancel = handleCancelEditingBase();
+    if (!didCancel) return;
+    handleImageDialogOpenChange(false);
+
+    if (removedCount > 0) {
+      const label = removedCount === 1 ? 'image' : 'images';
+      toast.info(`Removed ${removedCount} uploaded ${label} from this draft.`);
+    }
+
+    if (failedCount > 0) {
+      const label = failedCount === 1 ? 'image file' : 'image files';
+      setSaveError(`Some uploaded ${label} could not be cleaned up automatically.`);
+      toast.warning('Some uploaded images could not be removed automatically.');
+    }
+  }, [cleanupUploadedDraftImages, file, handleCancelEditingBase, handleImageDialogOpenChange, setSaveError]);
+
+  const handleSave = useCallback(async () => {
+    const didSave = await handleSaveBase();
+    if (didSave) {
+      clearUploadedDraftImages();
+    }
+  }, [clearUploadedDraftImages, handleSaveBase]);
+
+  useUnsavedChangesProtection({
+    isEditing,
+    isDirty,
+    isSaving,
+    onSave: handleSave,
+  });
+
+  const handleOutlineNavigate = useCallback((slug: string) => {
+    if (isEditing) {
+      const flatSections = [...outlineSections];
+      for (let index = 0; index < flatSections.length; index += 1) {
+        flatSections.splice(index + 1, 0, ...flatSections[index].children);
+      }
+      const targetSection = flatSections.find((section) => section.slug === slug);
+      if (!targetSection) {
+        return;
+      }
+
+      sourceEditorRef.current?.scrollToOffset(targetSection.startOffset);
+      return;
+    }
+
+    const container = previewRef.current;
+    if (!container) {
+      return;
+    }
+
+    const target = container.querySelector<HTMLElement>(`#${CSS.escape(slug)}`);
+    if (!target) {
+      return;
+    }
+
+    const targetTop = target.offsetTop - 16;
+    container.scrollTo({ top: Math.max(targetTop, 0), behavior: 'smooth' });
+    window.history.replaceState(null, '', `#${slug}`);
+  }, [isEditing, outlineSections]);
+
+  const actions = useMemo(
+    () =>
+      file ? (
+        <MarkdownPageActions
+          isEditing={isEditing}
+          isOutlineVisible={isOutlineVisible}
+          isCommentsVisible={isCommentsVisible}
+          isDirty={isDirty}
+          isSaving={isSaving}
+          isUploadingImage={isUploadingImage}
+          saveStatus={saveStatus}
+          onToggleOutline={() => setIsOutlineVisible((current) => !current)}
+          onToggleComments={() => setIsCommentsVisible((current) => !current)}
+          onStartEditing={handleStartEditing}
+          onOpenImageDialog={() => handleImageDialogOpenChange(true)}
+          onCancelEditing={() => void handleCancelEditing()}
+          onSave={() => void handleSave()}
+        />
+      ) : null,
+    [
+      file,
+      handleCancelEditing,
+      handleImageDialogOpenChange,
+      handleSave,
+      handleStartEditing,
+      isCommentsVisible,
+      isDirty,
+      isEditing,
+      isOutlineVisible,
+      isSaving,
+      isUploadingImage,
+      saveStatus,
+    ],
+  );
+
+  useEffect(() => {
+    document.title = file?.sourcePath ? `${file.sourcePath} - Markdown Viewer` : 'Markdown Viewer';
+  }, [file?.sourcePath]);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setActions(actions);
+  }, [actions, breadcrumbs, setActions, setBreadcrumbs]);
+
+  useEffect(() => {
+    return () => {
+      setBreadcrumbs(null);
+      setActions(null);
+    };
+  }, [setActions, setBreadcrumbs]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {buildMarkdownBreadcrumbs(null)}
+        <div className="app-shell-panel rounded-md p-8 text-sm text-muted-foreground">Loading markdown file...</div>
+      </div>
+    );
+  }
+
+  if (error || !file) {
     return (
       <ErrorState
-        title="404 - File not found"
-        description="The markdown file you requested is no longer available at this path."
+        title="File unavailable"
+        description={error || 'The requested markdown file could not be loaded.'}
       />
     );
   }
 
-  console.error('Route error:', error);
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-5">
+      <MarkdownPageAlerts
+        saveError={saveError}
+        commentActionError={commentActionError}
+        commentsError={commentsError}
+        isEditing={isEditing}
+        isDirty={isDirty}
+      />
+
+      {isEditing || !isDesktopEditSplit ? (
+        <div
+          className={cn(
+            'grid min-h-0 flex-1 gap-5',
+            isOutlineVisible && isCommentsVisible && 'xl:grid-cols-[18rem_minmax(0,1fr)_22rem]',
+            isOutlineVisible && !isCommentsVisible && 'xl:grid-cols-[18rem_minmax(0,1fr)]',
+            !isOutlineVisible && isCommentsVisible && 'xl:grid-cols-[minmax(0,1fr)_22rem]',
+            !isOutlineVisible && !isCommentsVisible && 'xl:grid-cols-[minmax(0,1fr)]',
+          )}
+        >
+          {isOutlineVisible ? <MarkdownOutline sections={outlineSections} onNavigate={handleOutlineNavigate} className="min-h-0" /> : null}
+
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            {isEditing ? (
+              <MarkdownEditorPane
+                draft={draft}
+                documentSourcePath={file.sourcePath}
+                isDesktopSplit={isDesktopEditSplit}
+                sourceEditorRef={sourceEditorRef}
+                onDraftChange={setDraft}
+              />
+            ) : (
+              <MarkdownViewerPane
+                previewKey={`view:${file.path}:${file.modified}`}
+                content={file.content}
+                documentSourcePath={file.sourcePath}
+                previewRef={previewRef}
+                pendingAnchorQuote={pendingAnchor?.quote ?? null}
+                selectionActionPosition={selectionActionPosition}
+                annotations={annotations}
+                activeAnnotationId={activeAnnotationId}
+                onCaptureSelection={capturePreviewSelection}
+                onOpenCreateComment={() => handleCreateDialogOpenChange(true)}
+                onAnnotationClick={handleAnnotationClick}
+              />
+            )}
+          </div>
+
+          {isCommentsVisible ? (
+            <CommentSidebar
+              annotations={annotations}
+              rawContent={file.content}
+              relativeFilePath={file.sourcePath}
+              fullFilePath={file.absolutePath}
+              draftText={commentDraft}
+              onDraftTextChange={setCommentDraft}
+              onCreate={handleCreateComment}
+              onCreateDocumentComment={handleCreateDocumentComment}
+              isCreateDialogOpen={isCreateCommentDialogOpen}
+              onCreateDialogOpenChange={handleCreateDialogOpenChange}
+              isCreatingDocumentComment={isCreatingDocumentComment}
+              pendingAnchorText={pendingAnchor?.quote ?? null}
+              createDisabledReason={isEditing ? 'Inline comments can be added from preview mode only.' : null}
+              onUpdate={updateAnnotationText}
+              onRemove={removeAnnotation}
+              onAnnotationClick={handleAnnotationClick}
+              activeAnnotationId={activeAnnotationId}
+              onOpenDocumentCommentDialog={handleOpenDocumentCommentDialog}
+              className={areCommentsLoading ? 'min-h-0 opacity-70' : 'min-h-0'}
+            />
+          ) : null}
+        </div>
+      ) : (
+        <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1" id="markdown-view-panels">
+          {isOutlineVisible ? (
+            <>
+              <ResizablePanel defaultSize={20} minSize={15} className="min-w-0 pr-2.5">
+                <MarkdownOutline sections={outlineSections} onNavigate={handleOutlineNavigate} className="min-h-0" />
+              </ResizablePanel>
+              <ResizableHandle className="w-3 cursor-col-resize bg-transparent" withHandle aria-label="Resize outline and preview panels" />
+            </>
+          ) : null}
+
+          <ResizablePanel defaultSize={isOutlineVisible && isCommentsVisible ? 55 : isCommentsVisible || isOutlineVisible ? 75 : 100} minSize={30} className="min-w-0 px-0">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+              <MarkdownViewerPane
+                previewKey={`view:${file.path}:${file.modified}`}
+                content={file.content}
+                documentSourcePath={file.sourcePath}
+                previewRef={previewRef}
+                pendingAnchorQuote={pendingAnchor?.quote ?? null}
+                selectionActionPosition={selectionActionPosition}
+                annotations={annotations}
+                activeAnnotationId={activeAnnotationId}
+                onCaptureSelection={capturePreviewSelection}
+                onOpenCreateComment={() => handleCreateDialogOpenChange(true)}
+                onAnnotationClick={handleAnnotationClick}
+              />
+            </div>
+          </ResizablePanel>
+
+          {isCommentsVisible ? (
+            <>
+              <ResizableHandle className="w-3 cursor-col-resize bg-transparent" withHandle aria-label="Resize preview and comments panels" />
+              <ResizablePanel defaultSize={isOutlineVisible ? 25 : 30} minSize={20} className="min-w-0 pl-2.5">
+                <CommentSidebar
+                  annotations={annotations}
+                  rawContent={file.content}
+                  relativeFilePath={file.sourcePath}
+                  fullFilePath={file.absolutePath}
+                  draftText={commentDraft}
+                  onDraftTextChange={setCommentDraft}
+                  onCreate={handleCreateComment}
+                  onCreateDocumentComment={handleCreateDocumentComment}
+                  isCreateDialogOpen={isCreateCommentDialogOpen}
+                  onCreateDialogOpenChange={handleCreateDialogOpenChange}
+                  isCreatingDocumentComment={isCreatingDocumentComment}
+                  pendingAnchorText={pendingAnchor?.quote ?? null}
+                  createDisabledReason={null}
+                  onUpdate={updateAnnotationText}
+                  onRemove={removeAnnotation}
+                  onAnnotationClick={handleAnnotationClick}
+                  activeAnnotationId={activeAnnotationId}
+                  onOpenDocumentCommentDialog={handleOpenDocumentCommentDialog}
+                  className={areCommentsLoading ? 'min-h-0 opacity-70' : 'min-h-0'}
+                />
+              </ResizablePanel>
+            </>
+          ) : null}
+        </ResizablePanelGroup>
+      )}
+
+      <ImageUploadDialog
+        open={isImageDialogOpen}
+        onOpenChange={handleImageDialogOpenChange}
+        inputRef={imageInputRef}
+        isDragging={isImageUploadDragging}
+        isUploading={isUploadingImage}
+        error={imageUploadError}
+        onInputChange={handleImageInputChange}
+        onDraggingChange={setIsImageUploadDragging}
+        onUpload={handleImageUpload}
+      />
+    </div>
+  );
+}
+
+export default function MarkdownPage() {
+  const params = useParams();
+  const routePath = params['*'] || '';
 
   return (
-    <ErrorState
-      title="Something went wrong"
-      description="An unexpected error interrupted the reader before this document could finish loading."
-    />
+    <AnnotationStoreProvider filePath={routePath}>
+      <MarkdownPageContent />
+    </AnnotationStoreProvider>
   );
 }

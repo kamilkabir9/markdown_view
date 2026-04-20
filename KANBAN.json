@@ -75,9 +75,11 @@
       "title": "Investigate how file comments/data are persisted",
       "column": "Backlog",
       "created": "2026-03-29T13:54:48.577Z",
-      "updated": "2026-03-29T13:54:48.577Z",
+      "updated": "2026-04-11T12:20:46.853Z",
       "type": "chore",
-      "body": "Document and verify where and how comment/data are persisted per file."
+      "body": "Document and verify where and how comment/data are persisted per file.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:20:46.852Z"
     },
     {
       "id": "settings-configurable-comments-delimiter-7e889e48",
@@ -118,9 +120,9 @@
     {
       "id": "add-image-preview-feature-0f0af155",
       "title": "Add image preview feature",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T19:36:06.360Z",
-      "updated": "2026-04-08T19:36:06.360Z",
+      "updated": "2026-04-12T01:59:05.323Z",
       "type": "feature",
       "body": "Add image preview support so users can view images more clearly from the document experience."
     },
@@ -129,9 +131,11 @@
       "title": "Enable direct document editing",
       "column": "Backlog",
       "created": "2026-04-08T19:36:06.360Z",
-      "updated": "2026-04-08T19:36:06.360Z",
+      "updated": "2026-04-11T12:19:55.952Z",
       "type": "feature",
-      "body": "Allow users to edit the document content directly within the application instead of only viewing it."
+      "body": "Allow users to edit the document content directly within the application instead of only viewing it.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.944Z"
     },
     {
       "id": "spa-api-spa-api-01-inventory-ssr-specifi-03753df1",
@@ -389,54 +393,54 @@
     {
       "id": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
       "title": "[SPA-API] Phase 1 Baseline and isolation",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:13.233Z",
-      "updated": "2026-04-08T20:14:13.233Z",
+      "updated": "2026-04-09T17:19:02.395Z",
       "type": "feature",
       "body": "Parent item for SPA/API migration phase 1. Covers SSR inventory, data-flow mapping, service extraction, and API contract definition."
     },
     {
       "id": "spa-api-phase-2-create-api-layer-cd5ea4dd",
       "title": "[SPA-API] Phase 2 Create API layer",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:13.246Z",
-      "updated": "2026-04-08T20:14:13.245Z",
+      "updated": "2026-04-09T17:19:02.426Z",
       "type": "feature",
       "body": "Parent item for SPA/API migration phase 2. Covers API routes, shared validation, and API-level test coverage."
     },
     {
       "id": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
       "title": "[SPA-API] Phase 3 Convert frontend to SPA",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:13.318Z",
-      "updated": "2026-04-08T20:14:13.317Z",
+      "updated": "2026-04-09T17:19:02.446Z",
       "type": "feature",
       "body": "Parent item for SPA/API migration phase 3. Covers SPA bootstrap, API client, route migration, and UI state handling."
     },
     {
       "id": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
       "title": "[SPA-API] Phase 4 Remove SSR infrastructure",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:13.318Z",
-      "updated": "2026-04-08T20:14:13.318Z",
+      "updated": "2026-04-09T17:19:15.074Z",
       "type": "feature",
       "body": "Parent item for SPA/API migration phase 4. Covers build/runtime updates, CLI changes, SSR removal, and dependency cleanup."
     },
     {
       "id": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
       "title": "[SPA-API] Phase 5 Hardening and cleanup",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:13.320Z",
-      "updated": "2026-04-08T20:14:13.319Z",
+      "updated": "2026-04-09T17:33:59.018Z",
       "type": "feature",
       "body": "Parent item for SPA/API migration phase 5. Covers deep-link fallback, end-to-end coverage, docs, and final verification."
     },
     {
       "id": "spa-api-spa-api-01-inventory-ssr-specifi-84baa1c7",
       "title": "[SPA-API] SPA-API-01 Inventory SSR-specific code paths",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:30.126Z",
-      "updated": "2026-04-08T20:14:30.125Z",
+      "updated": "2026-04-09T17:19:02.422Z",
       "type": "chore",
       "parentId": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
       "body": "Track all SSR-specific files, loaders, actions, and server-only utilities that must be migrated or removed. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-01."
@@ -444,9 +448,9 @@
     {
       "id": "spa-api-spa-api-02-map-ssr-data-flows-to-58d7946d",
       "title": "[SPA-API] SPA-API-02 Map SSR data flows to API contracts",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:30.190Z",
-      "updated": "2026-04-08T20:14:30.189Z",
+      "updated": "2026-04-09T17:19:02.424Z",
       "type": "chore",
       "parentId": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
       "body": "Document all browser data currently provided through SSR and map each flow to an explicit API contract. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-02."
@@ -454,9 +458,9 @@
     {
       "id": "spa-api-spa-api-03-extract-file-services-32821c99",
       "title": "[SPA-API] SPA-API-03 Extract file services",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:30.194Z",
-      "updated": "2026-04-08T20:14:30.193Z",
+      "updated": "2026-04-09T17:19:02.420Z",
       "type": "feature",
       "parentId": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
       "body": "Extract markdown file listing and file-read business logic into reusable server services. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-03."
@@ -464,9 +468,9 @@
     {
       "id": "spa-api-spa-api-04-extract-comment-servi-b0b22fec",
       "title": "[SPA-API] SPA-API-04 Extract comment services",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:30.199Z",
-      "updated": "2026-04-08T20:14:30.198Z",
+      "updated": "2026-04-09T17:19:02.427Z",
       "type": "feature",
       "parentId": "spa-api-phase-1-baseline-and-isolation-8e6afa1e",
       "body": "Extract comment persistence and mutation logic into reusable server services. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-04."
@@ -474,9 +478,9 @@
     {
       "id": "spa-api-spa-api-06-implement-file-api-en-6ae2cd21",
       "title": "[SPA-API] SPA-API-06 Implement file API endpoints",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:30.219Z",
-      "updated": "2026-04-08T20:14:30.218Z",
+      "updated": "2026-04-09T17:19:02.435Z",
       "type": "feature",
       "parentId": "spa-api-phase-2-create-api-layer-cd5ea4dd",
       "body": "Implement GET /api/files and GET /api/files/*path endpoints. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-06."
@@ -484,9 +488,9 @@
     {
       "id": "spa-api-spa-api-05-add-path-validation-a-828a4bf0",
       "title": "[SPA-API] SPA-API-05 Add path validation and API errors",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:30.219Z",
-      "updated": "2026-04-08T20:14:30.218Z",
+      "updated": "2026-04-09T17:19:02.428Z",
       "type": "feature",
       "parentId": "spa-api-phase-2-create-api-layer-cd5ea4dd",
       "body": "Add shared server path validation plus normalized API error handling for file and comment routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-05."
@@ -494,9 +498,9 @@
     {
       "id": "spa-api-spa-api-08-add-api-integration-c-97549fbf",
       "title": "[SPA-API] SPA-API-08 Add API integration coverage",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:30.219Z",
-      "updated": "2026-04-08T20:14:30.218Z",
+      "updated": "2026-04-09T17:19:02.444Z",
       "type": "chore",
       "parentId": "spa-api-phase-2-create-api-layer-cd5ea4dd",
       "body": "Add integration coverage for file and comment API routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-08."
@@ -504,9 +508,9 @@
     {
       "id": "spa-api-spa-api-07-implement-comment-api-e228d734",
       "title": "[SPA-API] SPA-API-07 Implement comment API endpoints",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:30.219Z",
-      "updated": "2026-04-08T20:14:30.218Z",
+      "updated": "2026-04-09T17:19:02.434Z",
       "type": "feature",
       "parentId": "spa-api-phase-2-create-api-layer-cd5ea4dd",
       "body": "Implement supported comment list/create/update/delete API endpoints. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-07."
@@ -514,9 +518,9 @@
     {
       "id": "spa-api-spa-api-09-replace-ssr-bootstrap-fa5454b3",
       "title": "[SPA-API] SPA-API-09 Replace SSR bootstrap with SPA entry",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:44.971Z",
-      "updated": "2026-04-08T20:14:44.970Z",
+      "updated": "2026-04-09T17:19:02.445Z",
       "type": "feature",
       "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
       "body": "Replace SSR bootstrap with a browser-only SPA entry and client router setup. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-09."
@@ -524,9 +528,9 @@
     {
       "id": "spa-api-spa-api-10-add-frontend-api-clie-92dd7525",
       "title": "[SPA-API] SPA-API-10 Add frontend API client",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:45.008Z",
-      "updated": "2026-04-08T20:14:45.007Z",
+      "updated": "2026-04-09T17:19:02.555Z",
       "type": "feature",
       "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
       "body": "Add a thin frontend API client and shared request helpers. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-10."
@@ -534,9 +538,9 @@
     {
       "id": "spa-api-spa-api-11-migrate-file-index-ro-30a10b78",
       "title": "[SPA-API] SPA-API-11 Migrate file index route",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:45.044Z",
-      "updated": "2026-04-08T20:14:45.044Z",
+      "updated": "2026-04-09T17:19:02.554Z",
       "type": "feature",
       "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
       "body": "Migrate the file index route from SSR loaders to client-side fetching. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-11."
@@ -544,9 +548,9 @@
     {
       "id": "spa-api-spa-api-12-migrate-markdown-read-f8035db0",
       "title": "[SPA-API] SPA-API-12 Migrate markdown reader route",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:45.048Z",
-      "updated": "2026-04-08T20:14:45.047Z",
+      "updated": "2026-04-09T17:19:02.552Z",
       "type": "feature",
       "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
       "body": "Migrate the markdown reader route from SSR loaders to client-side fetching. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-12."
@@ -554,9 +558,9 @@
     {
       "id": "spa-api-spa-api-14-add-spa-loading-and-e-a6394f72",
       "title": "[SPA-API] SPA-API-14 Add SPA loading and error states",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:45.067Z",
-      "updated": "2026-04-08T20:14:45.066Z",
+      "updated": "2026-04-09T17:19:02.655Z",
       "type": "feature",
       "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
       "body": "Add loading, empty, and error states for all migrated SPA routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-14."
@@ -564,9 +568,9 @@
     {
       "id": "spa-api-spa-api-13-migrate-comment-ui-fl-cb0892b9",
       "title": "[SPA-API] SPA-API-13 Migrate comment UI flows to API",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:45.067Z",
-      "updated": "2026-04-08T20:14:45.066Z",
+      "updated": "2026-04-09T17:19:02.658Z",
       "type": "feature",
       "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
       "body": "Migrate comment read and write UI flows to use the API client. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-13."
@@ -574,9 +578,9 @@
     {
       "id": "spa-api-spa-api-15-preserve-url-behavior-2e26f369",
       "title": "[SPA-API] SPA-API-15 Preserve URL behavior and route boundaries",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:14:45.067Z",
-      "updated": "2026-04-08T20:14:45.066Z",
+      "updated": "2026-04-09T17:19:02.657Z",
       "type": "feature",
       "parentId": "spa-api-phase-3-convert-frontend-to-spa-00393fcc",
       "body": "Preserve current URL behavior and ensure client routing does not collide with /api/* routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-15."
@@ -584,9 +588,9 @@
     {
       "id": "spa-api-spa-api-16-update-build-and-star-40891b69",
       "title": "[SPA-API] SPA-API-16 Update build and start scripts",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:15:01.911Z",
-      "updated": "2026-04-08T20:15:01.910Z",
+      "updated": "2026-04-09T17:19:15.085Z",
       "type": "feature",
       "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
       "body": "Update Vite, build scripts, and start scripts for SPA assets plus API server runtime. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-16."
@@ -594,9 +598,9 @@
     {
       "id": "spa-api-spa-api-17-update-cli-startup-fl-4b226136",
       "title": "[SPA-API] SPA-API-17 Update CLI startup flow",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:15:01.943Z",
-      "updated": "2026-04-08T20:15:01.942Z",
+      "updated": "2026-04-09T17:19:15.114Z",
       "type": "feature",
       "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
       "body": "Update the CLI startup flow to serve the built SPA and API against the selected content directory. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-17."
@@ -604,9 +608,9 @@
     {
       "id": "spa-api-spa-api-18-remove-ssr-runtime-in-943b2915",
       "title": "[SPA-API] SPA-API-18 Remove SSR runtime infrastructure",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:15:01.993Z",
-      "updated": "2026-04-08T20:15:01.993Z",
+      "updated": "2026-04-09T17:19:15.110Z",
       "type": "chore",
       "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
       "body": "Remove React Router SSR entrypoints, config, and no-longer-used runtime code. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-18."
@@ -614,9 +618,9 @@
     {
       "id": "spa-api-spa-api-19-remove-ssr-only-depen-abd86102",
       "title": "[SPA-API] SPA-API-19 Remove SSR-only dependencies",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:15:02.001Z",
-      "updated": "2026-04-08T20:15:02.000Z",
+      "updated": "2026-04-09T17:19:15.112Z",
       "type": "chore",
       "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
       "body": "Remove SSR-only dependencies from package.json after runtime parity is confirmed. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-19."
@@ -626,17 +630,25 @@
       "title": "[SPA-API] SPA-API-21 Add Playwright SPA coverage",
       "column": "Backlog",
       "created": "2026-04-08T20:15:02.032Z",
-      "updated": "2026-04-08T20:15:02.032Z",
+      "updated": "2026-04-09T17:33:59.232Z",
       "type": "chore",
       "parentId": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
-      "body": "Add Playwright coverage for SPA navigation, nested-route refresh, and key comment flows. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-21."
+      "body": "Add Playwright coverage for SPA navigation, nested-route refresh, and key comment flows. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-21.",
+      "comments": [
+        {
+          "id": "comment-opencode-dc060aea",
+          "author": "OpenCode",
+          "created": "2026-04-09T17:33:59.232Z",
+          "body": "Migration is complete. Browser automation remains as a follow-up because Playwright browser installation/runtime was not available in this environment. API integration tests, build, typecheck, deep-link HTTP verification, and production smoke tests all passed."
+        }
+      ]
     },
     {
       "id": "spa-api-spa-api-20-add-spa-deep-link-fal-ab502fef",
       "title": "[SPA-API] SPA-API-20 Add SPA deep-link fallback",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:15:02.032Z",
-      "updated": "2026-04-08T20:15:02.031Z",
+      "updated": "2026-04-09T17:19:15.115Z",
       "type": "feature",
       "parentId": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
       "body": "Add SPA fallback handling for deep links and verify refresh behavior on nested routes. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-20."
@@ -644,9 +656,9 @@
     {
       "id": "spa-api-spa-api-22-update-docs-for-spa-a-5020a008",
       "title": "[SPA-API] SPA-API-22 Update docs for SPA/API architecture",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:15:02.032Z",
-      "updated": "2026-04-08T20:15:02.032Z",
+      "updated": "2026-04-09T17:19:15.116Z",
       "type": "chore",
       "parentId": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
       "body": "Update README.md and migration docs to reflect the SPA/API architecture and commands. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-22."
@@ -654,9 +666,9 @@
     {
       "id": "spa-api-spa-api-23-run-final-verificatio-af203c9a",
       "title": "[SPA-API] SPA-API-23 Run final verification and cleanup",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:15:02.033Z",
-      "updated": "2026-04-08T20:15:02.033Z",
+      "updated": "2026-04-09T17:33:59.069Z",
       "type": "chore",
       "parentId": "spa-api-phase-5-hardening-and-cleanup-a30b5f99",
       "body": "Run final verification: typecheck, build, CLI validation, desktop/mobile checks, and dead-code cleanup. Source: SPA_API_MIGRATION_PLAN.md ticket SPA-API-23."
@@ -664,12 +676,389 @@
     {
       "id": "spa-api-spa-api-18a-remove-legacy-ssr-fa-6207d5cc",
       "title": "[SPA-API] SPA-API-18A Remove legacy SSR fallback handlers",
-      "column": "Backlog",
+      "column": "Done",
       "created": "2026-04-08T20:18:53.762Z",
-      "updated": "2026-04-08T20:18:53.761Z",
+      "updated": "2026-04-09T17:19:15.111Z",
       "type": "chore",
       "parentId": "spa-api-phase-4-remove-ssr-infrastructur-11231c3c",
       "body": "Audit and remove legacy React Router SSR fallback behavior and transitional server-rendered route fallbacks. Verify production runtime no longer depends on SSR fallback handlers once SPA deep-link fallback is in place."
+    },
+    {
+      "id": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "title": "[LEXICAL] Migrate viewer-only markdown flow to a Lexical editor",
+      "column": "Backlog",
+      "created": "2026-04-09T17:35:28.223Z",
+      "updated": "2026-04-11T12:19:55.950Z",
+      "type": "feature",
+      "body": "Replace the current view-only markdown experience with a Lexical-based editor that loads local .md files, preserves markdown-compatible content, saves changes back to disk, and supports images through a file-backed workflow.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.943Z"
+    },
+    {
+      "id": "lexical-lex-01-inventory-markdown-round--0769889a",
+      "title": "[LEXICAL] LEX-01 Inventory markdown round-trip requirements",
+      "column": "Done",
+      "created": "2026-04-09T17:35:41.471Z",
+      "updated": "2026-04-11T12:19:55.762Z",
+      "type": "chore",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Document which existing markdown constructs must survive import/export without loss, including headings, lists, tables, code fences, links, images, Mermaid blocks, and annotation-adjacent behavior. Define what stays read-only or falls back to raw markdown when Lexical cannot round-trip safely.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.761Z"
+    },
+    {
+      "id": "lexical-lex-03-add-server-markdown-write-a7d7b4f4",
+      "title": "[LEXICAL] LEX-03 Add server markdown write service",
+      "column": "Review",
+      "created": "2026-04-09T17:35:41.516Z",
+      "updated": "2026-04-11T12:19:55.900Z",
+      "type": "feature",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Extend the server file layer with a write service that saves markdown content back to disk under the configured content root.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.898Z"
+    },
+    {
+      "id": "lexical-lex-05-add-frontend-save-client--e1b9958b",
+      "title": "[LEXICAL] LEX-05 Add frontend save client and dirty-state tracking",
+      "column": "Review",
+      "created": "2026-04-09T17:35:41.516Z",
+      "updated": "2026-04-11T12:19:55.922Z",
+      "type": "feature",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Add API client support for saving edited markdown and track dirty, saving, and error states in the editor UI.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.919Z"
+    },
+    {
+      "id": "lexical-lex-02-select-lexical-nodes-and--3999e36b",
+      "title": "[LEXICAL] LEX-02 Select Lexical nodes and plugins for markdown-safe editing",
+      "column": "Review",
+      "created": "2026-04-09T17:35:41.517Z",
+      "updated": "2026-04-11T12:19:55.904Z",
+      "type": "chore",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Choose the minimal Lexical node and plugin set that maps cleanly to markdown output. Avoid enabling rich-text features that cannot be written back to .md files without lossy conversion.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.899Z"
+    },
+    {
+      "id": "lexical-lex-04-implement-file-save-api-e-0c449cae",
+      "title": "[LEXICAL] LEX-04 Implement file-save API endpoint",
+      "column": "Review",
+      "created": "2026-04-09T17:35:41.517Z",
+      "updated": "2026-04-11T12:19:55.926Z",
+      "type": "feature",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Add a write endpoint such as PUT /api/files/*path with path validation, normalized error responses, and safe handling for missing files and write failures.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.919Z"
+    },
+    {
+      "id": "lexical-lex-06-build-editor-shell-and-re-6d52189c",
+      "title": "[LEXICAL] LEX-06 Build editor shell and read/edit mode toggle",
+      "column": "Review",
+      "created": "2026-04-09T17:35:41.517Z",
+      "updated": "2026-04-11T12:19:55.924Z",
+      "type": "feature",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Add a Lexical editor mode within the existing document route so users can switch between read and edit flows without losing navigation context.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.919Z"
+    },
+    {
+      "id": "lexical-lex-07-implement-markdown-import-3987aa6d",
+      "title": "[LEXICAL] LEX-07 Implement markdown import/export with Lexical",
+      "column": "Review",
+      "created": "2026-04-09T17:35:55.875Z",
+      "updated": "2026-04-11T12:19:55.919Z",
+      "type": "feature",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Load raw .md into Lexical on open and export edited content back to markdown on save. Verify stable round-tripping for the supported feature set.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.918Z"
+    },
+    {
+      "id": "lexical-lex-08-preserve-unsupported-bloc-8b400511",
+      "title": "[LEXICAL] LEX-08 Preserve unsupported blocks safely",
+      "column": "Review",
+      "created": "2026-04-09T17:35:55.889Z",
+      "updated": "2026-04-11T12:19:55.944Z",
+      "type": "feature",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Handle Mermaid fences, unknown HTML, or unsupported markdown constructs without destructive edits. Prefer raw-block preservation, read-only rendering, or explicit fallback behavior.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.942Z"
+    },
+    {
+      "id": "lexical-lex-09-add-image-insertion-and-d-056ebf0d",
+      "title": "[LEXICAL] LEX-09 Add image insertion and disk-backed asset flow",
+      "column": "Review",
+      "created": "2026-04-09T17:35:55.893Z",
+      "updated": "2026-04-11T12:19:55.948Z",
+      "type": "feature",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Support inserting images by copying or uploading files into a project-relative asset location and serializing them to relative markdown image paths.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.943Z"
+    },
+    {
+      "id": "lexical-lex-10-add-editor-ux-for-save-re-5707e1cb",
+      "title": "[LEXICAL] LEX-10 Add editor UX for save, reload, and unsaved changes",
+      "column": "Review",
+      "created": "2026-04-09T17:35:55.984Z",
+      "updated": "2026-04-11T12:19:55.946Z",
+      "type": "feature",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Add save actions, keyboard shortcuts, feedback for save success or failure, and protection against losing unsaved changes during navigation or reload.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.942Z"
+    },
+    {
+      "id": "lexical-lex-11-add-automated-coverage-fo-f1d328a2",
+      "title": "[LEXICAL] LEX-11 Add automated coverage for edit/save round-trips",
+      "column": "Review",
+      "created": "2026-04-09T17:35:55.995Z",
+      "updated": "2026-04-11T12:19:55.949Z",
+      "type": "chore",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Add tests for markdown import/export fidelity, save endpoint behavior, and key document-editing flows including image serialization.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.943Z"
+    },
+    {
+      "id": "lexical-lex-12-update-docs-and-rollout-c-b6b124da",
+      "title": "[LEXICAL] LEX-12 Update docs and rollout constraints",
+      "column": "Review",
+      "created": "2026-04-09T17:35:55.995Z",
+      "updated": "2026-04-11T12:19:55.947Z",
+      "type": "chore",
+      "parentId": "lexical-migrate-viewer-only-markdown-flo-41573100",
+      "body": "Document the Lexical editor architecture, markdown feature limits, image asset conventions, and local-file save behavior in README and project notes.",
+      "deleted": true,
+      "deletedAt": "2026-04-11T12:19:55.943Z"
+    },
+    {
+      "id": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "title": "Migrate markdown workspace to source-first editor with external comments and section index",
+      "column": "Done",
+      "created": "2026-04-11T12:16:46.872Z",
+      "updated": "2026-04-11T20:04:09.461Z",
+      "type": "feature",
+      "body": "Goal: Replace the current Lexical-based markdown workflow with a GitHub-style source-first experience.\n\nTags: editor, markdown, codemirror, preview, comments, anchors, outline, migration\n\nScope:\n- Raw markdown remains the only source of truth\n- Replace Lexical edit mode with CodeMirror 6\n- Replace Lexical viewer with react-markdown preview\n- Keep comments external to markdown files\n- Add robust hybrid comment anchors\n- Add heading/section summary index from markdown AST\n\nNon-goals:\n- LLM-generated summaries\n- Rich-text round-trip editing\n- atjson-based document storage\n\nVerification:\n- Saving preserves markdown exactly as typed in source mode\n- Preview renders supported markdown consistently\n- Comments persist outside markdown files and survive normal edits\n- Section index links align with rendered headings\n- Existing load/save flows continue to work"
+    },
+    {
+      "id": "replace-lexical-viewer-with-react-markdo-b1522820",
+      "title": "Replace Lexical viewer with react-markdown preview pipeline",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.283Z",
+      "updated": "2026-04-11T12:28:18.394Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: preview, markdown, react-markdown, rendering\n\nScope:\n- Replace Lexical viewer with markdown preview rendering\n- Use react-markdown with remark-gfm, rehype-highlight, and rehype-slug\n- Keep heading ids stable for anchor navigation and comments\n- Support existing code block rendering and markdown images\n\nSub-tasks:\n- Build MarkdownPreview component\n- Configure remark/rehype pipeline\n- Add safe handling for raw HTML decision if needed\n- Ensure preview layout works on desktop and mobile\n- Align preview theme with existing app styles\n\nVerification:\n- GFM lists, tables, task lists, links, headings, blockquotes, and code blocks render correctly\n- Heading anchors are deterministic\n- Preview does not mutate saved content\n- Build and typecheck pass"
+    },
+    {
+      "id": "replace-lexical-editor-with-codemirror-6-1d253162",
+      "title": "Replace Lexical editor with CodeMirror 6 source editor",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.284Z",
+      "updated": "2026-04-11T12:28:18.397Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: editor, codemirror, markdown, source-mode\n\nScope:\n- Introduce CodeMirror 6 editor component for raw markdown\n- Use @uiw/react-codemirror and @codemirror/lang-markdown\n- Preserve existing dirty state, save shortcut, save/cancel behavior, and navigation blocking\n- Keep markdown string as the only editable state\n\nSub-tasks:\n- Add CodeMirror dependencies\n- Build MarkdownSourceEditor component\n- Wire route state from Lexical editor to raw source editor\n- Preserve theme styling and mobile usability\n- Remove Lexical-only edit restrictions and notices that no longer apply\n\nVerification:\n- Open file, edit markdown, save, reload, and confirm text matches exactly\n- Cmd/Ctrl+S saves correctly\n- Cancel restores server version\n- Navigation blocker still protects unsaved changes"
+    },
+    {
+      "id": "implement-external-comment-workflow-for--03a550e2",
+      "title": "Implement external comment workflow for preview selections",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.418Z",
+      "updated": "2026-04-11T12:35:09.390Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: comments, annotations, preview, sidebar, api\n\nScope:\n- Keep comments outside markdown files\n- Reuse existing comment storage and sidebar concepts\n- Allow users to select preview text and create anchored comments\n- Highlight matching comment ranges in rendered preview\n\nSub-tasks:\n- Mount AnnotationStoreProvider in the markdown route\n- Integrate comment sidebar into page layout\n- Capture preview text selection for comment creation\n- Persist comments through the external API/store only\n- Highlight and select active comment anchors in preview\n\nVerification:\n- Creating a comment does not change markdown file content\n- New comments appear in sidebar and highlight the selected text\n- Reload restores comments from the external store\n- Deleting or resolving comments updates UI correctly"
+    },
+    {
+      "id": "build-markdown-section-parser-and-summar-902c3aed",
+      "title": "Build markdown section parser and summary index sidebar",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.418Z",
+      "updated": "2026-04-11T12:28:18.400Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: outline, summary, headings, ast, navigation\n\nScope:\n- Extract headings and section ranges directly from markdown AST\n- Build a navigable summary/index similar to a document outline\n- Use structural excerpts only, not LLM summaries\n\nLibraries:\n- unified\n- remark-parse\n- remark-gfm\n- unist-util-visit\n- mdast-util-to-string\n- github-slugger\n\nSection model:\n- slug\n- depth\n- title\n- startOffset\n- endOffset\n- excerpt\n- children\n\nSub-tasks:\n- Build markdown section extraction utility\n- Generate stable heading slugs shared with preview\n- Render nested summary/index sidebar\n- Scroll preview to selected section\n- Optionally sync source editor selection later\n\nVerification:\n- Heading tree matches the markdown structure\n- Clicking an index item scrolls to the correct heading\n- Excerpts come from the correct section body\n- Repeated heading names still get stable unique slugs"
+    },
+    {
+      "id": "upgrade-comment-anchoring-to-hybrid-sour-f0dc69ec",
+      "title": "Upgrade comment anchoring to hybrid source-aware recovery",
+      "column": "Done",
+      "created": "2026-04-11T12:17:14.419Z",
+      "updated": "2026-04-11T12:38:47.210Z",
+      "type": "feature",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: comments, anchors, resilience, recovery, source-text\n\nScope:\n- Move from quote-only anchors to a hybrid anchor snapshot inspired by with-md\n- Use dom-anchor-text-quote for selection capture and dom-anchor-text-position as an additional hint\n- Store enough metadata to recover anchors after normal markdown edits\n\nAnchor fields:\n- textQuote\n- prefix\n- suffix\n- rangeStart\n- rangeEnd\n- headingPath\n- fallbackLine\n\nSub-tasks:\n- Expand comment schema and types for new anchor fields\n- Capture heading path and fallback line during comment creation\n- Implement ordered recovery resolver for source text and preview\n- Handle duplicate quote disambiguation with context scoring\n- Mark comments detached when recovery fails instead of guessing silently\n\nVerification:\n- Comments survive small edits before and after the quoted text\n- Duplicate text passages resolve to the correct section using context\n- Comments on changed text become detached instead of attaching to the wrong content\n- Existing comments migrate or fail safely"
+    },
+    {
+      "id": "add-migration-dependencies-and-shared-ma-53a4a363",
+      "title": "Add migration dependencies and shared markdown utilities",
+      "column": "Done",
+      "created": "2026-04-11T12:17:31.339Z",
+      "updated": "2026-04-11T12:28:18.245Z",
+      "type": "chore",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: dependencies, utilities, setup\n\nScope:\n- Add CodeMirror and markdown preview dependencies\n- Add mdast section parsing dependencies\n- Consolidate shared markdown helpers used by preview, comments, and index\n\nSub-tasks:\n- Install and lock dependency versions\n- Create shared slug/heading utilities\n- Create shared markdown parsing helpers\n- Remove unused Lexical-specific dependencies only after migration completes\n\nVerification:\n- Dependency install is reproducible\n- Type imports resolve cleanly\n- No duplicate slug logic exists in multiple places"
+    },
+    {
+      "id": "retire-lexical-specific-code-paths-after-1ef3ce40",
+      "title": "Retire Lexical-specific code paths after migration",
+      "column": "Done",
+      "created": "2026-04-11T12:17:31.448Z",
+      "updated": "2026-04-11T17:51:41.297Z",
+      "type": "chore",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: cleanup, lexical, migration, debt\n\nScope:\n- Remove obsolete Lexical editor/viewer code once replacements are live\n- Delete markdown editability warnings that only existed for Lexical round-tripping\n- Keep only code needed for source-first markdown editing\n\nSub-tasks:\n- Remove unused components and helpers\n- Remove dead imports and route branches\n- Reassess package.json for removable Lexical packages\n- Update any tests or docs that reference Lexical\n\nVerification:\n- No route imports Lexical components anymore\n- Typecheck and build pass after cleanup\n- No dead code remains for the old editor path"
+    },
+    {
+      "id": "run-migration-verification-across-editin-72bd0b16",
+      "title": "Run migration verification across editing, comments, and summary flows",
+      "column": "Done",
+      "created": "2026-04-11T12:17:31.453Z",
+      "updated": "2026-04-11T17:51:41.363Z",
+      "type": "chore",
+      "parentId": "migrate-markdown-workspace-to-source-fir-a6e1e89a",
+      "body": "Tags: verification, qa, regression, build\n\nScope:\n- Verify the full source-first workflow end to end\n- Cover save fidelity, comment persistence, and summary/index behavior\n\nTest matrix:\n- Plain markdown file with headings and code blocks\n- GFM file with tables and task lists\n- File with repeated phrases for anchor disambiguation\n- File with repeated heading names for slug uniqueness\n- Mobile and desktop layouts\n\nVerification:\n- npm run typecheck passes\n- npm run build passes\n- Saving preserves exact markdown text\n- Comments survive reload and routine edits without touching file content\n- Summary index navigates correctly in preview"
+    },
+    {
+      "id": "polish-markdown-view-page-layout-and-pos-38d96664",
+      "title": "Polish markdown view page layout and post-save behavior",
+      "column": "Backlog",
+      "created": "2026-04-11T20:04:09.480Z",
+      "updated": "2026-04-11T20:04:09.477Z",
+      "type": "feature",
+      "body": "Goal: Refine the markdown view page layout and immediate save feedback.\n\nTags: ui, layout, preview, outline, save-flow\n\nScope:\n- Replace the sticky top action bar behavior with a static header layout\n- Keep the document content below the header in its own scrollable view area\n- Simplify the Summary panel to show headings only\n- Keep the Summary panel on the right side\n- Show the latest raw markdown content immediately after save in source mode flow\n\nVerification:\n- Header stays fixed in normal document flow and does not overlay content\n- Main content area scrolls cleanly below the header\n- Summary shows heading titles only with correct navigation\n- Summary remains on the right side on supported layouts\n- After save, the visible source content reflects the saved markdown immediately without stale state"
+    },
+    {
+      "id": "make-markdown-view-header-static-with-co-870d56c9",
+      "title": "Make markdown view header static with content scrolling below",
+      "column": "Done",
+      "created": "2026-04-11T20:04:23.893Z",
+      "updated": "2026-04-11T20:17:10.947Z",
+      "type": "feature",
+      "parentId": "polish-markdown-view-page-layout-and-pos-38d96664",
+      "body": "Tags: ui, layout, header, scrolling\n\nScope:\n- Replace the sticky top bar on the markdown view page with a static header\n- Keep actions and breadcrumbs visible in the page header area\n- Move document scrolling into the content region below the header\n\nSub-tasks:\n- Audit current view-page layout containers and sticky behavior\n- Remove sticky positioning from the top bar\n- Ensure preview/editor region scrolls independently below the header\n- Preserve responsive layout on desktop and mobile\n\nVerification:\n- Header no longer sticks while scrolling document content\n- Content scroll starts below the header without overlap\n- Edit/view actions remain accessible and correctly positioned"
+    },
+    {
+      "id": "simplify-summary-panel-to-headings-only--dcacaa7d",
+      "title": "Simplify Summary panel to headings only on the left side",
+      "column": "Done",
+      "created": "2026-04-11T20:04:23.893Z",
+      "updated": "2026-04-11T20:21:12.648Z",
+      "type": "feature",
+      "parentId": "polish-markdown-view-page-layout-and-pos-38d96664",
+      "body": "Tags: ui, summary, outline, navigation\n\nScope:\n- Remove excerpt text from the Summary panel\n- Keep only heading labels in the outline\n- Move the Summary panel to the left side\n\nSub-tasks:\n- Update Summary item rendering to heading-only rows\n- Keep heading nesting/indentation behavior\n- Move the Summary panel to the left side in view and edit modes\n- Ensure small-screen layout still behaves sensibly\n\nVerification:\n- Summary renders heading titles only\n- Clicking a heading still navigates to the correct section\n- Summary remains on the left side for wide layouts",
+      "comments": [
+        {
+          "id": "comment-opencode-ab068ddf",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:19:46.568Z",
+          "body": "Ticket updated to reflect the current requirement: Summary belongs on the left side, not the right."
+        },
+        {
+          "id": "comment-opencode-d67712dd",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:21:12.648Z",
+          "body": "Implemented the updated requirement: Summary now renders on the left side on wide layouts and remains headings-only. The markdown content, Summary, and comments panels now each have their own scroll container under the app header. Verified with `npm run typecheck` and `npm run build`."
+        }
+      ]
+    },
+    {
+      "id": "show-saved-raw-markdown-immediately-afte-a30b1926",
+      "title": "Render direct markdown file routes inside the app shell",
+      "column": "Done",
+      "created": "2026-04-11T20:04:23.893Z",
+      "updated": "2026-04-11T20:14:36.667Z",
+      "type": "bug",
+      "parentId": "polish-markdown-view-page-layout-and-pos-38d96664",
+      "body": "Tags: bug, routing, markdown, app-shell, rendering\n\nScope:\n- Direct markdown file routes such as `/AGENTS.md` currently show raw markdown content by itself\n- These routes should instead render within the normal application shell/layout\n- The markdown content should remain readable, but it must stay inside the app experience with navigation and surrounding UI\n\nSub-tasks:\n- Identify why direct markdown file URLs bypass the app-shell experience\n- Route raw markdown file requests back through the normal document page\n- Ensure markdown content renders inside the app layout instead of standalone raw output\n- Verify normal in-app document viewing still behaves consistently\n\nVerification:\n- Visiting `/AGENTS.md` shows the document inside the app shell\n- Navigation, sidebars, and page layout are present\n- Markdown browsing through the app continues to work as before",
+      "comments": [
+        {
+          "id": "comment-opencode-2629e387",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:06:22.752Z",
+          "body": "Fixed as a bug in `app/routes/$.tsx`. Save now keeps the user in source mode and updates `draft` from the saved server response immediately, so the latest raw markdown stays visible after save. Verified with `npm run typecheck` and `npm run build`."
+        },
+        {
+          "id": "comment-opencode-3f974cee",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:09:37.991Z",
+          "body": "Ticket corrected: the real issue is that direct markdown file routes like `/AGENTS.md` should render raw markdown without the app chrome. The earlier change in `app/routes/$.tsx` fixed a separate save-flow UX issue but did not address this raw-route bug."
+        },
+        {
+          "id": "comment-opencode-a016eaa1",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:12:12.488Z",
+          "body": "Ticket corrected again: the actual bug is the opposite of the prior rewrite. Direct markdown routes like `/AGENTS.md` currently show raw content by itself, but they should render inside the normal app shell."
+        },
+        {
+          "id": "comment-opencode-6fefe6aa",
+          "author": "OpenCode",
+          "created": "2026-04-11T20:14:36.666Z",
+          "body": "Fixed the actual routing bug in `scripts/dev-server.js` and `scripts/markdown-viewer.js`. Direct `.md` requests like `/AGENTS.md` are now sent through the SPA entrypoint before Vite/static file serving can return the raw file. Verified with live HTTP checks against both dev and production servers, plus `npm run typecheck` and `npm run build`."
+        }
+      ]
+    },
+    {
+      "id": "add-right-side-preview-in-edit-mode-cab28a89",
+      "title": "Add right-side preview in edit mode",
+      "column": "Backlog",
+      "created": "2026-04-12T01:33:58.973Z",
+      "updated": "2026-04-12T01:33:58.971Z",
+      "type": "feature",
+      "body": "In edit mode, display a live markdown preview panel on the right side so users can edit and preview simultaneously."
+    },
+    {
+      "id": "replace-inline-highlight-with-numbered-c-e5a93899",
+      "title": "Replace inline highlight with numbered comment bubbles",
+      "column": "Backlog",
+      "created": "2026-04-12T01:33:58.988Z",
+      "updated": "2026-04-12T01:33:58.985Z",
+      "type": "feature",
+      "body": "Instead of highlighting selected text for doc comments, show numbered bubble markers tied to each comment."
+    },
+    {
+      "id": "show-comment-tooltip-on-bubble-hover-80ee45eb",
+      "title": "Show comment tooltip on bubble hover",
+      "column": "Backlog",
+      "created": "2026-04-12T01:34:04.333Z",
+      "updated": "2026-04-12T01:34:04.333Z",
+      "type": "feature",
+      "body": "On hover over a comment bubble marker, display the corresponding comment text in a tooltip/popover."
+    },
+    {
+      "id": "preserve-section-position-when-entering--ea1a14e0",
+      "title": "Preserve section position when entering edit mode",
+      "column": "Backlog",
+      "created": "2026-04-12T01:34:04.334Z",
+      "updated": "2026-04-12T01:34:04.333Z",
+      "type": "feature",
+      "body": "When switching from preview to edit mode, open the editor at the same document section/scroll position currently visible in preview."
+    },
+    {
+      "id": "add-ignore-paths-for-markdown-file-disco-f17a54cd",
+      "title": "Add ignore paths for markdown file discovery",
+      "column": "Backlog",
+      "created": "2026-04-12T01:42:24.894Z",
+      "updated": "2026-04-12T01:42:24.893Z",
+      "type": "feature",
+      "body": "Allow users to configure file and folder ignore paths so the server skips those locations when scanning for .md files."
+    },
+    {
+      "id": "fix-inline-comment-squiggle-click-double-ff616e8b",
+      "title": "Fix inline comment squiggle click/double-click interactions",
+      "column": "Backlog",
+      "created": "2026-04-12T11:40:57.930Z",
+      "updated": "2026-04-12T11:40:57.928Z",
+      "type": "bug",
+      "body": "Regression in comment highlights:\n- Single click on squiggly annotation does not consistently select/focus the linked comment.\n- Double click does not reliably open the inline comment popup.\n\nExpected behavior:\n- Single click selects/jumps to comment item in sidebar.\n- Double click opens popup with index + comment text.\n\nRepro:\n1) Open markdown preview with inline comments.\n2) Click squiggly highlighted text once.\n3) Double click same squiggle.\n\nNotes:\nLikely event sequencing conflict between single-click delay and DOM re-render/re-anchoring of squiggle nodes."
     }
   ]
 }

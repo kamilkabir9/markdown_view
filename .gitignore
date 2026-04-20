@@ -23,3 +23,9 @@ yarn-error.log*
 .playwright-cli/**
 screenshots/**
 scratchpad.txt
+.markdown-viewer/
+*.gif
+/.claude/worktrees
+*.md
+*.md
+*.md

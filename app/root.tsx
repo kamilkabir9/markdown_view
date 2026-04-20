@@ -1,39 +1,19 @@
 import {
   Link,
-  Links,
-  Meta,
   Outlet,
-  Scripts,
-  ScrollRestoration,
   useNavigation,
 } from 'react-router';
-import type { LinksFunction } from 'react-router';
 import { useState, useEffect } from 'react';
 import type { ComponentType } from 'react';
 import { SettingsIcon } from 'lucide-react';
-import { ThemeSwitcher } from '~/components/ThemeSwitcher';
+import { AppSettingsDialog } from '~/components/AppSettingsDialog';
 import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog';
-import { Separator } from '~/components/ui/separator';
+import { Toaster } from '~/components/ui/sonner';
+import { TooltipProvider } from '~/components/ui/tooltip';
 import { AppChromeProvider, useAppChrome } from '~/contexts/AppChromeContext';
-import { CopySettingsProvider, useCopySettings } from '~/contexts/CopySettingsContext';
+import { CopySettingsProvider } from '~/contexts/CopySettingsContext';
 import { ThemeProvider } from '~/contexts/ThemeContext';
-import packageJson from '../package.json';
-
 import './styles/tailwind.css';
-
-export const links: LinksFunction = () => [];
-
-const APP_VERSION = packageJson.version;
 
 function DevAgentation() {
   const [Agentation, setAgentation] = useState<ComponentType | null>(null);
@@ -96,23 +76,15 @@ function ScrollToTopButton() {
 function AppShell() {
   return (
     <AppChromeProvider>
-      <AppShellInner />
+      <TooltipProvider delay={180}>
+        <AppShellInner />
+      </TooltipProvider>
     </AppChromeProvider>
   );
 }
 
 function AppShellInner() {
   const { breadcrumbs, actions } = useAppChrome();
-  const {
-    contextPrefix,
-    commentPrefix,
-    commentsDelimiter,
-    pathMode,
-    setContextPrefix,
-    setCommentPrefix,
-    setCommentsDelimiter,
-    setPathMode,
-  } = useCopySettings();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
@@ -121,8 +93,8 @@ function AppShellInner() {
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground">
         Skip to content
       </a>
-      <div className="relative isolate mx-auto flex min-h-screen w-full max-w-[1420px] flex-col px-4 pb-10 pt-5 sm:px-6 lg:px-8">
-        <header className="sticky top-3 z-40 mb-5 space-y-3 rounded-md border border-border/65 bg-background/88 px-3 py-2.5 backdrop-blur-sm supports-[backdrop-filter]:bg-background/72 sm:px-4">
+      <div className="relative isolate mx-auto flex h-screen w-full max-w-[1420px] flex-col overflow-hidden px-4 pb-6 pt-5 sm:px-6 lg:px-8">
+        <header className="mb-5 space-y-3 rounded-md border border-border/65 bg-background px-3 py-2.5 sm:px-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <Link to="/" className="inline-flex items-center text-xs tracking-[0.18em] text-muted-foreground uppercase transition-colors hover:text-foreground">
@@ -149,124 +121,26 @@ function AppShellInner() {
           )}
         </header>
 
-        <main id="main-content" className="flex-1">
+        <main id="main-content" className="flex flex-1 min-h-0 flex-col">
           <Outlet />
         </main>
-        <Separator className="mb-4 mt-12 opacity-55" />
-        <footer className="px-1 py-2 text-xs tracking-[0.14em] text-muted uppercase">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p>Markdown Viewer</p>
-            <p>v{APP_VERSION}</p>
-          </div>
-        </footer>
       </div>
 
-      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="sm:max-w-[28rem]">
-          <DialogHeader>
-            <DialogTitle>Settings</DialogTitle>
-            <DialogDescription>Configure reading theme and copy formatting.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-5 pt-1">
-            <div>
-              <p className="mb-2 text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">
-                Theme
-              </p>
-              <ThemeSwitcher className="w-full" />
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-[0.68rem] tracking-[0.14em] text-muted-foreground uppercase">
-                Copy format
-              </p>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="copy-context-prefix">Context prefix</Label>
-                <Input
-                  id="copy-context-prefix"
-                  value={contextPrefix}
-                  onChange={(event) => setContextPrefix(event.target.value)}
-                  placeholder="Context"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="copy-comment-prefix">Comment prefix</Label>
-                <Input
-                  id="copy-comment-prefix"
-                  value={commentPrefix}
-                  onChange={(event) => setCommentPrefix(event.target.value)}
-                  placeholder="Comment"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="copy-comments-delimiter">Comments delimiter</Label>
-                <Input
-                  id="copy-comments-delimiter"
-                  value={commentsDelimiter}
-                  onChange={(event) => setCommentsDelimiter(event.target.value)}
-                  placeholder="---"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="copy-path-mode">File path mode</Label>
-                <Select
-                  value={pathMode}
-                  onValueChange={(value) => {
-                    if (value === 'relative' || value === 'full') {
-                      setPathMode(value);
-                    }
-                  }}
-                >
-                  <SelectTrigger id="copy-path-mode" className="h-8 w-full rounded-sm border-border/70 bg-background px-3 py-2">
-                    <SelectValue>
-                      {(value: string | null) => (value === 'full' ? 'Full path' : 'Relative path')}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent align="start" className="rounded-sm">
-                    <SelectGroup>
-                      <SelectItem value="relative" className="rounded-sm">Relative path</SelectItem>
-                      <SelectItem value="full" className="rounded-sm">Full path</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AppSettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
 
       <ScrollToTopButton />
+      <Toaster richColors closeButton position="top-right" />
       <DevAgentation />
     </>
   );
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect x=%2212%22 y=%228%22 width=%2240%22 height=%2248%22 rx=%224%22 fill=%22%23171311%22/><line x1=%2220%22 y1=%2224%22 x2=%2244%22 y2=%2224%22 stroke=%22%23F4EFE7%22 stroke-width=%223%22/><line x1=%2220%22 y1=%2234%22 x2=%2244%22 y2=%2234%22 stroke=%22%23F4EFE7%22 stroke-width=%223%22/></svg>" />
-        <Meta />
-        <Links />
-      </head>
-      <body className="min-h-screen bg-background text-foreground antialiased">
-        <ThemeProvider>
-          <CopySettingsProvider>
-            <AppShell />
-          </CopySettingsProvider>
-        </ThemeProvider>
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
 export default function App() {
-  return <Outlet />;
+  return (
+    <ThemeProvider>
+      <CopySettingsProvider>
+        <AppShell />
+      </CopySettingsProvider>
+    </ThemeProvider>
+  );
 }

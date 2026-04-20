@@ -1,89 +1,130 @@
-import { useEffect, type RefObject } from 'react';
+import { useEffect, useState, type RefObject } from 'react';
 import type { Annotation } from '~/contexts/AnnotationStore';
+import { findAnnotationBlock, isRangeWithinSingleAnnotationBlock } from '~/lib/annotation-blocks';
 
-const BLOCK_SELECTOR = 'p, li, blockquote, pre, table, h1, h2, h3, h4, h5, h6';
+const SQUIGGLE_SELECTOR = 'span[data-annotation-squiggle][data-annotation-id][data-annotation-number]';
+const ANNOTATION_CONTENT_SELECTOR = '[data-annotation-content]';
 
 interface CommentHighlighterProps {
-  containerRef: RefObject<HTMLDivElement | null>;
+  containerRef: RefObject<HTMLElement | null>;
   annotations: Annotation[];
   onAnnotationClick?: (annotation: Annotation) => void;
   activeAnnotationId?: string | null;
 }
 
-function getIntersectingTextNodes(range: Range, container: HTMLElement): Text[] {
-  const root =
-    range.commonAncestorContainer.nodeType === Node.TEXT_NODE
-      ? range.commonAncestorContainer.parentNode
-      : range.commonAncestorContainer;
-
-  if (!root) return [];
-
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      if (!(node instanceof Text)) return NodeFilter.FILTER_REJECT;
-      if (!node.textContent?.trim()) return NodeFilter.FILTER_REJECT;
-      if (!container.contains(node.parentNode)) return NodeFilter.FILTER_REJECT;
-      return range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-    },
-  });
-
-  const nodes: Text[] = [];
-  let current = walker.nextNode();
-  while (current) {
-    nodes.push(current as Text);
-    current = walker.nextNode();
-  }
-
-  return nodes;
+interface ResolvedAnnotationRange {
+  annotation: Annotation;
+  range: Range;
+  number: number;
 }
 
-function wrapRangeWithMarks(range: Range, annotationId: string, isActive: boolean): HTMLElement[] {
-  const container = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
-    ? (range.commonAncestorContainer as HTMLElement)
-    : range.commonAncestorContainer.parentElement;
+interface ActiveTooltip {
+  squiggle: HTMLElement;
+  label: string;
+  left: number;
+  top: number;
+  placement: 'top' | 'bottom';
+}
 
-  if (!container) return [];
+function formatTooltipComment(text: string): string {
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= 180) {
+    return normalized;
+  }
 
-  const textNodes = getIntersectingTextNodes(range, container);
-  const marks: HTMLElement[] = [];
+  return `${normalized.slice(0, 177)}...`;
+}
 
-  textNodes.forEach((textNode) => {
-    const nodeRange = document.createRange();
-    nodeRange.selectNodeContents(textNode);
+function buildTooltipLabel(number: number, commentText: string): string {
+  const comment = formatTooltipComment(commentText);
+  return comment ? `#${number} - ${comment}` : `#${number}`;
+}
 
-    const startOffset = textNode === range.startContainer ? range.startOffset : 0;
-    const endOffset = textNode === range.endContainer ? range.endOffset : textNode.textContent?.length ?? 0;
+function createSquiggle(annotationId: string, number: number, commentText: string, isActive: boolean): HTMLSpanElement {
+  const squiggle = document.createElement('span');
+  squiggle.setAttribute('data-annotation-squiggle', 'true');
+  squiggle.setAttribute('data-annotation-id', annotationId);
+  squiggle.setAttribute('data-annotation-number', String(number));
+  squiggle.className = ['annotation-squiggle', isActive ? 'annotation-squiggle--active' : ''].filter(Boolean).join(' ');
+  squiggle.setAttribute('role', 'button');
+  squiggle.setAttribute('tabindex', '0');
 
-    if (startOffset >= endOffset) return;
+  const tooltipLabel = buildTooltipLabel(number, commentText);
+  squiggle.setAttribute('aria-label', `Jump to inline comment ${tooltipLabel}`);
 
-    nodeRange.setStart(textNode, startOffset);
-    nodeRange.setEnd(textNode, endOffset);
+  return squiggle;
+}
 
-    const mark = document.createElement('mark');
-    mark.setAttribute('data-annotation-id', annotationId);
-    mark.className = [
-      'annotation-mark',
-      'box-decoration-clone cursor-pointer',
-      isActive ? 'annotation-mark--active' : '',
-    ].filter(Boolean).join(' ');
+function measureTooltip(squiggle: HTMLElement, label: string): ActiveTooltip {
+  const rect = squiggle.getBoundingClientRect();
+  const left = Math.min(Math.max(rect.left + rect.width / 2, 16), window.innerWidth - 16);
+  const placement = rect.top > 72 ? 'top' : 'bottom';
 
-    try {
-      nodeRange.surroundContents(mark);
-      marks.push(mark);
-    } catch {}
-  });
+  return {
+    squiggle,
+    label,
+    left,
+    top: placement === 'top' ? rect.top : rect.bottom,
+    placement,
+  };
+}
 
-  return marks;
+function trimRangeEdges(range: Range): Range | null {
+  const nextRange = range.cloneRange();
+
+  if (nextRange.startContainer.nodeType === Node.TEXT_NODE) {
+    const textNode = nextRange.startContainer as Text;
+    const text = textNode.textContent ?? '';
+    let start = Math.min(nextRange.startOffset, text.length);
+
+    while (start < text.length && /\s/.test(text[start] ?? '')) {
+      start += 1;
+    }
+
+    nextRange.setStart(textNode, start);
+  }
+
+  if (nextRange.endContainer.nodeType === Node.TEXT_NODE) {
+    const textNode = nextRange.endContainer as Text;
+    const text = textNode.textContent ?? '';
+    let end = Math.min(nextRange.endOffset, text.length);
+
+    while (end > 0 && /\s/.test(text[end - 1] ?? '')) {
+      end -= 1;
+    }
+
+    nextRange.setEnd(textNode, end);
+  }
+
+  if (nextRange.collapsed) {
+    return null;
+  }
+
+  return nextRange;
 }
 
 function findAnnotatedBlock(mark: HTMLElement, container: HTMLElement): HTMLElement | null {
-  const block = mark.closest(BLOCK_SELECTOR);
-  if (block instanceof HTMLElement && container.contains(block)) {
-    return block;
+  return findAnnotationBlock(mark, container);
+}
+
+function scrollActiveAnnotationIntoView(container: HTMLElement, annotationId: string | null | undefined): void {
+  if (!annotationId) {
+    return;
   }
 
-  const fallback = mark.parentElement;
-  return fallback && container.contains(fallback) ? fallback : null;
+  const activeBlock = container.querySelector<HTMLElement>('[data-annotation-active="true"]');
+  const activeSquiggle = container.querySelector<HTMLElement>(`${SQUIGGLE_SELECTOR}[data-annotation-id="${CSS.escape(annotationId)}"]`);
+  const target = activeBlock ?? activeSquiggle;
+
+  if (!target) {
+    return;
+  }
+
+  target.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+    inline: 'nearest',
+  });
 }
 
 export function CommentHighlighter({
@@ -92,150 +133,287 @@ export function CommentHighlighter({
   onAnnotationClick,
   activeAnnotationId,
 }: CommentHighlighterProps) {
+  const [activeTooltip, setActiveTooltip] = useState<ActiveTooltip | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !activeTooltip) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && activeTooltip.squiggle.contains(target)) {
+        return;
+      }
+
+      setActiveTooltip(null);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveTooltip(null);
+      }
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeTooltip]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !activeTooltip) return;
+
+    const container = containerRef.current;
+    if (!container) {
+      setActiveTooltip(null);
+      return;
+    }
+
+    const updateTooltipPosition = () => {
+      setActiveTooltip((current) => {
+        if (!current) return null;
+        if (!document.contains(current.squiggle)) return null;
+        return measureTooltip(current.squiggle, current.label);
+      });
+    };
+
+    container.addEventListener('scroll', updateTooltipPosition, { passive: true });
+    window.addEventListener('resize', updateTooltipPosition);
+
+    return () => {
+      container.removeEventListener('scroll', updateTooltipPosition);
+      window.removeEventListener('resize', updateTooltipPosition);
+    };
+  }, [activeTooltip, containerRef]);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const container = containerRef.current;
     if (!container) return;
-    const highlightContainer = container;
 
-    const abortController = new AbortController();
-    let isApplyingHighlights = false;
+    const highlightContainer = container;
+    let cancelled = false;
     let pendingFrame: number | null = null;
-    let mutationObserver: MutationObserver | null = null;
-    let clickHandlers: Array<{ mark: Element; handler: () => void }> = [];
+    let pendingSingleClick: number | null = null;
+    let handlers: Array<{
+      element: HTMLElement;
+      click: (event: MouseEvent) => void;
+      keydown: (event: KeyboardEvent) => void;
+    }> = [];
 
     function removeAllMarks() {
+      setActiveTooltip(null);
+      if (pendingSingleClick !== null) {
+        window.clearTimeout(pendingSingleClick);
+        pendingSingleClick = null;
+      }
+
       const annotatedBlocks = highlightContainer.querySelectorAll('[data-annotation-block]');
       annotatedBlocks.forEach((block) => {
         block.removeAttribute('data-annotation-block');
         block.removeAttribute('data-annotation-active');
       });
 
-      const existingMarks = highlightContainer.querySelectorAll('mark[data-annotation-id]');
+      const existingMarks = highlightContainer.querySelectorAll(SQUIGGLE_SELECTOR);
       existingMarks.forEach((mark) => {
-        try {
-          const parent = mark.parentNode;
-          if (!parent) return;
-          while (mark.firstChild) {
-            parent.insertBefore(mark.firstChild, mark);
+        const parent = mark.parentNode;
+        if (!parent) return;
+
+        const contentWrapper = mark.querySelector(`:scope > ${ANNOTATION_CONTENT_SELECTOR}`);
+        if (contentWrapper) {
+          while (contentWrapper.firstChild) {
+            parent.insertBefore(contentWrapper.firstChild, mark);
           }
-          parent.removeChild(mark);
-          parent.normalize();
+        }
+
+        parent.removeChild(mark);
+      });
+
+      handlers.forEach(({ element, click, keydown }) => {
+        try {
+          element.removeEventListener('click', click);
+          element.removeEventListener('keydown', keydown);
         } catch {}
       });
 
-      clickHandlers.forEach(({ mark, handler }) => {
-        try {
-          mark.removeEventListener('click', handler);
-        } catch {}
-      });
-      clickHandlers = [];
+      handlers = [];
     }
 
-    function applyHighlights() {
-      if (pendingFrame !== null) {
-        cancelAnimationFrame(pendingFrame);
+    async function applyHighlights() {
+      const inlineAnnotations = annotations.filter(
+        (annotation): annotation is Annotation & { anchor: NonNullable<Annotation['anchor']> } =>
+          !annotation.isGlobal && annotation.anchor !== null,
+      );
+
+      removeAllMarks();
+      if (inlineAnnotations.length === 0) {
+        return;
       }
 
-      pendingFrame = requestAnimationFrame(() => {
-        pendingFrame = null;
-        if (abortController.signal.aborted) return;
-
-        isApplyingHighlights = true;
-
-        if (annotations.length === 0) {
-          removeAllMarks();
-          isApplyingHighlights = false;
+      try {
+        const textQuote = await import('dom-anchor-text-quote');
+        if (cancelled) {
           return;
         }
 
-        import('dom-anchor-text-quote')
-          .then((textQuote) => {
-            if (abortController.signal.aborted) return;
+        const resolvedRanges: ResolvedAnnotationRange[] = [];
 
+        inlineAnnotations.forEach((annotation, index) => {
+          try {
+            const exact = annotation.anchor.exact.trim();
+            if (!exact) return;
+
+            const range = textQuote.toRange(highlightContainer, {
+              ...annotation.anchor,
+              exact,
+            });
+            if (!range || range.collapsed) return;
+
+            const trimmedRange = trimRangeEdges(range);
+            if (!trimmedRange || !isRangeWithinSingleAnnotationBlock(trimmedRange, highlightContainer)) {
+              return;
+            }
+
+            resolvedRanges.push({
+              annotation,
+              range: trimmedRange,
+              number: index + 1,
+            });
+          } catch {}
+        });
+
+        resolvedRanges
+          .sort((left, right) => right.range.compareBoundaryPoints(Range.START_TO_START, left.range) || right.number - left.number)
+          .forEach(({ annotation, range, number }) => {
             try {
-              removeAllMarks();
+              const squiggle = createSquiggle(annotation.id, number, annotation.text, annotation.id === activeAnnotationId);
+              const content = range.extractContents();
+              const contentWrapper = document.createElement('span');
+              contentWrapper.setAttribute('data-annotation-content', 'true');
+              contentWrapper.className = 'annotation-squiggle__content';
+              contentWrapper.append(content);
+              squiggle.append(contentWrapper);
+              range.insertNode(squiggle);
 
-              annotations.forEach((annotation) => {
-                try {
-                  if (!annotation.anchor) return;
-                  const range = textQuote.toRange(highlightContainer, annotation.anchor);
-                  if (!range || range.collapsed) return;
+              const block = findAnnotatedBlock(squiggle, highlightContainer);
+              if (block) {
+                block.setAttribute('data-annotation-block', 'true');
+                if (annotation.id === activeAnnotationId) {
+                  block.setAttribute('data-annotation-active', 'true');
+                }
+              }
 
-                  const marks = wrapRangeWithMarks(
-                    range,
-                    annotation.id,
-                    annotation.id === activeAnnotationId,
-                  );
-                  marks.forEach((mark) => {
-                    const block = findAnnotatedBlock(mark, highlightContainer);
-                    if (block) {
-                      block.setAttribute('data-annotation-block', 'true');
-                      if (annotation.id === activeAnnotationId) {
-                        block.setAttribute('data-annotation-active', 'true');
-                      }
-                    }
+              const tooltipLabel = buildTooltipLabel(number, annotation.text);
+              const clickHandler = (event: MouseEvent) => {
+                if (pendingSingleClick !== null) {
+                  window.clearTimeout(pendingSingleClick);
+                  pendingSingleClick = null;
+                }
 
-                    const clickHandler = () => onAnnotationClick?.(annotation);
-                    mark.addEventListener('click', clickHandler);
-                    clickHandlers.push({ mark, handler: clickHandler });
-                  });
-                } catch {}
+                if (event.detail >= 2) {
+                  onAnnotationClick?.(annotation);
+                  setActiveTooltip(measureTooltip(squiggle, tooltipLabel));
+                  return;
+                }
+
+                pendingSingleClick = window.setTimeout(() => {
+                  setActiveTooltip(null);
+                  onAnnotationClick?.(annotation);
+                  pendingSingleClick = null;
+                }, 220);
+              };
+              const keydownHandler = (event: KeyboardEvent) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  setActiveTooltip(null);
+                  onAnnotationClick?.(annotation);
+                  return;
+                }
+
+                if (event.key === 'Escape') {
+                  setActiveTooltip((current) => (current?.squiggle === squiggle ? null : current));
+                  return;
+                }
+
+                if (event.key.toLowerCase() === 'd') {
+                  event.preventDefault();
+                  onAnnotationClick?.(annotation);
+                  setActiveTooltip(measureTooltip(squiggle, tooltipLabel));
+                }
+              };
+
+              squiggle.addEventListener('click', clickHandler);
+              squiggle.addEventListener('keydown', keydownHandler);
+
+              handlers.push({
+                element: squiggle,
+                click: clickHandler,
+                keydown: keydownHandler,
               });
             } catch {}
-            finally {
-              isApplyingHighlights = false;
-            }
-          })
-          .catch(() => {
-            isApplyingHighlights = false;
           });
-      });
+
+        scrollActiveAnnotationIntoView(highlightContainer, activeAnnotationId);
+      } catch {}
     }
 
-    mutationObserver = new MutationObserver((mutations) => {
-      if (abortController.signal.aborted || isApplyingHighlights) return;
-
-      const hasRelevantMutation = mutations.some((mutation) => {
-        if (mutation.type === 'characterData') return true;
-
-        if (mutation.type === 'childList') {
-          return [...mutation.addedNodes, ...mutation.removedNodes].some((node) => {
-            if (!(node instanceof Element)) {
-              return node.nodeType === Node.TEXT_NODE;
-            }
-
-            return !node.matches('mark[data-annotation-id]')
-              && !node.closest('mark[data-annotation-id]');
-          });
-        }
-
-        return false;
-      });
-
-      if (hasRelevantMutation) {
-        applyHighlights();
-      }
+    pendingFrame = requestAnimationFrame(() => {
+      void applyHighlights();
     });
-
-    mutationObserver.observe(highlightContainer, {
-      childList: true,
-      characterData: true,
-      subtree: true,
-    });
-
-    applyHighlights();
 
     return () => {
-      abortController.abort();
+      cancelled = true;
+      if (pendingSingleClick !== null) {
+        window.clearTimeout(pendingSingleClick);
+      }
       if (pendingFrame !== null) {
         cancelAnimationFrame(pendingFrame);
       }
-      mutationObserver?.disconnect();
       removeAllMarks();
     };
   }, [containerRef, annotations, onAnnotationClick, activeAnnotationId]);
 
-  return null;
+  useEffect(() => {
+    if (typeof window === 'undefined' || !activeAnnotationId) {
+      return;
+    }
+
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      scrollActiveAnnotationIntoView(container, activeAnnotationId);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [activeAnnotationId, containerRef]);
+
+  if (!activeTooltip) {
+    return null;
+  }
+
+  return (
+    <div
+      role="tooltip"
+      className={[
+        'annotation-floating-tooltip',
+        activeTooltip.placement === 'top'
+          ? 'annotation-floating-tooltip--top'
+          : 'annotation-floating-tooltip--bottom',
+      ].join(' ')}
+      style={{
+        top: `${activeTooltip.top}px`,
+        left: `${activeTooltip.left}px`,
+      }}
+    >
+      {activeTooltip.label}
+    </div>
+  );
 }
