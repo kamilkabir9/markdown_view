@@ -15,45 +15,6 @@ import { CopySettingsProvider } from '~/contexts/CopySettingsContext';
 import { ThemeProvider } from '~/contexts/ThemeContext';
 import './styles/tailwind.css';
 
-function ScrollbarDebug() {
-  useEffect(() => {
-    if (!import.meta.env.DEV) return;
-
-    const inspect = (el: Element, event: string) => {
-      const styles = getComputedStyle(el);
-      console.log(`[scrollbar-debug] ${event}`, el, {
-        scrollbarColor: styles.getPropertyValue('scrollbar-color'),
-        scrollbarWidth: styles.getPropertyValue('scrollbar-width'),
-        overflowY: styles.getPropertyValue('overflow-y'),
-      });
-    };
-
-    const attached = new WeakSet<Element>();
-
-    const attach = (el: Element) => {
-      if (attached.has(el)) return;
-      attached.add(el);
-      inspect(el, 'mounted');
-      const onEnter = () => inspect(el, 'mouseenter');
-      const onLeave = () => inspect(el, 'mouseleave');
-      el.addEventListener('mouseenter', onEnter);
-      el.addEventListener('mouseleave', onLeave);
-    };
-
-    document.querySelectorAll('.scrollbar-on-active, .cm-scroller').forEach(attach);
-
-    const observer = new MutationObserver(() => {
-      document.querySelectorAll('.scrollbar-on-active, .cm-scroller').forEach(attach);
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return null;
-}
-
 function DevAgentation() {
   const [Agentation, setAgentation] = useState<ComponentType | null>(null);
 
@@ -170,7 +131,6 @@ function AppShellInner() {
       <ScrollToTopButton />
       <Toaster richColors closeButton position="top-right" />
       <DevAgentation />
-      <ScrollbarDebug />
     </>
   );
 }
