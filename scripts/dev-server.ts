@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 import express from 'express';
 import { readFile } from 'node:fs/promises';
@@ -13,7 +13,7 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(scriptDir, '..');
 const port = Number.parseInt(process.env.PORT || '3000', 10);
 
-async function main() {
+async function main(): Promise<void> {
   process.env.NODE_ENV = process.env.NODE_ENV ?? 'development';
   process.env.MARKDOWN_VIEWER_CONTENT_ROOT = process.env.MARKDOWN_VIEWER_CONTENT_ROOT || process.cwd();
 

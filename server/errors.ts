@@ -1,5 +1,9 @@
 export class ApiError extends Error {
-  constructor(status, code, message, details) {
+  status: number;
+  code: string;
+  details?: unknown;
+
+  constructor(status: number, code: string, message: string, details?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -8,7 +12,16 @@ export class ApiError extends Error {
   }
 }
 
-export function toErrorResponse(error) {
+interface ErrorResponse {
+  status: number;
+  body: {
+    code: string;
+    message: string;
+    details?: unknown;
+  };
+}
+
+export function toErrorResponse(error: unknown): ErrorResponse {
   if (error instanceof ApiError) {
     return {
       status: error.status,

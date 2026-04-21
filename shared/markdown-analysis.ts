@@ -5,11 +5,48 @@ import { visit } from 'unist-util-visit';
 import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 
-function parseMarkdown(markdown) {
+export interface MarkdownBlockRange {
+  type: string;
+  startOffset: number;
+  endOffset: number;
+  text: string;
+}
+
+export interface MarkdownSection {
+  slug: string;
+  depth: number;
+  title: string;
+  path: string[];
+  startOffset: number;
+  endOffset: number;
+  headingEndOffset: number;
+  excerpt: string;
+  children: MarkdownSection[];
+}
+
+export interface MarkdownHeading {
+  depth: number;
+  title: string;
+  slug: string;
+  headingIndex: number;
+  startOffset: number;
+  endOffset: number;
+  path: string[];
+}
+
+export interface MarkdownAnalysis {
+  headings: MarkdownHeading[];
+  sections: MarkdownSection[];
+  blockRanges: MarkdownBlockRange[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseMarkdown(markdown: string): any {
   return unified().use(remarkParse).use(remarkGfm).parse(markdown);
 }
 
-function getExcerpt(root, headingIndex, nextHeadingIndex) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getExcerpt(root: any, headingIndex: number, nextHeadingIndex: number): string {
   for (let index = headingIndex + 1; index < nextHeadingIndex; index += 1) {
     const node = root.children[index];
     if (!node || node.type === 'heading') {
@@ -25,7 +62,8 @@ function getExcerpt(root, headingIndex, nextHeadingIndex) {
   return '';
 }
 
-function inferBlockType(node) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function inferBlockType(node: any): string {
   switch (node.type) {
     case 'heading':
       return 'heading';
@@ -46,16 +84,18 @@ function inferBlockType(node) {
   }
 }
 
-export function analyzeMarkdown(markdown) {
-  const root = parseMarkdown(markdown);
+export function analyzeMarkdown(markdown: string): MarkdownAnalysis {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const root: any = parseMarkdown(markdown);
   const slugger = new GithubSlugger();
-  const headings = [];
-  const headingPath = [];
-  const blockRanges = [];
+  const headings: MarkdownHeading[] = [];
+  const headingPath: { depth: number; title: string }[] = [];
+  const blockRanges: MarkdownBlockRange[] = [];
 
-  visit(root, (node, index, parent) => {
-    const startOffset = node.position?.start?.offset;
-    const endOffset = node.position?.end?.offset;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  visit(root, (node: any, index: number | undefined, parent: any) => {
+    const startOffset: number | undefined = node.position?.start?.offset;
+    const endOffset: number | undefined = node.position?.end?.offset;
 
     if (typeof startOffset === 'number' && typeof endOffset === 'number') {
       if (node.type === 'paragraph'
@@ -89,13 +129,13 @@ export function analyzeMarkdown(markdown) {
 
     const slug = slugger.slug(title);
     const path = [...headingPath.map((entry) => entry.title), title];
-    const nextEntry = {
+    const nextEntry: MarkdownHeading = {
       depth: node.depth,
       title,
       slug,
       headingIndex: index,
-      startOffset,
-      endOffset,
+      startOffset: startOffset!,
+      endOffset: endOffset!,
       path,
     };
 
@@ -103,12 +143,12 @@ export function analyzeMarkdown(markdown) {
     headingPath.push({ depth: node.depth, title });
   });
 
-  const sections = [];
-  const stack = [];
+  const sections: MarkdownSection[] = [];
+  const stack: MarkdownSection[] = [];
 
   headings.forEach((heading, index) => {
     const nextHeading = headings[index + 1];
-    const section = {
+    const section: MarkdownSection = {
       slug: heading.slug,
       depth: heading.depth,
       title: heading.title,
@@ -140,9 +180,9 @@ export function analyzeMarkdown(markdown) {
   };
 }
 
-export function findHeadingPathAtIndex(markdown, index) {
+export function findHeadingPathAtIndex(markdown: string, index: number): string[] {
   const { headings } = analyzeMarkdown(markdown);
-  let match = [];
+  let match: string[] = [];
 
   headings.forEach((heading) => {
     if (heading.startOffset <= index) {
@@ -153,7 +193,7 @@ export function findHeadingPathAtIndex(markdown, index) {
   return match;
 }
 
-export function findSectionByHeadingPath(markdown, path) {
+export function findSectionByHeadingPath(markdown: string, path: string[]): MarkdownSection | null {
   if (!Array.isArray(path) || path.length === 0) {
     return null;
   }
@@ -177,7 +217,7 @@ export function findSectionByHeadingPath(markdown, path) {
   return null;
 }
 
-export function findBlockAtIndex(markdown, index) {
+export function findBlockAtIndex(markdown: string, index: number): MarkdownBlockRange | null {
   const { blockRanges } = analyzeMarkdown(markdown);
 
   return blockRanges.find((block) => index >= block.startOffset && index <= block.endOffset) ?? null;

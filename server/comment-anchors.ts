@@ -1,9 +1,21 @@
 import { findBlockAtIndex, findHeadingPathAtIndex, findSectionByHeadingPath } from '../shared/markdown-analysis.js';
 
-function findAllIndices(haystack, needle) {
+export interface TextAnchor {
+  exact: string;
+  prefix?: string;
+  suffix?: string;
+  rangeStart?: number;
+  rangeEnd?: number;
+  headingPath?: string[];
+  fallbackLine?: number;
+  sectionSlug?: string;
+  blockType?: string;
+}
+
+function findAllIndices(haystack: string, needle: string): number[] {
   if (!needle) return [];
 
-  const indices = [];
+  const indices: number[] = [];
   let index = 0;
 
   while (index < haystack.length) {
@@ -16,12 +28,12 @@ function findAllIndices(haystack, needle) {
   return indices;
 }
 
-export function lineNumberAtIndex(markdown, index) {
+export function lineNumberAtIndex(markdown: string, index: number): number {
   if (index <= 0) return 1;
   return markdown.slice(0, Math.min(index, markdown.length)).split('\n').length;
 }
 
-function scoreCandidate(markdown, anchor, candidateStart) {
+function scoreCandidate(markdown: string, anchor: TextAnchor, candidateStart: number): number {
   let score = 0;
   const prefix = anchor.prefix ?? '';
   const suffix = anchor.suffix ?? '';
@@ -63,7 +75,7 @@ function scoreCandidate(markdown, anchor, candidateStart) {
   return score;
 }
 
-export function resolveAnchorInMarkdown(markdown, anchor) {
+export function resolveAnchorInMarkdown(markdown: string, anchor: TextAnchor): { start: number; end: number } | null {
   if (!anchor?.exact) return null;
 
   if (typeof anchor.rangeStart === 'number' && typeof anchor.rangeEnd === 'number') {
@@ -92,7 +104,7 @@ export function resolveAnchorInMarkdown(markdown, anchor) {
   return { start: bestStart, end: bestStart + anchor.exact.length };
 }
 
-export function enrichAnchorFromMarkdown(markdown, anchor) {
+export function enrichAnchorFromMarkdown(markdown: string, anchor: TextAnchor): TextAnchor {
   const match = resolveAnchorInMarkdown(markdown, anchor);
   if (!match) return anchor;
 

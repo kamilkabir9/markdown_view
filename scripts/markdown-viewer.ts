@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 import { existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -17,7 +17,7 @@ const args = process.argv.slice(2);
 const DEFAULT_PORT = 3000;
 const MAX_PORT_SCAN = 50;
 
-function printHelp() {
+function printHelp(): void {
   console.log('markdown-viewer');
   console.log('');
   console.log('Usage:');
@@ -36,7 +36,7 @@ if (args.includes('--help') || args.includes('-h')) {
   process.exit(0);
 }
 
-let directoryArg;
+let directoryArg: string | undefined;
 let optionArgs = args;
 
 if (args[0] && !args[0].startsWith('-')) {
@@ -44,7 +44,7 @@ if (args[0] && !args[0].startsWith('-')) {
   optionArgs = args.slice(1);
 }
 
-let port;
+let port: string | undefined;
 let workingDir = directoryArg ? resolve(process.cwd(), directoryArg) : process.cwd();
 let shouldOpenBrowser = true;
 
@@ -70,12 +70,13 @@ for (let i = 0; i < optionArgs.length; i += 1) {
   process.exit(1);
 }
 
-function isValidPort(value) {
+function isValidPort(value: string | undefined): boolean {
+  if (!value) return false;
   const parsed = Number.parseInt(value, 10);
   return Number.isInteger(parsed) && parsed > 0 && parsed <= 65535;
 }
 
-function isPortAvailable(portNumber) {
+function isPortAvailable(portNumber: number): Promise<boolean> {
   return new Promise((resolveAvailability) => {
     const server = createServer();
     server.unref();
@@ -86,7 +87,7 @@ function isPortAvailable(portNumber) {
   });
 }
 
-async function pickAvailablePort(startPort) {
+async function pickAvailablePort(startPort: number): Promise<number> {
   for (let offset = 0; offset < MAX_PORT_SCAN; offset += 1) {
     const candidate = startPort + offset;
     if (candidate > 65535) break;
@@ -95,9 +96,9 @@ async function pickAvailablePort(startPort) {
   throw new Error(`Could not find an open port in range ${startPort}-${Math.min(65535, startPort + MAX_PORT_SCAN - 1)}`);
 }
 
-function openBrowser(url) {
+function openBrowser(url: string): void {
   const platform = process.platform;
-  const cmd =
+  const cmd: [string, string[]] =
     platform === 'darwin'
       ? ['open', [url]]
       : platform === 'win32'
@@ -124,7 +125,7 @@ if (!statSync(workingDir).isDirectory()) {
   process.exit(1);
 }
 
-async function main() {
+async function main(): Promise<void> {
   if (port && !isValidPort(port)) {
     console.error(`Invalid --port value: ${port}`);
     process.exit(1);
@@ -135,7 +136,7 @@ async function main() {
   const requestedPort = port
     ? Number.parseInt(port, 10)
     : isValidPort(process.env.PORT)
-      ? Number.parseInt(process.env.PORT, 10)
+      ? Number.parseInt(process.env.PORT!, 10)
       : DEFAULT_PORT;
   const selectedPort = await pickAvailablePort(requestedPort);
 
@@ -147,25 +148,25 @@ async function main() {
   process.env.PORT = String(selectedPort);
   process.env.MARKDOWN_VIEWER_CONTENT_ROOT = workingDir;
 
-  const { default: express } = await import('express');
-  const app = express();
+  const { default: expressModule } = await import('express');
+  const app = expressModule();
   const host = process.env.HOST;
 
   app.disable('x-powered-by');
-  app.use(express.json({ limit: '1mb' }));
+  app.use(expressModule.json({ limit: '1mb' }));
   app.use('/api', createApiRouter());
-  app.use('/content', express.static(getContentRoot()));
+  app.use('/content', expressModule.static(getContentRoot()));
   app.get(/^(?!\/(?:api|content|assets)\b).*\.md$/i, (_req, res) => {
     res.sendFile(join(clientBuildDir, 'index.html'));
   });
-  app.use('/assets', express.static(join(clientBuildDir, 'assets'), {
+  app.use('/assets', expressModule.static(join(clientBuildDir, 'assets'), {
     immutable: true,
     maxAge: '1y',
   }));
-  app.use(express.static(clientBuildDir, { index: false }));
+  app.use(expressModule.static(clientBuildDir, { index: false }));
 
   if (existsSync(publicDir)) {
-    app.use(express.static(publicDir, { maxAge: '1h' }));
+    app.use(expressModule.static(publicDir, { maxAge: '1h' }));
   }
 
   app.get('*', (_req, res) => {
@@ -180,7 +181,7 @@ async function main() {
         console.log(`[markdown-viewer] http://localhost:${selectedPort}`);
       });
 
-  ['SIGTERM', 'SIGINT'].forEach((signal) => {
+  (['SIGTERM', 'SIGINT'] as const).forEach((signal) => {
     process.once(signal, () => {
       server.close(() => process.exit(0));
     });
@@ -196,7 +197,7 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+main().catch((error: Error) => {
   console.error(error.message);
   process.exit(1);
 });

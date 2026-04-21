@@ -4,7 +4,7 @@ import { getContentRoot } from './content-root.js';
 import { ApiError } from './errors.js';
 
 const MARKDOWN_EXTENSION = '.md';
-const IMAGE_MIME_EXTENSIONS = {
+const IMAGE_MIME_EXTENSIONS: Record<string, string> = {
   'image/gif': '.gif',
   'image/jpeg': '.jpg',
   'image/png': '.png',
@@ -25,15 +25,38 @@ const SKIP_DIRS = new Set([
   '.cache',
 ]);
 
-function normalizeRoutePath(pathname) {
+export interface MarkdownFile {
+  content: string;
+  path: string;
+  sourcePath: string;
+  absolutePath: string;
+  size: number;
+  modified: string;
+}
+
+export interface MarkdownFileEntry {
+  path: string;
+  name: string;
+  relativePath: string;
+  routePath: string;
+  size: number;
+  modified: string;
+}
+
+export interface AssetResult {
+  markdownPath: string;
+  contentPath: string;
+}
+
+function normalizeRoutePath(pathname: string): string {
   return pathname.replace(/\0/g, '').replace(/^\/+|\/+$/g, '');
 }
 
-function isVisibleContentSegment(segment) {
+function isVisibleContentSegment(segment: string): boolean {
   return segment !== '' && segment !== '.' && segment !== '..' && !segment.startsWith('.');
 }
 
-function isRoutableMarkdownPath(pathname) {
+function isRoutableMarkdownPath(pathname: string): boolean {
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length === 0) return false;
   if (!segments.every(isVisibleContentSegment)) return false;
@@ -42,12 +65,12 @@ function isRoutableMarkdownPath(pathname) {
   return extension === '' || extension === MARKDOWN_EXTENSION;
 }
 
-function isSafePath(rootDir, pathname) {
+function isSafePath(rootDir: string, pathname: string): boolean {
   const resolved = normalize(resolve(rootDir, pathname));
   return resolved.startsWith(rootDir + sep) || resolved === rootDir;
 }
 
-function getMarkdownCandidatePaths(rootDir, pathname) {
+function getMarkdownCandidatePaths(rootDir: string, pathname: string): string[] {
   if (!isRoutableMarkdownPath(pathname)) return [];
 
   if (extname(pathname).toLowerCase() === MARKDOWN_EXTENSION) {
@@ -61,7 +84,7 @@ function getMarkdownCandidatePaths(rootDir, pathname) {
   ];
 }
 
-async function walkDir(rootDir, dir, files = []) {
+async function walkDir(rootDir: string, dir: string, files: MarkdownFileEntry[] = []): Promise<MarkdownFileEntry[]> {
   const entries = await readdir(dir, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -93,7 +116,7 @@ async function walkDir(rootDir, dir, files = []) {
   return files;
 }
 
-async function resolveMarkdownFilePath(pathname) {
+async function resolveMarkdownFilePath(pathname: string): Promise<string | null> {
   const rootDir = getContentRoot();
   const sanitizedPath = normalizeRoutePath(pathname);
   const candidatePaths = getMarkdownCandidatePaths(rootDir, sanitizedPath);
@@ -116,14 +139,14 @@ async function resolveMarkdownFilePath(pathname) {
   return null;
 }
 
-function sanitizeAssetFileName(fileName) {
+function sanitizeAssetFileName(fileName: string): string {
   return fileName
     .replace(/[^a-zA-Z0-9._-]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '') || 'image';
 }
 
-function getAssetExtension(fileName, contentType) {
+function getAssetExtension(fileName: string, contentType: string): string {
   const providedExtension = extname(fileName).toLowerCase();
   if (providedExtension) {
     return providedExtension;
@@ -132,25 +155,35 @@ function getAssetExtension(fileName, contentType) {
   return IMAGE_MIME_EXTENSIONS[contentType] || '';
 }
 
-function getMarkdownAssetPath(markdownSourcePath, fileName) {
+function getMarkdownAssetPath(markdownSourcePath: string, fileName: string): string {
   const sourceSegments = markdownSourcePath.split('/');
   sourceSegments.pop();
 
   return [...sourceSegments, fileName].filter(Boolean).join('/');
 }
 
-function normalizeMarkdownAssetPath(markdownPath) {
+function normalizeMarkdownAssetPath(markdownPath: unknown): string | null {
   if (typeof markdownPath !== 'string') return null;
   const trimmed = markdownPath.trim();
   if (!trimmed.startsWith('./')) return null;
 
   const relativePath = trimmed.replace(/^\.\//, '');
-  if (!relativePath || /[\/]/.test(relativePath)) return null;
+  if (!relativePath || /[/]/.test(relativePath)) return null;
 
   return relativePath;
 }
 
-async function resolveUniqueAssetFileName({ rootDir, markdownSourcePath, baseName, extension }) {
+async function resolveUniqueAssetFileName({
+  rootDir,
+  markdownSourcePath,
+  baseName,
+  extension,
+}: {
+  rootDir: string;
+  markdownSourcePath: string;
+  baseName: string;
+  extension: string;
+}): Promise<string> {
   const sourceSegments = markdownSourcePath.split('/').slice(0, -1);
 
   for (let duplicateIndex = 0; duplicateIndex < 10_000; duplicateIndex += 1) {
@@ -173,12 +206,12 @@ async function resolveUniqueAssetFileName({ rootDir, markdownSourcePath, baseNam
   throw new ApiError(500, 'asset_name_generation_failed', 'A unique name for the uploaded image could not be generated.');
 }
 
-export async function listMarkdownFiles() {
+export async function listMarkdownFiles(): Promise<MarkdownFileEntry[]> {
   const rootDir = getContentRoot();
   return walkDir(rootDir, rootDir);
 }
 
-export async function readMarkdownFile(pathname) {
+export async function readMarkdownFile(pathname: string): Promise<MarkdownFile | null> {
   const rootDir = getContentRoot();
   const filePath = await resolveMarkdownFilePath(pathname);
 
@@ -202,11 +235,9 @@ export async function readMarkdownFile(pathname) {
   } catch {
     return null;
   }
-
-  return null;
 }
 
-export async function saveMarkdownFile(pathname, content) {
+export async function saveMarkdownFile(pathname: string, content: unknown): Promise<MarkdownFile> {
   if (typeof content !== 'string') {
     throw new ApiError(400, 'invalid_content', 'The `content` field must be a string.');
   }
@@ -232,7 +263,17 @@ export async function saveMarkdownFile(pathname, content) {
   return savedFile;
 }
 
-export async function storeMarkdownAsset({ documentPath, fileName, contentType, buffer }) {
+export async function storeMarkdownAsset({
+  documentPath,
+  fileName,
+  contentType,
+  buffer,
+}: {
+  documentPath: string;
+  fileName: string;
+  contentType: string;
+  buffer: Buffer;
+}): Promise<AssetResult> {
   if (typeof documentPath !== 'string' || documentPath.trim() === '') {
     throw new ApiError(400, 'invalid_document_path', 'The `documentPath` field is required.');
   }
@@ -283,7 +324,13 @@ export async function storeMarkdownAsset({ documentPath, fileName, contentType, 
   };
 }
 
-export async function deleteMarkdownAsset({ documentPath, markdownPath }) {
+export async function deleteMarkdownAsset({
+  documentPath,
+  markdownPath,
+}: {
+  documentPath: string;
+  markdownPath: unknown;
+}): Promise<void> {
   if (typeof documentPath !== 'string' || documentPath.trim() === '') {
     throw new ApiError(400, 'invalid_document_path', 'The `documentPath` field is required.');
   }
@@ -313,7 +360,7 @@ export async function deleteMarkdownAsset({ documentPath, markdownPath }) {
   }
 }
 
-export async function requireMarkdownFile(pathname) {
+export async function requireMarkdownFile(pathname: string): Promise<MarkdownFile> {
   const result = await readMarkdownFile(pathname);
 
   if (!result) {
@@ -323,7 +370,7 @@ export async function requireMarkdownFile(pathname) {
   return result;
 }
 
-export async function resolveCommentFileKey(pathname) {
+export async function resolveCommentFileKey(pathname: string): Promise<string> {
   const file = await requireMarkdownFile(pathname);
   return file.path;
 }

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { type Request, type Response, type Router } from 'express';
 import multer from 'multer';
 import { toErrorResponse, ApiError } from './errors.js';
 import { listComments, createComment, deleteComment, importComments, rebaseCommentsForFile, updateComment } from './comment-service.js';
@@ -15,8 +15,10 @@ const imageUpload = multer({
   },
 });
 
-function asyncRoute(handler) {
-  return async (req, res) => {
+type AsyncHandler = (req: Request, res: Response) => Promise<void>;
+
+function asyncRoute(handler: AsyncHandler) {
+  return async (req: Request, res: Response) => {
     try {
       await handler(req, res);
     } catch (error) {
@@ -29,14 +31,14 @@ function asyncRoute(handler) {
   };
 }
 
-function withUpload(middleware, handler) {
-  return (req, res) => {
-    middleware(req, res, async (uploadError) => {
+function withUpload(middleware: multer.Multer['single'] extends (...args: unknown[]) => infer R ? never : ReturnType<multer.Multer['single']>, handler: AsyncHandler) {
+  return (req: Request, res: Response) => {
+    (middleware as (req: Request, res: Response, cb: (err?: unknown) => void) => void)(req, res, async (uploadError?: unknown) => {
       if (uploadError) {
         const error =
           uploadError instanceof multer.MulterError && uploadError.code === 'LIMIT_FILE_SIZE'
             ? new ApiError(413, 'asset_too_large', `Image uploads are limited to ${Math.floor(MAX_IMAGE_UPLOAD_BYTES / (1024 * 1024))}MB.`)
-            : new ApiError(400, 'invalid_upload', uploadError.message || 'The uploaded image could not be processed.');
+            : new ApiError(400, 'invalid_upload', uploadError instanceof Error ? uploadError.message : 'The uploaded image could not be processed.');
 
         const { status, body } = toErrorResponse(error);
         res.status(status).json(body);
@@ -56,15 +58,15 @@ function withUpload(middleware, handler) {
   };
 }
 
-function getRouteFilePath(req) {
-  return req.params[0] || '';
+function getRouteFilePath(req: Request): string {
+  return (req.params as Record<string, string>)[0] || '';
 }
 
-function getOptionalString(value) {
+function getOptionalString(value: unknown): string {
   return typeof value === 'string' ? value : '';
 }
 
-function requireQueryString(req, key, code, message) {
+function requireQueryString(req: Request, key: string, code: string, message: string): string {
   const value = getOptionalString(req.query[key]);
   if (!value) {
     throw new ApiError(400, code, message);
@@ -72,15 +74,15 @@ function requireQueryString(req, key, code, message) {
   return value;
 }
 
-function requireBodyString(req, key, code, message) {
-  const value = getOptionalString(req.body?.[key]);
+function requireBodyString(req: Request, key: string, code: string, message: string): string {
+  const value = getOptionalString((req.body as Record<string, unknown> | undefined)?.[key]);
   if (!value) {
     throw new ApiError(400, code, message);
   }
   return value;
 }
 
-export function createApiRouter() {
+export function createApiRouter(): Router {
   const router = express.Router();
 
   router.get('/files', asyncRoute(async (_req, res) => {
@@ -94,7 +96,7 @@ export function createApiRouter() {
   }));
 
   router.put('/files/*', asyncRoute(async (req, res) => {
-    const file = await saveMarkdownFile(getRouteFilePath(req), req.body?.content);
+    const file = await saveMarkdownFile(getRouteFilePath(req), (req.body as Record<string, unknown> | undefined)?.content);
     await rebaseCommentsForFile(file.path, file.content);
     res.json(file);
   }));
@@ -136,7 +138,7 @@ export function createApiRouter() {
 
   router.post('/comments', asyncRoute(async (req, res) => {
     const filePath = requireBodyString(req, 'filePath', 'missing_file_path', 'The `filePath` field is required.');
-    const annotation = req.body?.annotation;
+    const annotation = (req.body as Record<string, unknown> | undefined)?.annotation;
 
     const comment = await createComment({ filePath, annotation });
     res.status(201).json({ comment });
@@ -147,7 +149,7 @@ export function createApiRouter() {
 
     const comments = await importComments({
       filePath,
-      annotations: req.body?.annotations,
+      annotations: (req.body as Record<string, unknown> | undefined)?.annotations,
     });
 
     res.status(201).json({ comments });
@@ -155,16 +157,16 @@ export function createApiRouter() {
 
   router.put('/comments/:id', asyncRoute(async (req, res) => {
     const filePath = requireBodyString(req, 'filePath', 'missing_file_path', 'The `filePath` field is required.');
-    const text = getOptionalString(req.body?.text);
+    const text = getOptionalString((req.body as Record<string, unknown> | undefined)?.text);
 
-    const comment = await updateComment({ filePath, id: req.params.id, text });
+    const comment = await updateComment({ filePath, id: req.params['id'] as string, text });
     res.json({ comment });
   }));
 
   router.delete('/comments/:id', asyncRoute(async (req, res) => {
     const filePath = requireQueryString(req, 'file', 'missing_file_path', 'The `file` query parameter is required.');
 
-    await deleteComment({ filePath, id: req.params.id });
+    await deleteComment({ filePath, id: req.params['id'] as string });
     res.status(204).send();
   }));
 
