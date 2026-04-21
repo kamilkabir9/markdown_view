@@ -21,41 +21,35 @@ export function MarkdownEditorPane({
 }: MarkdownEditorPaneProps) {
   const { syncScroll } = useCopySettings();
   const previewRef = useRef<HTMLElement | null>(null);
-  const isSyncing = useRef(false);
 
   useEffect(() => {
     if (!isDesktopSplit || !syncScroll) return;
 
+    let cancelled = false;
     let attempts = 0;
-    const maxAttempts = 50;
+    const maxAttempts = 120;
     let animationFrameId: number | undefined;
+    let detach: (() => void) | undefined;
 
-    const setupScrollSync = () => {
-      const editorScrollDOM = sourceEditorRef.current?.getScrollDOM();
-      const previewEl = previewRef.current;
+    const attach = (editorScrollDOM: HTMLElement, previewEl: HTMLElement) => {
+      let source: 'editor' | 'preview' | null = null;
 
-      if (!editorScrollDOM || !previewEl) {
-        if (attempts < maxAttempts) {
-          attempts++;
-          animationFrameId = requestAnimationFrame(setupScrollSync);
-        }
-        return;
-      }
+      const clearSource = () => { source = null; };
 
       const onEditorScroll = () => {
-        if (isSyncing.current) return;
-        isSyncing.current = true;
+        if (source === 'preview') return;
+        source = 'editor';
         const ratio = editorScrollDOM.scrollTop / Math.max(editorScrollDOM.scrollHeight - editorScrollDOM.clientHeight, 1);
         previewEl.scrollTop = ratio * Math.max(previewEl.scrollHeight - previewEl.clientHeight, 1);
-        requestAnimationFrame(() => { isSyncing.current = false; });
+        requestAnimationFrame(clearSource);
       };
 
       const onPreviewScroll = () => {
-        if (isSyncing.current) return;
-        isSyncing.current = true;
+        if (source === 'editor') return;
+        source = 'preview';
         const ratio = previewEl.scrollTop / Math.max(previewEl.scrollHeight - previewEl.clientHeight, 1);
         editorScrollDOM.scrollTop = ratio * Math.max(editorScrollDOM.scrollHeight - editorScrollDOM.clientHeight, 1);
-        requestAnimationFrame(() => { isSyncing.current = false; });
+        requestAnimationFrame(clearSource);
       };
 
       editorScrollDOM.addEventListener('scroll', onEditorScroll, { passive: true });
@@ -67,13 +61,30 @@ export function MarkdownEditorPane({
       };
     };
 
-    const cleanup = setupScrollSync();
+    const setupScrollSync = () => {
+      if (cancelled) return;
+      const editorScrollDOM = sourceEditorRef.current?.getScrollDOM();
+      const previewEl = previewRef.current;
+
+      if (!editorScrollDOM || !previewEl) {
+        if (attempts < maxAttempts) {
+          attempts++;
+          animationFrameId = requestAnimationFrame(setupScrollSync);
+        }
+        return;
+      }
+
+      detach = attach(editorScrollDOM, previewEl);
+    };
+
+    setupScrollSync();
 
     return () => {
+      cancelled = true;
       if (animationFrameId !== undefined) {
         cancelAnimationFrame(animationFrameId);
       }
-      cleanup?.();
+      detach?.();
     };
   }, [isDesktopSplit, syncScroll, sourceEditorRef]);
 

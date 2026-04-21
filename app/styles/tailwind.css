@@ -114,8 +114,8 @@ body {
 .scrollbar-on-active:hover::-webkit-scrollbar,
 .scrollbar-on-active:focus::-webkit-scrollbar,
 .scrollbar-on-active:focus-within::-webkit-scrollbar {
-  width: 0.625rem;
-  height: 0.625rem;
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 .scrollbar-on-active:hover::-webkit-scrollbar-thumb,
@@ -127,9 +127,7 @@ body {
   background-clip: padding-box;
 }
 
-.scrollbar-on-active:hover::-webkit-scrollbar-track,
-.scrollbar-on-active:focus::-webkit-scrollbar-track,
-.scrollbar-on-active:focus-within::-webkit-scrollbar-track {
+.scrollbar-on-active::-webkit-scrollbar-track {
   background: transparent;
 }
 
@@ -144,22 +142,22 @@ body {
   scrollbar-width: none;
 }
 
+.markdown-source-editor .cm-scroller::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .markdown-source-editor .cm-scroller:hover,
 .markdown-source-editor .cm-scroller:focus,
 .markdown-source-editor .cm-scroller:focus-within {
   scrollbar-width: thin;
 }
 
-.markdown-source-editor .cm-scroller::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-
 .markdown-source-editor .cm-scroller:hover::-webkit-scrollbar,
 .markdown-source-editor .cm-scroller:focus::-webkit-scrollbar,
 .markdown-source-editor .cm-scroller:focus-within::-webkit-scrollbar {
-  width: 0.625rem;
-  height: 0.625rem;
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 .markdown-source-editor .cm-scroller:hover::-webkit-scrollbar-thumb,
@@ -169,6 +167,10 @@ body {
   border-radius: 999px;
   background: color-mix(in oklab, var(--foreground) 22%, transparent);
   background-clip: padding-box;
+}
+
+.markdown-source-editor .cm-scroller::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .markdown-source-editor .cm-content,
