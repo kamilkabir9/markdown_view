@@ -88,12 +88,14 @@ export function buildCommentCopyText(
 ): string {
   const filePrefix = `File Path: ${options.selectedPath}`;
 
+  const text = annotation.text.trim();
+
   if (annotation.isGlobal || !annotation.anchor) {
-    return `${filePrefix}\n\n// ${options.commentPrefix}: ${annotation.text}`;
+    return `${filePrefix}\n\n// ${options.commentPrefix}: ${text}`;
   }
 
-  const context = findMarkdownContext(rawContent, annotation);
-  return `${filePrefix}\n\n// ${options.contextPrefix}:\n${context}\n\n// ${options.commentPrefix}: ${annotation.text}`;
+  const context = findMarkdownContext(rawContent, annotation).trim();
+  return `${filePrefix}\n\n// ${options.contextPrefix}:\n${context}\n\n// ${options.commentPrefix}: ${text}`;
 }
 
 export function buildAllCommentsCopyText(
