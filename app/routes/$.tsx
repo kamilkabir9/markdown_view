@@ -217,13 +217,30 @@ function MarkdownPageContent() {
       return;
     }
 
-    const target = container.querySelector<HTMLElement>(`#${CSS.escape(slug)}`);
+    let target = container.querySelector<HTMLElement>(`#${CSS.escape(slug)}`);
     if (!target) {
-      return;
+      const headings = Array.from(container.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5, h6'));
+      target = headings.find((h) => h.id === slug) ?? null;
+      if (!target) {
+        return;
+      }
     }
 
-    const targetTop = target.offsetTop - 16;
-    container.scrollTo({ top: Math.max(targetTop, 0), behavior: 'smooth' });
+    let node: HTMLElement | null = target;
+    let scroller: HTMLElement = container;
+    while (node) {
+      const overflowY = window.getComputedStyle(node).overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+        scroller = node;
+        break;
+      }
+      node = node.parentElement;
+    }
+
+    const scrollerRect = scroller.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const nextTop = scroller.scrollTop + targetRect.top - scrollerRect.top - 16;
+    scroller.scrollTo({ top: Math.max(nextTop, 0), behavior: 'smooth' });
     window.history.replaceState(null, '', `#${slug}`);
   }, [isEditing, outlineSections]);
 

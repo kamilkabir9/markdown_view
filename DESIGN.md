@@ -1,5 +1,5 @@
-# Design Direction dddd
-ffffgffgfdg
+# Design Direction 
+
 This product should feel like a quiet editorial workspace for people who prefer reading, scanning, and annotating documents without fighting a noisy interface.
 The visual reference is a mix of modern coffee brewery packaging, printed tasting notes, and Chanel-style editorial restraint.
 Borrow the calm, proportion, and confidence - not the branding.

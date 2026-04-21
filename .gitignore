@@ -26,6 +26,4 @@ scratchpad.txt
 .markdown-viewer/
 *.gif
 /.claude/worktrees
-*.md
-*.md
-*.md
+**.md
