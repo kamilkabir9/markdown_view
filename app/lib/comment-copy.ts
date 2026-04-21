@@ -38,15 +38,17 @@ export function getSelectedTextPreview(value: string, maxLength = 180): string {
   return `${compact.slice(0, startLength)} ... ${compact.slice(-endLength)}`;
 }
 
-export function findMarkdownContext(rawContent: string, annotation: Annotation): string {
+export function findMarkdownContext(rawContent: string, annotation: Annotation): { text: string; lineNumber: number } {
   const exact = annotation.anchor?.exact ?? '';
   const resolved = resolveAnchorInMarkdown(rawContent, annotation.anchor);
   const index = resolved?.start ?? rawContent.indexOf(exact);
-  if (index === -1) return exact;
+  if (index === -1) return { text: exact, lineNumber: 1 };
 
   let lineStart = rawContent.lastIndexOf('\n', index);
   if (lineStart === -1) lineStart = 0;
   else lineStart += 1;
+
+  const lineNumber = rawContent.slice(0, lineStart).split('\n').length;
 
   let lineEnd = rawContent.indexOf('\n', index + exact.length);
   if (lineEnd === -1) lineEnd = rawContent.length;
@@ -78,7 +80,7 @@ export function findMarkdownContext(rawContent: string, annotation: Annotation):
   const selectedLine = rawContent.slice(lineStart, lineEnd);
   const contextLines = lines.filter((line) => line !== selectedLine);
 
-  return [selectedLine, ...contextLines.slice(0, 2)].join('\n');
+  return { text: [selectedLine, ...contextLines.slice(0, 2)].join('\n'), lineNumber };
 }
 
 export function buildCommentCopyText(
@@ -94,8 +96,9 @@ export function buildCommentCopyText(
     return `${filePrefix}\n\n// ${options.commentPrefix}: ${text}`;
   }
 
-  const context = findMarkdownContext(rawContent, annotation).trim();
-  return `${filePrefix}\n\n// ${options.contextPrefix}:\n${context}\n\n// ${options.commentPrefix}: ${text}`;
+  const { text: contextText, lineNumber } = findMarkdownContext(rawContent, annotation);
+  const context = contextText.trim();
+  return `${filePrefix}\n\n// ${options.contextPrefix} (line ${lineNumber}):\n${context}\n\n// ${options.commentPrefix}: ${text}`;
 }
 
 export function buildAllCommentsCopyText(
