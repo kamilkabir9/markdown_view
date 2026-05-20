@@ -1,15 +1,22 @@
 {
-  "name": "markdown-viewer",
+  "name": "md-lens",
   "version": "1.0.0",
   "type": "module",
   "bin": {
-    "markdown-viewer": "./scripts/markdown-viewer.ts"
+    "md-lens": "./scripts/markdown-viewer.js"
   },
+  "files": [
+    "dist/",
+    "scripts/",
+    "server/",
+    "public/"
+  ],
   "scripts": {
     "dev": "tsx ./scripts/dev-server.ts",
     "build": "vite build",
     "prestart": "npm run build",
     "start": "tsx ./scripts/markdown-viewer.ts --no-open",
+    "prepublishOnly": "npm run build",
     "test:api": "node --import tsx/esm --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },

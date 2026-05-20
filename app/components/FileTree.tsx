@@ -23,7 +23,7 @@ function FileTreeNodeList({ nodes, search }: FileTreeProps) {
             <li key={`dir:${node.name}:${node.children.length}`}>
               <Collapsible defaultOpen={search.trim().length > 0} className="group/collapsible">
                 <CollapsibleTrigger
-                  className="group flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-surface-secondary/35"
+                  className="group flex min-h-11 w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-foreground transition-colors hover:bg-surface-secondary/35 sm:min-h-0 sm:py-1.5"
                   aria-label={`Toggle ${node.name} directory`}
                 >
                   <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90" />
@@ -44,7 +44,7 @@ function FileTreeNodeList({ nodes, search }: FileTreeProps) {
           <li key={node.file.path}>
             <Link
               to={`/${node.file.relativePath}`}
-              className="flex items-center justify-between gap-3 rounded-sm px-2 py-1.5 text-sm transition-colors duration-150 hover:bg-surface-secondary/35"
+              className="flex min-h-11 items-center justify-between gap-3 rounded-sm px-2 py-2 text-sm transition-colors duration-150 hover:bg-surface-secondary/35 sm:min-h-0 sm:py-1.5"
             >
               <span className="flex min-w-0 items-center gap-2">
                 <FileTextIcon className="h-4 w-4 shrink-0 text-muted-foreground" />

@@ -102,7 +102,7 @@ export function CommentCard({
               </div>
             </div>
 
-            <div className={`flex items-center gap-1 transition-opacity ${showActions ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
+            <div className={`flex items-center gap-1 transition-opacity ${showActions ? 'opacity-100' : 'opacity-100 sm:pointer-events-none sm:opacity-0'}`}>
               <ButtonTooltip label="Edit comment">
                 <Button
                   variant="ghost"

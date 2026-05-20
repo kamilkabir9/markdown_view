@@ -18,17 +18,17 @@ const DEFAULT_PORT = 3000;
 const MAX_PORT_SCAN = 50;
 
 function printHelp(): void {
-  console.log('markdown-viewer');
+  console.log('md-lens');
   console.log('');
   console.log('Usage:');
-  console.log('  markdown-viewer [directory] [--port <number>] [--no-open]');
-  console.log('  markdown-viewer --help');
+  console.log('  md-lens [directory] [--port <number>] [--no-open]');
+  console.log('  md-lens --help');
   console.log('');
   console.log('Examples:');
-  console.log('  markdown-viewer');
-  console.log('  markdown-viewer ./docs');
-  console.log('  markdown-viewer --port 4000');
-  console.log('  markdown-viewer --no-open');
+  console.log('  md-lens');
+  console.log('  md-lens ./docs');
+  console.log('  md-lens --port 4000');
+  console.log('  md-lens --no-open');
 }
 
 if (args.includes('--help') || args.includes('-h')) {
@@ -175,10 +175,10 @@ async function main(): Promise<void> {
 
   const server = host
     ? app.listen(selectedPort, host, () => {
-        console.log(`[markdown-viewer] http://${host}:${selectedPort}`);
+        console.log(`[md-lens] http://${host}:${selectedPort}`);
       })
     : app.listen(selectedPort, () => {
-        console.log(`[markdown-viewer] http://localhost:${selectedPort}`);
+        console.log(`[md-lens] http://localhost:${selectedPort}`);
       });
 
   (['SIGTERM', 'SIGINT'] as const).forEach((signal) => {

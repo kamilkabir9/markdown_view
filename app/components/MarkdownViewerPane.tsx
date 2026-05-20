@@ -37,7 +37,7 @@ export function MarkdownViewerPane({
 }: MarkdownViewerPaneProps) {
   return (
     <div
-      className="relative flex min-h-[32rem] min-w-0 flex-1 overflow-hidden xl:min-h-0"
+      className="relative flex min-h-[28rem] min-w-0 flex-1 overflow-visible xl:min-h-0 xl:overflow-hidden"
       onMouseUp={() => void onCaptureSelection()}
       onKeyUp={() => void onCaptureSelection()}
     >
