@@ -93,8 +93,8 @@ function AppShellInner() {
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground">
         Skip to content
       </a>
-      <div className="relative isolate mx-auto flex h-screen w-full max-w-[1420px] flex-col overflow-hidden px-4 pb-6 pt-5 sm:px-6 lg:px-8">
-        <header className="mb-5 space-y-3 rounded-md border border-border/65 bg-background px-3 py-2.5 sm:px-4">
+      <div className="relative isolate mx-auto flex min-h-dvh w-full max-w-[1420px] flex-col overflow-x-hidden px-2 pb-3 pt-2 sm:px-6 sm:pb-6 sm:pt-5 lg:px-8 xl:h-screen xl:overflow-hidden">
+        <header className="mb-3 min-w-0 space-y-3 rounded-md border border-border/65 bg-background px-3 py-2.5 sm:mb-5 sm:px-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <Link to="/" className="inline-flex items-center text-xs tracking-[0.18em] text-muted-foreground uppercase transition-colors hover:text-foreground">
@@ -114,14 +114,14 @@ function AppShellInner() {
           </div>
 
           {(breadcrumbs || actions) && (
-            <div className="flex flex-col gap-3 border-t border-border/65 pt-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="min-w-0">{breadcrumbs}</div>
-              <div className="flex flex-wrap items-center gap-2 lg:justify-end">{actions}</div>
+            <div className="flex min-w-0 flex-col gap-3 border-t border-border/65 pt-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0 overflow-hidden">{breadcrumbs}</div>
+              <div className="grid min-w-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center lg:justify-end">{actions}</div>
             </div>
           )}
         </header>
 
-        <main id="main-content" className="flex flex-1 min-h-0 flex-col">
+        <main id="main-content" className="flex min-h-0 flex-1 flex-col">
           <Outlet />
         </main>
       </div>

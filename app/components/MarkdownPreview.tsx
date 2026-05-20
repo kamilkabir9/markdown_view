@@ -66,7 +66,7 @@ export const MarkdownPreview = forwardRef<HTMLElement, MarkdownPreviewProps>(fun
   }), [documentSourcePath, isDarkTheme]);
 
   return (
-    <article ref={ref} className={cn('app-shell-panel scrollbar-on-active markdown-article min-h-0 overflow-y-auto rounded-md px-5 py-4 sm:px-6', className)}>
+    <article ref={ref} className={cn('app-shell-panel scrollbar-on-active markdown-article min-h-0 min-w-0 overflow-x-hidden rounded-md px-3 py-3 sm:px-6 sm:py-4 xl:overflow-y-auto', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug, rehypeHighlight]}

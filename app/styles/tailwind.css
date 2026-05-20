@@ -182,6 +182,7 @@ body {
   font-family: var(--font-reading);
   font-size: 1.04rem;
   line-height: 1.82;
+  overflow-wrap: break-word;
 }
 
 .markdown-article > :first-child {
@@ -200,6 +201,7 @@ body {
   font-weight: 650;
   letter-spacing: -0.015em;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .markdown-article :where(h1) {
@@ -304,7 +306,8 @@ body {
 
 .markdown-article :where(table) {
   display: block;
-  width: max-content;
+  width: 100%;
+  max-width: 100%;
   min-width: 100%;
   overflow-x: auto;
   border-collapse: separate;
@@ -465,10 +468,25 @@ body {
 @media (max-width: 640px) {
   .markdown-article {
     font-size: 1rem;
+    line-height: 1.72;
   }
 
   .markdown-article :where(h1) {
-    font-size: 2.3rem;
+    font-size: 2rem;
+    line-height: 1.08;
+  }
+
+  .markdown-article :where(h2) {
+    font-size: 1.55rem;
+  }
+
+  .markdown-article :where(blockquote) {
+    padding: 0.85rem;
+  }
+
+  .markdown-article :where(pre code) {
+    padding: 0.95rem;
+    font-size: 0.86rem;
   }
 }
 
